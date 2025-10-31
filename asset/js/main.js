@@ -47,3 +47,25 @@ document.addEventListener("DOMContentLoaded", () => {
     cycle = setInterval(breatheCycle, 4000);
   }
 });
+// 🎯 3D Tilt Effect on Hover
+const cards = document.querySelectorAll(".card");
+
+cards.forEach((card) => {
+  card.addEventListener("mousemove", (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left; // X position inside card
+    const y = e.clientY - rect.top; // Y position inside card
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    // Calculate rotation limits
+    const rotateX = ((y - centerY) / 20) * -1;
+    const rotateY = (x - centerX) / 20;
+
+    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+  });
+
+  card.addEventListener("mouseleave", () => {
+    card.style.transform = "rotateX(0deg) rotateY(0deg) scale(1)";
+  });
+});
