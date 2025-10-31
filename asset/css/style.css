@@ -222,3 +222,20 @@ footer {
   margin-top: 20px;
   color: #333;
 }
+/* Hero animated gradient (very slow & subtle) */
+.hero-animated {
+  background: linear-gradient(120deg, rgba(79,164,154,0.95) 0%, rgba(255,213,128,0.9) 50%, rgba(90,103,216,0.85) 100%);
+  background-size: 300% 300%;
+  animation: heroGradient 20s ease-in-out infinite;
+}
+
+@keyframes heroGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .hero-animated { animation: none; }
+}
