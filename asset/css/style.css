@@ -380,3 +380,31 @@ div:hover .card-light {
   position: relative;
   z-index: 1;
 }
+/* === 🌈 Unique Orb Colors per Card === */
+.feature-blue .card-orb {
+  background: radial-gradient(circle at center, rgba(59, 130, 246, 0.6), transparent 70%);
+}
+
+.feature-green .card-orb {
+  background: radial-gradient(circle at center, rgba(16, 185, 129, 0.6), transparent 70%);
+}
+
+.feature-purple .card-orb {
+  background: radial-gradient(circle at center, rgba(139, 92, 246, 0.6), transparent 70%);
+}
+
+/* Optional soft glow animation (static version first) */
+.card-orb {
+  animation: orbFloat 6s ease-in-out infinite alternate;
+}
+
+@keyframes orbFloat {
+  from {
+    transform: translateY(-10px) scale(1);
+    opacity: 0.25;
+  }
+  to {
+    transform: translateY(10px) scale(1.1);
+    opacity: 0.35;
+  }
+}
