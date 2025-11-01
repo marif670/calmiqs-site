@@ -500,3 +500,7 @@ section.features .card p {
   position: relative;
   z-index: 5;
 }
+html,
+body {
+  background-color: yellow !important;
+}
