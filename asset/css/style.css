@@ -463,22 +463,22 @@ div:hover .card-light {
   filter: blur(20px);
 }
 /* 🌈 Feature Cards Gradient Backgrounds */
-.card:nth-child(1) {
+section .card:nth-child(1) {
   background: linear-gradient(135deg, #3b82f6, #60a5fa) !important; /* Blue */
 }
 
-.card:nth-child(2) {
+section .card:nth-child(2) {
   background: linear-gradient(135deg, #10b981, #34d399) !important; /* Green */
 }
 
-.card:nth-child(3) {
+section .card:nth-child(3) {
   background: linear-gradient(135deg, #8b5cf6, #a78bfa) !important; /* Purple */
 }
 
-/* Make text more readable */
+/* Ensure text stays visible */
 .card h3,
 .card p {
-  color: white !important;
+  color: #fff !important;
   position: relative;
   z-index: 2;
 }
