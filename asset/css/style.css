@@ -427,7 +427,7 @@ div:hover .card-light {
 
 /* 🩵 Blue Orb */
 .orb-blue {
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.6), rgba(59, 130, 246, 0.1));
+  background: red !important;
 }
 
 /* 💚 Green Orb */
