@@ -423,20 +423,6 @@ div:hover .card-light {
   opacity: 0.9;
 }
 
-/* 🩵 Blue Orb */
-.orb-blue {
-  background: red !important;
-}
-
-/* 💚 Green Orb */
-.orb-green {
-  background: radial-gradient(circle, rgba(34, 197, 94, 0.6), rgba(34, 197, 94, 0.1));
-}
-
-/* 💜 Purple Orb */
-.orb-purple {
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.6), rgba(168, 85, 247, 0.1));
-}
 /* 🧩 Card container setup */
 .card {
   position: relative;
