@@ -439,3 +439,22 @@ div:hover .card-light {
 .orb-purple {
   background: radial-gradient(circle, rgba(168, 85, 247, 0.6), rgba(168, 85, 247, 0.1));
 }
+/* 🧩 Card container setup */
+.card {
+  position: relative;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* 🌈 Orb background (test version to confirm visibility) */
+.card-orb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 1rem;
+  background: rgba(255, 0, 0, 0.3); /* test: visible red overlay */
+  z-index: 0;
+  filter: blur(20px);
+}
