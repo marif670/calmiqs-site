@@ -1,70 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contact Calmiqs | Get in Touch</title>
-  <link rel="stylesheet" href="assets/css/style.css" />
-</head>
-<body>
-  <!-- ===== Header ===== -->
-  <header>
-    <nav class="navbar">
-      <div class="logo"><a href="index.html">Calmiqs</a></div>
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="tools.html">Tools</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="sustainability.html">Sustainability</a></li>
-        <li><a href="contact.html" class="active">Contact</a></li>
-      </ul>
-    </nav>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact — Calmiqs</title>
 
-  <!-- ===== Contact Section ===== -->
-  <main class="contact-section">
-    <section class="contact-intro">
-      <h1>Contact Us</h1>
-      <p>
-        We'd love to hear from you! Whether you have feedback, collaboration ideas, or general inquiries,
-        reach out to us through the form below or email us directly.
+    <!-- Tailwind (same setup as other pages) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4FA49A",
+              accent: "#FFD580",
+              tech: "#5A67D8",
+            },
+            fontFamily: {
+              sans: ["Poppins", "sans-serif"],
+            },
+            animation: {
+              gradient: "gradientBG 8s ease infinite",
+            },
+            keyframes: {
+              gradientBG: {
+                "0%,100%": { backgroundPosition: "0% 50%" },
+                "50%": { backgroundPosition: "100% 50%" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <link rel="stylesheet" href="/assets/css/style.css?v=12" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="font-sans bg-[#F9FAFB] text-gray-800">
+    <!-- 🌿 Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
+        <h1 class="text-2xl font-bold text-primary">
+          <a href="index.html">Calmiqs</a>
+        </h1>
+        <nav>
+          <ul class="flex gap-6 text-gray-700">
+            <li><a href="index.html" class="hover:text-primary">Home</a></li>
+            <li><a href="tools.html" class="hover:text-primary">Tools</a></li>
+            <li><a href="blog.html" class="hover:text-primary">Blog</a></li>
+            <li><a href="about.html" class="hover:text-primary">About</a></li>
+            <li>
+              <a href="contact.html" class="text-primary font-semibold">Contact</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- 🌤️ Hero Section -->
+    <section class="relative text-center py-24 px-6 text-white overflow-hidden">
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-primary via-accent to-tech animate-gradient bg-[length:400%_400%]"
+      ></div>
+
+      <div class="relative z-10">
+        <h2 class="text-4xl sm:text-5xl font-bold mb-6 drop-shadow-lg">
+          Get in Touch with Calmiqs
+        </h2>
+        <p class="max-w-2xl mx-auto mb-8 text-lg">
+          We’d love to hear from you — whether it’s feedback, collaboration, or questions about our
+          wellness tools.
+        </p>
+        <a
+          href="#contact-form"
+          class="bg-white text-primary px-6 py-3 rounded-xl font-medium hover:bg-accent hover:text-white transition shadow-md hover:shadow-lg"
+        >
+          🌿 Reach Out Now
+        </a>
+      </div>
+    </section>
+
+    <!-- ✉️ Contact Form Section -->
+    <section id="contact-form" class="max-w-3xl mx-auto py-20 px-6">
+      <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-8 md:p-10">
+        <h3 class="text-2xl font-bold text-center mb-8 text-primary">Send Us a Message</h3>
+        <form class="space-y-6">
+          <div>
+            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition"
+              placeholder="Your Name"
+            />
+          </div>
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition"
+              placeholder="you@example.com"
+            />
+          </div>
+          <div>
+            <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
+              Message
+            </label>
+            <textarea
+              id="message"
+              name="message"
+              rows="5"
+              required
+              class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition resize-none"
+              placeholder="Type your message here..."
+            ></textarea>
+          </div>
+          <div class="text-center">
+            <button
+              type="submit"
+              class="bg-primary text-white px-8 py-3 rounded-xl font-medium hover:bg-accent transition shadow-md hover:shadow-lg"
+            >
+              Send Message
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- 🌍 Location / Connect Section -->
+    <section class="max-w-4xl mx-auto py-12 px-6 text-center">
+      <h3 class="text-2xl font-bold mb-4 text-tech">Where We Are</h3>
+      <p class="text-gray-600 max-w-2xl mx-auto">
+        Calmiqs is a remote-first, globally distributed team connected by a shared purpose — to
+        build mindful, sustainable technology for everyone.
       </p>
+      <div class="mt-10 rounded-2xl bg-gray-100 border border-gray-200 p-12 text-gray-500 italic">
+        🗺️ Future map placeholder — "Eco-Lab, Earth"
+      </div>
     </section>
 
-    <section class="contact-form">
-      <form id="contactForm" method="POST" data-netlify="true" name="contact">
-        <input type="hidden" name="form-name" value="contact">
-        <label for="name">Your Name</label>
-        <input type="text" id="name" name="name" placeholder="Enter your name" required>
+    <!-- 🌿 Footer -->
+    <footer class="bg-white border-t border-gray-200 py-8 mt-20">
+      <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center px-6">
+        <p class="text-gray-600">
+          ©
+          <span id="year"></span>
+          Calmiqs — Wellness with a lighter footprint
+        </p>
+        <div class="flex gap-4 text-sm text-gray-500 mt-4 md:mt-0">
+          <a href="privacy.html" class="hover:text-primary">Privacy</a>
+          <a href="terms.html" class="hover:text-primary">Terms</a>
+        </div>
+      </div>
+    </footer>
 
-        <label for="email">Your Email</label>
-        <input type="email" id="email" name="email" placeholder="Enter your email" required>
-
-        <label for="message">Message</label>
-        <textarea id="message" name="message" rows="5" placeholder="Write your message..." required></textarea>
-
-        <button type="submit">Send Message</button>
-      </form>
-    </section>
-
-    <section class="contact-alt">
-      <h3>Other ways to connect</h3>
-      <p>Email: <a href="mailto:support@calmiqs.com">support@calmiqs.com</a></p>
-      <p>Follow us on: 
-        <a href="#">Twitter</a> | 
-        <a href="#">LinkedIn</a> | 
-        <a href="#">Instagram</a>
-      </p>
-    </section>
-  </main>
-
-  <!-- ===== Footer ===== -->
-  <footer>
-    <div class="footer-content">
-      <p>© 2025 Calmiqs. All rights reserved.</p>
-    </div>
-  </footer>
-
-  <script src="assets/js/main.js"></script>
-</body>
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+  </body>
 </html>
