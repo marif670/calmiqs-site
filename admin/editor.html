@@ -175,15 +175,19 @@
         document.getElementById(id).addEventListener("input", updatePreview)
       );
 
-      // Load posts from JSON
+      // Load posts from JSON or localStorage
       async function loadPosts() {
         try {
-          const res = await fetch("/assets/data/posts.json");
+          const res = await fetch("/assets/data/posts.json", { cache: "no-store" });
+          if (!res.ok) throw new Error("File not found");
           posts = await res.json();
-          renderPosts();
+          console.log("Loaded posts from JSON:", posts);
         } catch (err) {
-          console.error("Failed to load posts:", err);
+          console.warn("Falling back to localStorage:", err);
+          const local = localStorage.getItem("calmiqs_posts");
+          posts = local ? JSON.parse(local) : [];
         }
+        renderPosts();
       }
 
       // Render posts
