@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blog — Calmiqs</title>
+    <title>Calmiqs | Blog</title>
 
-    <!-- Tailwind (same setup as other pages) -->
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -16,28 +16,13 @@
               accent: "#FFD580",
               tech: "#5A67D8",
             },
-            fontFamily: {
-              sans: ["Poppins", "sans-serif"],
-            },
-            animation: {
-              gradient: "gradientBG 8s ease infinite",
-            },
-            keyframes: {
-              gradientBG: {
-                "0%,100%": { backgroundPosition: "0% 50%" },
-                "50%": { backgroundPosition: "100% 50%" },
-              },
-            },
+            fontFamily: { sans: ["Poppins", "sans-serif"] },
           },
         },
       };
     </script>
 
     <link rel="stylesheet" href="/assets/css/style.css?v=12" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
   </head>
 
   <body class="font-sans bg-[#F9FAFB] text-gray-800">
@@ -52,7 +37,7 @@
             <li><a href="index.html" class="hover:text-primary">Home</a></li>
             <li><a href="tools.html" class="hover:text-primary">Tools</a></li>
             <li>
-              <a href="blog.html" class="text-primary font-semibold">Blog</a>
+              <a href="blog.html" class="hover:text-primary font-semibold text-primary">Blog</a>
             </li>
             <li><a href="about.html" class="hover:text-primary">About</a></li>
             <li><a href="contact.html" class="hover:text-primary">Contact</a></li>
@@ -61,113 +46,99 @@
       </div>
     </header>
 
-    <!-- 🌤️ Hero Section -->
+    <!-- 📰 Blog Hero -->
     <section class="relative text-center py-24 px-6 text-white overflow-hidden">
       <div
         class="absolute inset-0 bg-gradient-to-br from-primary via-accent to-tech animate-gradient bg-[length:400%_400%]"
       ></div>
 
       <div class="relative z-10">
-        <h2 class="text-4xl sm:text-5xl font-bold mb-6 drop-shadow-lg">Eco + Mindful Insights</h2>
+        <h2 class="text-4xl sm:text-5xl font-bold mb-6 drop-shadow-lg">
+          Explore Wellness & Sustainability
+        </h2>
         <p class="max-w-2xl mx-auto mb-8 text-lg">
-          Discover curated articles on sustainability, mindfulness, and AI-powered wellness for a
-          balanced future.
+          Articles and insights to help you live calmer, greener, and more mindful.
         </p>
       </div>
     </section>
-    <!-- 🔍 Blog Search + Dynamic Posts -->
-    <main class="max-w-6xl mx-auto py-16 px-6">
-      <div class="text-center mb-12">
-        <h2 class="text-4xl font-bold text-primary mb-4">Latest Wellness Articles</h2>
-        <p class="text-gray-600 max-w-2xl mx-auto">
-          Discover stories and tools for a calmer, greener lifestyle.
-        </p>
-      </div>
 
-      <!-- 🔍 Search Input -->
-      <div class="mb-10 flex justify-center">
-        <input
-          id="searchInput"
-          type="text"
-          placeholder="Search articles..."
-          class="w-full sm:w-1/2 px-4 py-3 rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-primary"
-        />
-      </div>
+    <!-- 🔍 Search -->
+    <div class="max-w-6xl mx-auto px-4 mt-10">
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="Search articles..."
+        class="w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:outline-none mb-10"
+      />
+    </div>
 
-      <!-- 🧠 Dynamic Blog Grid -->
-      <div
-        id="blogGrid"
-        class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center"
-      ></div>
-    </main>
+    <!-- 🧱 Blog Grid -->
+    <main
+      id="blogGrid"
+      class="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-8 px-4 pb-20"
+    ></main>
 
-    <!-- 🌿 Footer -->
-    <footer class="bg-white border-t border-gray-200 py-8 mt-20">
-      <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center px-6">
-        <p class="text-gray-600">
-          ©
-          <span id="year"></span>
-          Calmiqs — Wellness with a lighter footprint
-        </p>
-        <div class="flex gap-4 text-sm text-gray-500 mt-4 md:mt-0">
-          <a href="privacy.html" class="hover:text-primary">Privacy</a>
-          <a href="terms.html" class="hover:text-primary">Terms</a>
-        </div>
-      </div>
+    <!-- 🌱 Footer -->
+    <footer class="bg-gray-100 py-6 mt-20 text-center text-gray-600 text-sm">
+      © 2025 Calmiqs — Wellness through AI and Sustainability.
     </footer>
 
+    <!-- ⚙️ Script -->
     <script>
-      const blogPosts = {
-        "mindful-breathing": {
-          title: "The Art of Mindful Breathing",
-          date: "November 2, 2025",
-          image: "https://via.placeholder.com/400x250?text=Mindful+Breathing",
-          excerpt: "Learn how controlled breathing enhances mindfulness and calm.",
-        },
-        "eco-habits": {
-          title: "5 Small Eco Habits That Reduce Stress",
-          date: "November 4, 2025",
-          image: "https://via.placeholder.com/400x250?text=Eco+Habits",
-          excerpt:
-            "Simple sustainability practices to boost serenity and reduce your carbon footprint.",
-        },
-      };
+      (() => {
+        const blogPosts = {
+          "mindful-breathing": {
+            title: "The Art of Mindful Breathing",
+            date: "November 2, 2025",
+            image: "https://via.placeholder.com/400x250?text=Mindful+Breathing",
+            excerpt: "Learn how controlled breathing enhances mindfulness and calm.",
+          },
+          "eco-habits": {
+            title: "5 Small Eco Habits That Reduce Stress",
+            date: "November 4, 2025",
+            image: "https://via.placeholder.com/400x250?text=Eco+Habits",
+            excerpt:
+              "Simple sustainability practices to boost serenity and reduce your carbon footprint.",
+          },
+        };
 
-      const blogGrid = document.getElementById("blogGrid");
+        const blogGrid = document.getElementById("blogGrid");
 
-      function renderPosts(filter = "") {
-        blogGrid.innerHTML = "";
-        const posts = Object.entries(blogPosts).filter(([key, post]) =>
-          post.title.toLowerCase().includes(filter.toLowerCase())
-        );
+        function renderPosts(filter = "") {
+          blogGrid.innerHTML = "";
+          const posts = Object.entries(blogPosts).filter(([key, post]) =>
+            post.title.toLowerCase().includes(filter.toLowerCase())
+          );
 
-        if (posts.length === 0) {
-          blogGrid.innerHTML =
-            '<p class="text-gray-500 text-center col-span-full">No posts found.</p>';
-          return;
+          if (posts.length === 0) {
+            blogGrid.innerHTML =
+              '<p class="text-gray-500 text-center col-span-full">No posts found.</p>';
+            return;
+          }
+
+          posts.forEach(([key, post]) => {
+            const card = document.createElement("a");
+            card.href = `post-template.html?post=${key}`;
+            card.className =
+              "bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 block";
+            card.innerHTML = `
+              <img src="${post.image}" alt="${post.title}" class="w-full h-48 object-cover" />
+              <div class="p-5">
+                <h3 class="text-xl font-semibold text-primary mb-2">${post.title}</h3>
+                <p class="text-gray-600 mb-3">${post.excerpt}</p>
+                <p class="text-sm text-gray-400">${post.date}</p>
+              </div>
+            `;
+            blogGrid.appendChild(card);
+          });
         }
 
-        posts.forEach(([key, post]) => {
-          const card = document.createElement("a");
-          card.href = `post-template.html?post=${key}`;
-          card.className =
-            "bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 block max-w-sm";
-          card.innerHTML = `
-        <img src="${post.image}" alt="${post.title}" class="w-full h-48 object-cover" />
-        <div class="p-5">
-          <h3 class="text-xl font-semibold text-primary mb-2">${post.title}</h3>
-          <p class="text-gray-600 mb-3">${post.excerpt}</p>
-          <p class="text-sm text-gray-400">${post.date}</p>
-        </div>
-      `;
-          blogGrid.appendChild(card);
-        });
-      }
-
-      const searchInput = document.getElementById("searchInput");
-      searchInput.addEventListener("input", (e) => renderPosts(e.target.value));
-
-      renderPosts();
+        const searchInput = document.getElementById("searchInput");
+        if (searchInput) {
+          searchInput.addEventListener("input", (e) => renderPosts(e.target.value));
+        }
+        renderPosts();
+      })();
     </script>
   </body>
 </html>

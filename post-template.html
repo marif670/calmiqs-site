@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calmiqs | Blog Post</title>
+    <title>Calmiqs | Article</title>
 
-    <!-- Tailwind (keep your existing config) -->
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -16,17 +16,16 @@
               accent: "#FFD580",
               tech: "#5A67D8",
             },
-            fontFamily: {
-              sans: ["Poppins", "sans-serif"],
-            },
+            fontFamily: { sans: ["Poppins", "sans-serif"] },
           },
         },
       };
     </script>
+
     <link rel="stylesheet" href="/assets/css/style.css?v=12" />
   </head>
 
-  <body class="font-sans bg-[#F9FAFB] text-gray-800">
+  <body class="bg-[#F9FAFB] font-sans text-gray-800">
     <!-- 🌿 Header -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
       <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
@@ -37,7 +36,9 @@
           <ul class="flex gap-6 text-gray-700">
             <li><a href="index.html" class="hover:text-primary">Home</a></li>
             <li><a href="tools.html" class="hover:text-primary">Tools</a></li>
-            <li><a href="blog.html" class="hover:text-primary">Blog</a></li>
+            <li>
+              <a href="blog.html" class="hover:text-primary font-semibold text-primary">Blog</a>
+            </li>
             <li><a href="about.html" class="hover:text-primary">About</a></li>
             <li><a href="contact.html" class="hover:text-primary">Contact</a></li>
           </ul>
@@ -45,80 +46,74 @@
       </div>
     </header>
 
-    <!-- 🌈 Hero -->
-    <section id="post-hero" class="relative text-center py-24 px-6 text-white overflow-hidden">
-      <div
-        class="absolute inset-0 bg-gradient-to-br from-primary via-accent to-tech animate-gradient bg-[length:400%_400%]"
-      ></div>
-      <div class="relative z-10">
-        <h2 id="post-title" class="text-4xl sm:text-5xl font-bold mb-6 drop-shadow-lg">
-          Loading...
-        </h2>
-        <p id="post-date" class="text-lg opacity-90"></p>
-      </div>
-    </section>
+    <!-- 📰 Blog Post Container -->
+    <main id="postContainer" class="py-16 px-6 min-h-[70vh]"></main>
 
-    <!-- 📰 Post Content -->
-    <main class="max-w-3xl mx-auto py-12 px-6 leading-relaxed">
-      <img id="post-image" src="" alt="" class="w-full rounded-2xl shadow-lg mb-8" />
-      <div id="post-content" class="space-y-6 text-lg"></div>
-    </main>
-
-    <!-- 🔁 Post Navigation -->
-    <section class="max-w-3xl mx-auto px-6 pb-16 flex justify-between text-primary">
-      <a id="prev-post" href="#" class="hover:underline">← Previous Post</a>
-      <a id="next-post" href="#" class="hover:underline">Next Post →</a>
-    </section>
-
-    <!-- 🌿 Footer -->
-    <footer class="bg-white border-t mt-12">
-      <div class="max-w-6xl mx-auto text-center py-6 text-gray-500 text-sm">
-        © 2025 Calmiqs. All rights reserved.
-      </div>
+    <!-- 🌱 Footer -->
+    <footer class="bg-gray-100 py-6 mt-20 text-center text-gray-600 text-sm">
+      © 2025 Calmiqs — Wellness through AI and Sustainability.
     </footer>
 
-    <!-- 🧠 Dynamic Loader -->
+    <!-- ⚙️ Dynamic Post Loader -->
     <script>
-      // Example post data (will later connect to JSON or CMS)
-      const blogPosts = {
-        "mindful-breathing": {
-          title: "The Art of Mindful Breathing",
-          date: "November 2, 2025",
-          image: "/assets/images/mindful-breathing.jpg",
-          content: `
-            <p>Mindful breathing helps restore calm and focus in moments of stress. It’s one of the most accessible wellness practices.</p>
-            <p>By aligning your breath with awareness, you can reduce anxiety, improve concentration, and reconnect with the present moment.</p>
-            <blockquote class="border-l-4 border-primary pl-4 italic text-gray-600">
-              "When you own your breath, nobody can steal your peace."
-            </blockquote>
-            <h3 class="text-2xl font-semibold mt-8 mb-4">Simple Practice</h3>
-            <p>1. Sit comfortably and close your eyes.<br>
-            2. Inhale deeply through your nose for 4 seconds.<br>
-            3. Hold your breath for 4 seconds.<br>
-            4. Exhale slowly for 4 seconds.<br>
-            5. Repeat for 2–3 minutes daily.</p>
-          `,
-          prev: "green-focus",
-          next: "eco-habits",
-        },
-      };
+      (() => {
+        const posts = {
+          "mindful-breathing": {
+            title: "The Art of Mindful Breathing",
+            date: "November 2, 2025",
+            image: "https://via.placeholder.com/800x400?text=Mindful+Breathing",
+            content: `
+              <p>Mindful breathing is a powerful way to calm your mind and improve focus.
+              It works by bringing awareness to your breath and allowing your body’s rhythm
+              to slow down. Practice it daily to reduce anxiety and enhance clarity.</p>
 
-      // Get post key from URL (e.g. ?post=mindful-breathing)
-      const params = new URLSearchParams(window.location.search);
-      const postKey = params.get("post");
+              <p>Start by inhaling deeply through your nose for 4 seconds, holding for 2,
+              and exhaling gently for 6. Repeat this cycle 5 times to reset your state of mind.</p>
+            `,
+          },
+          "eco-habits": {
+            title: "5 Small Eco Habits That Reduce Stress",
+            date: "November 4, 2025",
+            image: "https://via.placeholder.com/800x400?text=Eco+Habits",
+            content: `
+              <p>Adopting eco-friendly habits isn’t just good for the planet — it’s good for you.
+              Studies show that living sustainably reduces stress and improves life satisfaction.</p>
 
-      const post = blogPosts[postKey] || Object.values(blogPosts)[0];
+              <ul class="list-disc list-inside">
+                <li>Start composting your organic waste.</li>
+                <li>Take mindful walks in green spaces.</li>
+                <li>Switch to reusable bottles and bags.</li>
+                <li>Spend one weekend a month in nature.</li>
+                <li>Practice gratitude for the earth’s beauty.</li>
+              </ul>
+            `,
+          },
+        };
 
-      // Inject data
-      document.getElementById("post-title").textContent = post.title;
-      document.getElementById("post-date").textContent = post.date;
-      document.getElementById("post-image").src = post.image;
-      document.getElementById("post-image").alt = post.title;
-      document.getElementById("post-content").innerHTML = post.content;
+        const params = new URLSearchParams(window.location.search);
+        const postKey = params.get("post");
+        const post = posts[postKey];
+        const container = document.getElementById("postContainer");
 
-      // Post nav
-      document.getElementById("prev-post").href = `post-template.html?post=${post.prev}`;
-      document.getElementById("next-post").href = `post-template.html?post=${post.next}`;
+        if (post) {
+          container.innerHTML = `
+            <article class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+              <img src="${post.image}" alt="${post.title}" class="rounded-xl mb-6 w-full h-auto" />
+              <h1 class="text-4xl font-bold text-primary mb-4">${post.title}</h1>
+              <p class="text-sm text-gray-500 mb-8">${post.date}</p>
+              <div class="prose max-w-none text-gray-700 leading-relaxed">${post.content}</div>
+            </article>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="text-center text-gray-500 mt-20">
+              <h2 class="text-2xl font-bold mb-4">Post Not Found</h2>
+              <p>Sorry, we couldn’t find the article you were looking for.</p>
+              <a href="blog.html" class="text-primary hover:underline mt-4 inline-block">← Back to Blog</a>
+            </div>
+          `;
+        }
+      })();
     </script>
   </body>
 </html>
