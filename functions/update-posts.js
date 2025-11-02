@@ -2,7 +2,7 @@
 export async function onRequestPost(context) {
   const GITHUB_TOKEN = context.env.GITHUB_TOKEN;
   const REPO_OWNER = "marif670";
-  const REPO_NAME = "clamiqs-site";
+  const REPO_NAME = "calmiqs-site";
   const FILE_PATH = "assets/data/posts.json";
   const AUTH_PASSWORD = "calmiqs2025";
 
