@@ -3,33 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calmiqs | Article</title>
+    <title>Calmiqs Blog Post</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
-            colors: { primary: "#4FA49A", accent: "#FFD580", tech: "#5A67D8" },
+            colors: {
+              primary: "#4FA49A",
+              accent: "#FFD580",
+              tech: "#5A67D8",
+            },
             fontFamily: { sans: ["Poppins", "sans-serif"] },
           },
         },
       };
     </script>
-    <link rel="stylesheet" href="/assets/css/style.css?v=14" />
+
+    <link rel="stylesheet" href="/assets/css/style.css?v=12" />
   </head>
 
-  <body class="bg-[#F9FAFB] font-sans text-gray-800">
+  <body class="font-sans bg-[#F9FAFB] text-gray-800">
+    <!-- Header -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
       <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
-        <h1 class="text-2xl font-bold text-primary"><a href="index.html">Calmiqs</a></h1>
+        <h1 class="text-2xl font-bold text-primary">
+          <a href="index.html">Calmiqs</a>
+        </h1>
         <nav>
           <ul class="flex gap-6 text-gray-700">
             <li><a href="index.html" class="hover:text-primary">Home</a></li>
             <li><a href="tools.html" class="hover:text-primary">Tools</a></li>
-            <li>
-              <a href="blog.html" class="hover:text-primary font-semibold text-primary">Blog</a>
-            </li>
+            <li><a href="blog.html" class="text-primary font-semibold">Blog</a></li>
             <li><a href="about.html" class="hover:text-primary">About</a></li>
             <li><a href="contact.html" class="hover:text-primary">Contact</a></li>
           </ul>
@@ -37,77 +43,102 @@
       </div>
     </header>
 
-    <main id="postContainer" class="py-16 px-6 min-h-[70vh]"></main>
+    <main class="max-w-4xl mx-auto py-16 px-6">
+      <div id="postContainer" class="text-center"></div>
+      <div id="postNav" class="flex justify-between mt-12"></div>
+    </main>
 
-    <footer class="bg-gray-100 py-6 mt-20 text-center text-gray-600 text-sm">
-      © 2025 Calmiqs — Wellness through AI and Sustainability.
+    <footer class="bg-gray-100 py-8 mt-16 text-center text-gray-600">
+      <p>© 2025 Calmiqs — Wellness Meets Sustainability</p>
     </footer>
 
     <script>
-      (async () => {
-        const params = new URLSearchParams(window.location.search);
-        const slug = params.get("post");
-        const container = document.getElementById("postContainer");
-        const res = await fetch("/assets/data/posts.json");
-        const posts = await res.json();
-        const keys = Object.keys(posts);
-        const index = keys.indexOf(slug);
-        const post = posts[slug];
+      (() => {
+        const postContainer = document.getElementById("postContainer");
+        const postNav = document.getElementById("postNav");
 
-        if (!post) {
-          container.innerHTML = `<div class='text-center text-gray-500 mt-20'><h2 class='text-2xl font-bold mb-4'>Post Not Found</h2><a href='blog.html' class='text-primary hover:underline'>← Back to Blog</a></div>`;
-          return;
+        const embeddedPosts = {
+          "mindful-breathing": {
+            title: "The Art of Mindful Breathing",
+            date: "November 2, 2025",
+            image: "https://via.placeholder.com/800x400?text=Mindful+Breathing",
+            content: `
+              <p>Mindful breathing allows you to focus on your breath and anchor your thoughts in the present moment. This practice reduces stress, anxiety, and improves focus.</p>
+              <p class="mt-4">Start by taking deep, slow breaths, observing each inhale and exhale. Feel the air as it enters and leaves your body, grounding you in calm awareness.</p>
+            `,
+          },
+          "eco-habits": {
+            title: "5 Small Eco Habits That Reduce Stress",
+            date: "November 4, 2025",
+            image: "https://via.placeholder.com/800x400?text=Eco+Habits",
+            content: `
+              <p>Living sustainably doesn't have to be overwhelming. By making small eco-friendly changes, you can create a lifestyle that supports both the planet and your mental well-being.</p>
+              <ul class="list-disc ml-6 mt-4 text-left">
+                <li>Practice digital detoxes to save energy and reduce stress.</li>
+                <li>Walk or cycle instead of driving short distances.</li>
+                <li>Start composting to reconnect with nature.</li>
+                <li>Use reusable water bottles and cups.</li>
+                <li>Spend time in green spaces daily.</li>
+              </ul>
+            `,
+          },
+        };
+
+        async function loadPosts() {
+          try {
+            const res = await fetch("posts.json");
+            if (!res.ok) throw new Error("No JSON");
+            return await res.json();
+          } catch {
+            return embeddedPosts;
+          }
         }
 
-        const prevSlug = keys[index - 1];
-        const nextSlug = keys[index + 1];
-        const related = Object.entries(posts)
-          .filter(([s, p]) => s !== slug && p.tags.some((tag) => post.tags.includes(tag)))
-          .slice(0, 3);
+        loadPosts().then((posts) => {
+          const params = new URLSearchParams(window.location.search);
+          const keys = Object.keys(posts);
+          const key = params.get("post") || keys[0];
+          const post = posts[key];
 
-        container.innerHTML = `
-          <article class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-            <a href="blog.html" class="inline-block text-primary hover:underline mb-6">← Back to Blog</a>
-            <img src="${post.image}" alt="${post.title}" class="rounded-xl mb-6 w-full h-auto" />
+          if (!post) {
+            postContainer.innerHTML = `<p class="text-gray-500">Post not found.</p>`;
+            return;
+          }
+
+          postContainer.innerHTML = `
             <h1 class="text-4xl font-bold text-primary mb-4">${post.title}</h1>
-            <p class="text-sm text-gray-500 mb-8">${post.date}</p>
-            <div class="prose max-w-none text-gray-700 leading-relaxed mb-10">${post.content}</div>
-            <div class="flex justify-between">
+            <p class="text-gray-500 mb-6">${post.date}</p>
+            <img src="${post.image}" alt="${post.title}" class="rounded-xl mb-8 shadow-lg mx-auto" />
+            <div class="text-lg leading-relaxed text-left max-w-3xl mx-auto">${post.content}</div>
+            <div class="mt-10 text-center">
+              <a href="blog.html"
+                 class="inline-block bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-accent transition shadow">
+                 ← Back to Blog
+              </a>
+            </div>
+          `;
+
+          const currentIndex = keys.indexOf(key);
+          const prevKey = keys[currentIndex - 1];
+          const nextKey = keys[currentIndex + 1];
+
+          postNav.innerHTML = `
+            <div>
               ${
-                prevSlug
-                  ? `<a href="post-template.html?post=${prevSlug}" class="text-primary hover:underline">← ${posts[prevSlug].title}</a>`
-                  : "<span></span>"
-              }
-              ${
-                nextSlug
-                  ? `<a href="post-template.html?post=${nextSlug}" class="text-primary hover:underline">${posts[nextSlug].title} →</a>`
+                prevKey
+                  ? `<a href="post-template.html?post=${prevKey}" class="text-primary hover:underline">← ${posts[prevKey].title}</a>`
                   : ""
               }
             </div>
-          </article>
-
-          ${
-            related.length
-              ? `<section class="max-w-6xl mx-auto mt-16">
-                  <h2 class="text-2xl font-semibold text-primary mb-6 text-center">Recommended Posts</h2>
-                  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    ${related
-                      .map(
-                        ([slug, p]) => `
-                        <a href="post-template.html?post=${slug}" class="bg-white rounded-2xl shadow-md hover:shadow-lg transition block overflow-hidden">
-                          <img src="${p.image}" class="w-full h-40 object-cover" />
-                          <div class="p-4">
-                            <h3 class="font-semibold text-primary mb-2">${p.title}</h3>
-                            <p class="text-gray-600 text-sm">${p.excerpt}</p>
-                          </div>
-                        </a>`
-                      )
-                      .join("")}
-                  </div>
-                </section>`
-              : ""
-          }
-        `;
+            <div>
+              ${
+                nextKey
+                  ? `<a href="post-template.html?post=${nextKey}" class="text-primary hover:underline">${posts[nextKey].title} →</a>`
+                  : ""
+              }
+            </div>
+          `;
+        });
       })();
     </script>
   </body>
