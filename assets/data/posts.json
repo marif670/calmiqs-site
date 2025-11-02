@@ -4,47 +4,20 @@
     "date": "November 2, 2025",
     "image": "https://via.placeholder.com/800x400?text=Mindful+Breathing",
     "excerpt": "Learn how controlled breathing enhances mindfulness and calm.",
-    "content": "<p>Mindful breathing is a powerful way to calm your mind and improve focus. It works by bringing awareness to your breath and allowing your body’s rhythm to slow down. Practice it daily to reduce anxiety and enhance clarity.</p><p>Start by inhaling deeply through your nose for 4 seconds, holding for 2, and exhaling gently for 6. Repeat this cycle 5 times to reset your state of mind.</p>",
-    "tags": ["mindfulness", "breathing"]
+    "content": "<p>Mindful breathing allows you to focus on your breath and anchor your thoughts in the present moment. This practice reduces stress, anxiety, and improves focus.</p><p class='mt-4'>Start by taking deep, slow breaths, observing each inhale and exhale. Feel the air as it enters and leaves your body, grounding you in calm awareness.</p>"
   },
   "eco-habits": {
     "title": "5 Small Eco Habits That Reduce Stress",
     "date": "November 4, 2025",
     "image": "https://via.placeholder.com/800x400?text=Eco+Habits",
     "excerpt": "Simple sustainability practices to boost serenity and reduce your carbon footprint.",
-    "content": "<p>Adopting eco-friendly habits isn’t just good for the planet — it’s good for you. Studies show that living sustainably reduces stress and improves life satisfaction.</p><ul class='list-disc list-inside'><li>Start composting your organic waste.</li><li>Take mindful walks in green spaces.</li><li>Switch to reusable bottles and bags.</li><li>Spend one weekend a month in nature.</li><li>Practice gratitude for the earth’s beauty.</li></ul>",
-    "tags": ["eco", "wellness"]
+    "content": "<p>Living sustainably doesn't have to be overwhelming. By making small eco-friendly changes, you can create a lifestyle that supports both the planet and your mental well-being.</p><ul class='list-disc ml-6 mt-4 text-left'><li>Practice digital detoxes to save energy and reduce stress.</li><li>Walk or cycle instead of driving short distances.</li><li>Start composting to reconnect with nature.</li><li>Use reusable water bottles and cups.</li><li>Spend time in green spaces daily.</li></ul>"
   },
-  "morning-rituals": {
-    "title": "Morning Rituals to Center Your Mind",
-    "date": "November 5, 2025",
-    "image": "https://via.placeholder.com/800x400?text=Morning+Rituals",
-    "excerpt": "Simple routines that promote focus, gratitude, and calm energy.",
-    "content": "<p>Begin your mornings with intention — hydration, stretching, and mindful journaling can dramatically change your day’s tone.</p>",
-    "tags": ["mindfulness", "habits"]
-  },
-  "sleep-balance": {
-    "title": "How Sleep Balances Mental Wellness",
-    "date": "November 6, 2025",
-    "image": "https://via.placeholder.com/800x400?text=Sleep+Balance",
-    "excerpt": "Discover how quality rest affects your mood, focus, and inner peace.",
-    "content": "<p>Good sleep is the foundation of calm and productivity. Learn techniques for better sleep hygiene and circadian balance.</p>",
-    "tags": ["wellness", "sleep"]
-  },
-  "green-space": {
-    "title": "Healing Power of Green Spaces",
-    "date": "November 7, 2025",
-    "image": "https://via.placeholder.com/800x400?text=Green+Spaces",
-    "excerpt": "Why spending time in nature helps regulate stress and emotions.",
-    "content": "<p>Exposure to greenery reduces cortisol and increases serotonin. Make outdoor moments part of your daily wellness practice.</p>",
-    "tags": ["eco", "nature"]
-  },
-  "digital-detox": {
-    "title": "Digital Detox for Mental Clarity",
-    "date": "November 8, 2025",
-    "image": "https://via.placeholder.com/800x400?text=Digital+Detox",
-    "excerpt": "Take a mindful break from screens to restore attention and peace.",
-    "content": "<p>Limiting screen time and scheduling tech-free hours helps your mind rest and reconnect with the present moment.</p>",
-    "tags": ["mindfulness", "tech"]
+  "ai-wellness": {
+    "title": "AI in Wellness: The Future of Calm Technology",
+    "date": "November 10, 2025",
+    "image": "https://via.placeholder.com/800x400?text=AI+Wellness",
+    "excerpt": "Discover how artificial intelligence is reshaping mindfulness, meditation, and eco-wellness.",
+    "content": "<p>AI is transforming the way we manage mental health, making mindfulness tools more personalized and accessible than ever. Apps now adapt to your emotional rhythm and recommend breathing or focus exercises in real-time.</p><p class='mt-4'>Calmiqs integrates these ideas by blending technology and ecology — encouraging smarter habits that promote calm while staying kind to the planet.</p>"
   }
 }

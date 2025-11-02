@@ -86,7 +86,7 @@
 
         async function loadPosts() {
           try {
-            const res = await fetch("posts.json");
+            const res = await fetch("/assets/data/posts.json");
             if (!res.ok) throw new Error("No JSON");
             return await res.json();
           } catch {
