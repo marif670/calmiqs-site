@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calmiqs Blog Editor</title>
 
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -24,11 +24,10 @@
       };
     </script>
 
-    <link rel="stylesheet" href="/assets/css/style.css" />
+    <link rel="stylesheet" href="/assets/css/style.css?v=12" />
   </head>
-
-  <body class="font-sans bg-[#F9FAFB] text-gray-800 min-h-screen">
-    <!-- Header -->
+  <body class="font-sans bg-[#F9FAFB] text-gray-800">
+    <!-- 🌿 Header -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
       <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
         <h1 class="text-2xl font-bold text-primary">
@@ -45,9 +44,9 @@
       </div>
     </header>
 
-    <!-- Login Section -->
-    <section id="login-section" class="flex items-center justify-center h-[80vh]">
-      <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-md text-center">
+    <!-- 🌱 Login -->
+    <section id="login-section" class="flex justify-center items-center h-[80vh]">
+      <div class="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center">
         <h2 class="text-2xl font-bold text-primary mb-4">Admin Login</h2>
         <input
           id="password"
@@ -61,26 +60,24 @@
         >
           Login
         </button>
-        <p id="login-error" class="text-red-500 text-sm mt-3 hidden">
-          Incorrect password. Please try again.
-        </p>
+        <p id="login-error" class="text-red-500 mt-3 hidden">Incorrect password.</p>
       </div>
     </section>
 
-    <!-- Editor Section -->
-    <main id="editor-section" class="hidden max-w-6xl mx-auto py-10">
-      <h2 class="text-3xl font-bold text-primary mb-6">Blog Manager</h2>
+    <!-- 📝 Editor -->
+    <main id="editor-section" class="hidden max-w-5xl mx-auto py-10">
+      <h2 class="text-3xl font-bold text-primary mb-6">Manage Blog Posts</h2>
 
-      <div class="grid md:grid-cols-2 gap-10">
-        <!-- Create / Edit Form -->
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Form -->
         <div class="bg-white rounded-xl shadow-md p-6">
-          <h3 class="text-xl font-semibold mb-4">Create / Edit Post</h3>
+          <h3 class="text-xl font-semibold mb-4">Create or Edit Post</h3>
           <form id="postForm" class="space-y-4">
-            <input type="hidden" id="editIndex" value="" />
+            <input type="hidden" id="editIndex" />
             <input
               id="title"
               type="text"
-              placeholder="Post Title"
+              placeholder="Title"
               class="border rounded-lg w-full p-3"
               required
             />
@@ -91,22 +88,22 @@
               class="border rounded-lg w-full p-3"
               required
             />
-            <textarea
-              id="content"
-              rows="6"
-              placeholder="Write your content..."
-              class="border rounded-lg w-full p-3"
-              required
-            ></textarea>
             <input
               id="image"
               type="text"
               placeholder="Image URL (optional)"
               class="border rounded-lg w-full p-3"
             />
+            <textarea
+              id="content"
+              rows="5"
+              placeholder="Write post content..."
+              class="border rounded-lg w-full p-3"
+              required
+            ></textarea>
             <button
               type="submit"
-              class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-tech transition"
+              class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-tech transition w-full"
             >
               Save Post
             </button>
@@ -115,7 +112,7 @@
 
         <!-- Preview -->
         <div class="bg-white rounded-xl shadow-md p-6">
-          <h3 class="text-xl font-semibold mb-4">Live Preview</h3>
+          <h3 class="text-xl font-semibold mb-4">Preview</h3>
           <div id="preview" class="border rounded-lg p-4 bg-[#F9FAFB]">
             <p class="text-gray-500 italic text-center">Start typing to preview...</p>
           </div>
@@ -130,34 +127,115 @@
     </main>
 
     <script>
+      const ADMIN_PASSWORD = "calmiqs123"; // ✅ set your admin password here
       const passwordInput = document.getElementById("password");
       const loginBtn = document.getElementById("login-btn");
       const loginSection = document.getElementById("login-section");
       const editorSection = document.getElementById("editor-section");
       const loginError = document.getElementById("login-error");
-      const preview = document.getElementById("preview");
-      const postList = document.getElementById("postList");
-
-      const ADMIN_PASSWORD = "calmiqs123"; // 🔒 Change as needed
 
       let posts = [];
 
-      // Login logic
+      // 🔐 Login
       loginBtn.addEventListener("click", () => {
         if (passwordInput.value === ADMIN_PASSWORD) {
           loginSection.classList.add("hidden");
           editorSection.classList.remove("hidden");
+          loadPosts();
         } else {
           loginError.classList.remove("hidden");
         }
       });
 
-      // Live Preview
-      const updatePreview = () => {
+      // 🧠 Load posts
+      async function loadPosts() {
+        try {
+          const res = await fetch("/assets/data/posts.json", { cache: "no-store" });
+          posts = await res.json();
+        } catch (e) {
+          const local = localStorage.getItem("calmiqs_posts");
+          posts = local ? JSON.parse(local) : [];
+        }
+        renderPosts();
+      }
+
+      // 🖋️ Render post list
+      function renderPosts() {
+        const list = document.getElementById("postList");
+        list.innerHTML = "";
+        posts.forEach((post, i) => {
+          const li = document.createElement("li");
+          li.className = "bg-white shadow rounded-lg p-4 flex justify-between items-center";
+          li.innerHTML = `
+            <div>
+              <h4 class="font-semibold text-primary">${post.title}</h4>
+              <p class="text-sm text-gray-600">${post.author}</p>
+            </div>
+            <div class="flex gap-3">
+              <button class="text-tech hover:underline" onclick="editPost(${i})">Edit</button>
+              <button class="text-red-500 hover:underline" onclick="deletePost(${i})">Delete</button>
+            </div>
+          `;
+          list.appendChild(li);
+        });
+      }
+
+      // ✏️ Edit post
+      window.editPost = function (index) {
+        const post = posts[index];
+        document.getElementById("title").value = post.title;
+        document.getElementById("author").value = post.author;
+        document.getElementById("image").value = post.image || "";
+        document.getElementById("content").value = post.content;
+        document.getElementById("editIndex").value = index;
+        updatePreview();
+      };
+
+      // ❌ Delete post
+      window.deletePost = function (index) {
+        if (confirm("Delete this post?")) {
+          posts.splice(index, 1);
+          savePosts();
+          renderPosts();
+        }
+      };
+
+      // 💾 Save new or edited post
+      document.getElementById("postForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const newPost = {
+          title: document.getElementById("title").value,
+          author: document.getElementById("author").value,
+          image: document.getElementById("image").value,
+          content: document.getElementById("content").value,
+          date: new Date().toISOString(),
+        };
+
+        const editIndex = document.getElementById("editIndex").value;
+        if (editIndex !== "") {
+          posts[editIndex] = newPost;
+          document.getElementById("editIndex").value = "";
+        } else {
+          posts.push(newPost);
+        }
+
+        savePosts();
+        renderPosts();
+        e.target.reset();
+        preview.innerHTML = `<p class="text-gray-500 italic text-center">Start typing to preview...</p>`;
+      });
+
+      // 🧾 Preview
+      const preview = document.getElementById("preview");
+      ["title", "author", "content", "image"].forEach((id) =>
+        document.getElementById(id).addEventListener("input", updatePreview)
+      );
+
+      function updatePreview() {
         const title = document.getElementById("title").value || "Post Title";
         const author = document.getElementById("author").value || "Author";
-        const content = document.getElementById("content").value || "Post content...";
-        const image = document.getElementById("image").value || "/assets/img/default.jpg";
+        const content = document.getElementById("content").value || "Content...";
+        const image = document.getElementById("image").value || "/assets/img/blog1.jpg";
 
         preview.innerHTML = `
           <div class="rounded-lg overflow-hidden shadow-md bg-white">
@@ -169,96 +247,13 @@
             </div>
           </div>
         `;
-      };
-
-      ["title", "author", "content", "image"].forEach((id) =>
-        document.getElementById(id).addEventListener("input", updatePreview)
-      );
-
-      // Load posts from JSON or localStorage
-      async function loadPosts() {
-        try {
-          const res = await fetch("/assets/data/posts.json", { cache: "no-store" });
-          if (!res.ok) throw new Error("File not found");
-          posts = await res.json();
-          console.log("Loaded posts from JSON:", posts);
-        } catch (err) {
-          console.warn("Falling back to localStorage:", err);
-          const local = localStorage.getItem("calmiqs_posts");
-          posts = local ? JSON.parse(local) : [];
-        }
-        renderPosts();
       }
 
-      // Render posts
-      function renderPosts() {
-        postList.innerHTML = "";
-        posts.forEach((post, index) => {
-          const li = document.createElement("li");
-          li.className = "bg-white shadow rounded-lg p-4 flex justify-between items-center";
-          li.innerHTML = `
-            <div>
-              <h4 class="font-semibold">${post.title}</h4>
-              <p class="text-sm text-gray-600">${post.author}</p>
-            </div>
-            <div class="flex gap-3">
-              <button class="text-primary hover:underline" onclick="editPost(${index})">Edit</button>
-              <button class="text-red-500 hover:underline" onclick="deletePost(${index})">Delete</button>
-            </div>
-          `;
-          postList.appendChild(li);
-        });
-      }
-
-      // Edit existing post
-      window.editPost = function (index) {
-        const post = posts[index];
-        document.getElementById("title").value = post.title;
-        document.getElementById("author").value = post.author;
-        document.getElementById("content").value = post.content;
-        document.getElementById("image").value = post.image || "";
-        document.getElementById("editIndex").value = index;
-        updatePreview();
-      };
-
-      // Delete post
-      window.deletePost = function (index) {
-        if (confirm("Delete this post?")) {
-          posts.splice(index, 1);
-          renderPosts();
-          savePosts();
-        }
-      };
-
-      // Save post
-      document.getElementById("postForm").addEventListener("submit", (e) => {
-        e.preventDefault();
-        const newPost = {
-          title: document.getElementById("title").value,
-          author: document.getElementById("author").value,
-          content: document.getElementById("content").value,
-          image: document.getElementById("image").value,
-          date: new Date().toISOString(),
-        };
-
-        const index = document.getElementById("editIndex").value;
-        if (index) posts[index] = newPost;
-        else posts.push(newPost);
-
-        savePosts();
-        renderPosts();
-        e.target.reset();
-        preview.innerHTML =
-          "<p class='text-gray-500 italic text-center'>Start typing to preview...</p>";
-      });
-
-      // Save posts to localStorage (JSON write disabled on Pages)
+      // 💽 Save to localStorage
       function savePosts() {
         localStorage.setItem("calmiqs_posts", JSON.stringify(posts));
-        alert("Post saved (local only). Sync manually to /assets/data/posts.json");
+        alert("Post saved (local only).");
       }
-
-      loadPosts();
     </script>
   </body>
 </html>
