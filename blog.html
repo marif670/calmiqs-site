@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog — Calmiqs</title>
+
+    <!-- Tailwind (same setup as other pages) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4FA49A",
+              accent: "#FFD580",
+              tech: "#5A67D8",
+            },
+            fontFamily: {
+              sans: ["Poppins", "sans-serif"],
+            },
+            animation: {
+              gradient: "gradientBG 8s ease infinite",
+            },
+            keyframes: {
+              gradientBG: {
+                "0%,100%": { backgroundPosition: "0% 50%" },
+                "50%": { backgroundPosition: "100% 50%" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <link rel="stylesheet" href="/assets/css/style.css?v=12" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="font-sans bg-[#F9FAFB] text-gray-800">
+    <!-- 🌿 Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
+        <h1 class="text-2xl font-bold text-primary">
+          <a href="index.html">Calmiqs</a>
+        </h1>
+        <nav>
+          <ul class="flex gap-6 text-gray-700">
+            <li><a href="index.html" class="hover:text-primary">Home</a></li>
+            <li><a href="tools.html" class="hover:text-primary">Tools</a></li>
+            <li>
+              <a href="blog.html" class="text-primary font-semibold">Blog</a>
+            </li>
+            <li><a href="about.html" class="hover:text-primary">About</a></li>
+            <li><a href="contact.html" class="hover:text-primary">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- 🌤️ Hero Section -->
+    <section class="relative text-center py-24 px-6 text-white overflow-hidden">
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-primary via-accent to-tech animate-gradient bg-[length:400%_400%]"
+      ></div>
+
+      <div class="relative z-10">
+        <h2 class="text-4xl sm:text-5xl font-bold mb-6 drop-shadow-lg">Eco + Mindful Insights</h2>
+        <p class="max-w-2xl mx-auto mb-8 text-lg">
+          Discover curated articles on sustainability, mindfulness, and AI-powered wellness for a
+          balanced future.
+        </p>
+      </div>
+    </section>
+
+    <!-- 📰 Blog Section -->
+    <section class="max-w-6xl mx-auto py-20 px-6">
+      <h3 class="text-3xl font-bold text-primary mb-10 text-center">Featured Articles</h3>
+      <div id="blog-grid" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+
+    <!-- 🌿 Footer -->
+    <footer class="bg-white border-t border-gray-200 py-8 mt-20">
+      <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center px-6">
+        <p class="text-gray-600">
+          ©
+          <span id="year"></span>
+          Calmiqs — Wellness with a lighter footprint
+        </p>
+        <div class="flex gap-4 text-sm text-gray-500 mt-4 md:mt-0">
+          <a href="privacy.html" class="hover:text-primary">Privacy</a>
+          <a href="terms.html" class="hover:text-primary">Terms</a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      // 🌿 Placeholder Blog Data (Future-ready for API/AI feed)
+      const blogPosts = [
+        {
+          title: "The Science of Calm: How Breathing Shapes the Mind",
+          excerpt:
+            "Discover how mindful breathing activates neural pathways that reduce stress and enhance focus.",
+          image: "/assets/images/breathing.jpg",
+          link: "#",
+        },
+        {
+          title: "Eco Habits for a Greener You",
+          excerpt:
+            "Small daily actions can make a big difference. Learn how to align your wellness routine with sustainability.",
+          image: "/assets/images/eco.jpg",
+          link: "#",
+        },
+        {
+          title: "AI + Mindfulness: The Future of Self-Care",
+          excerpt:
+            "From guided meditations to emotion-aware environments, AI is transforming personal wellness.",
+          image: "/assets/images/ai-mindfulness.jpg",
+          link: "#",
+        },
+        {
+          title: "Digital Detox for a Modern World",
+          excerpt:
+            "Technology overload is real — here’s how to unplug without disconnecting from what matters.",
+          image: "/assets/images/detox.jpg",
+          link: "#",
+        },
+        {
+          title: "Sustainable Sleep: The Eco Impact of Rest",
+          excerpt:
+            "Explore how natural materials, ambient light, and mindful rest contribute to planetary health.",
+          image: "/assets/images/sleep.jpg",
+          link: "#",
+        },
+        {
+          title: "Calm by Design: How Colors Influence Mood",
+          excerpt:
+            "Your environment shapes your emotions. Learn how to use color psychology to boost calm and focus.",
+          image: "/assets/images/colors.jpg",
+          link: "#",
+        },
+      ];
+
+      const blogGrid = document.getElementById("blog-grid");
+
+      // Dynamically render cards
+      blogPosts.forEach((post) => {
+        const card = document.createElement("div");
+        card.className =
+          "bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-lg";
+
+        card.innerHTML = `
+          <img src="${post.image}" alt="${post.title}" class="w-full h-48 object-cover" />
+          <div class="p-6 text-left">
+            <h4 class="text-xl font-semibold text-gray-800 mb-3">${post.title}</h4>
+            <p class="text-gray-600 mb-4">${post.excerpt}</p>
+            <a href="${post.link}" class="text-primary font-medium hover:underline">Read More →</a>
+          </div>
+        `;
+
+        blogGrid.appendChild(card);
+      });
+    </script>
+  </body>
+</html>
