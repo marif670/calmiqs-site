@@ -22,7 +22,7 @@
       };
     </script>
 
-    <link rel="stylesheet" href="/assets/css/style.css?v=12" />
+    <link rel="stylesheet" href="/assets/css/style.css?v=13" />
   </head>
 
   <body class="font-sans bg-[#F9FAFB] text-gray-800">
@@ -46,7 +46,7 @@
       </div>
     </header>
 
-    <!-- 📰 Blog Hero -->
+    <!-- 📰 Hero -->
     <section class="relative text-center py-24 px-6 text-white overflow-hidden">
       <div
         class="absolute inset-0 bg-gradient-to-br from-primary via-accent to-tech animate-gradient bg-[length:400%_400%]"
@@ -86,27 +86,19 @@
     <!-- ⚙️ Script -->
     <script>
       (() => {
-        const blogPosts = {
-          "mindful-breathing": {
-            title: "The Art of Mindful Breathing",
-            date: "November 2, 2025",
-            image: "https://via.placeholder.com/400x250?text=Mindful+Breathing",
-            excerpt: "Learn how controlled breathing enhances mindfulness and calm.",
-          },
-          "eco-habits": {
-            title: "5 Small Eco Habits That Reduce Stress",
-            date: "November 4, 2025",
-            image: "https://via.placeholder.com/400x250?text=Eco+Habits",
-            excerpt:
-              "Simple sustainability practices to boost serenity and reduce your carbon footprint.",
-          },
-        };
-
         const blogGrid = document.getElementById("blogGrid");
+        const searchInput = document.getElementById("searchInput");
+        let blogPosts = {};
+
+        async function fetchPosts() {
+          const res = await fetch("/assets/data/posts.json");
+          blogPosts = await res.json();
+          renderPosts();
+        }
 
         function renderPosts(filter = "") {
           blogGrid.innerHTML = "";
-          const posts = Object.entries(blogPosts).filter(([key, post]) =>
+          const posts = Object.entries(blogPosts).filter(([slug, post]) =>
             post.title.toLowerCase().includes(filter.toLowerCase())
           );
 
@@ -116,9 +108,9 @@
             return;
           }
 
-          posts.forEach(([key, post]) => {
+          posts.forEach(([slug, post]) => {
             const card = document.createElement("a");
-            card.href = `post-template.html?post=${key}`;
+            card.href = `post-template.html?post=${slug}`;
             card.className =
               "bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 block";
             card.innerHTML = `
@@ -133,11 +125,8 @@
           });
         }
 
-        const searchInput = document.getElementById("searchInput");
-        if (searchInput) {
-          searchInput.addEventListener("input", (e) => renderPosts(e.target.value));
-        }
-        renderPosts();
+        searchInput.addEventListener("input", (e) => renderPosts(e.target.value));
+        fetchPosts();
       })();
     </script>
   </body>

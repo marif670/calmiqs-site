@@ -22,7 +22,7 @@
       };
     </script>
 
-    <link rel="stylesheet" href="/assets/css/style.css?v=12" />
+    <link rel="stylesheet" href="/assets/css/style.css?v=13" />
   </head>
 
   <body class="bg-[#F9FAFB] font-sans text-gray-800">
@@ -46,7 +46,7 @@
       </div>
     </header>
 
-    <!-- 📰 Blog Post Container -->
+    <!-- 📰 Blog Post -->
     <main id="postContainer" class="py-16 px-6 min-h-[70vh]"></main>
 
     <!-- 🌱 Footer -->
@@ -54,62 +54,41 @@
       © 2025 Calmiqs — Wellness through AI and Sustainability.
     </footer>
 
-    <!-- ⚙️ Dynamic Post Loader -->
+    <!-- ⚙️ Script -->
     <script>
-      (() => {
-        const posts = {
-          "mindful-breathing": {
-            title: "The Art of Mindful Breathing",
-            date: "November 2, 2025",
-            image: "https://via.placeholder.com/800x400?text=Mindful+Breathing",
-            content: `
-              <p>Mindful breathing is a powerful way to calm your mind and improve focus.
-              It works by bringing awareness to your breath and allowing your body’s rhythm
-              to slow down. Practice it daily to reduce anxiety and enhance clarity.</p>
-
-              <p>Start by inhaling deeply through your nose for 4 seconds, holding for 2,
-              and exhaling gently for 6. Repeat this cycle 5 times to reset your state of mind.</p>
-            `,
-          },
-          "eco-habits": {
-            title: "5 Small Eco Habits That Reduce Stress",
-            date: "November 4, 2025",
-            image: "https://via.placeholder.com/800x400?text=Eco+Habits",
-            content: `
-              <p>Adopting eco-friendly habits isn’t just good for the planet — it’s good for you.
-              Studies show that living sustainably reduces stress and improves life satisfaction.</p>
-
-              <ul class="list-disc list-inside">
-                <li>Start composting your organic waste.</li>
-                <li>Take mindful walks in green spaces.</li>
-                <li>Switch to reusable bottles and bags.</li>
-                <li>Spend one weekend a month in nature.</li>
-                <li>Practice gratitude for the earth’s beauty.</li>
-              </ul>
-            `,
-          },
-        };
-
+      (async () => {
         const params = new URLSearchParams(window.location.search);
-        const postKey = params.get("post");
-        const post = posts[postKey];
+        const slug = params.get("post");
         const container = document.getElementById("postContainer");
 
-        if (post) {
+        try {
+          const res = await fetch("/assets/data/posts.json");
+          const posts = await res.json();
+          const post = posts[slug];
+
+          if (post) {
+            container.innerHTML = `
+              <article class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+                <img src="${post.image}" alt="${post.title}" class="rounded-xl mb-6 w-full h-auto" />
+                <h1 class="text-4xl font-bold text-primary mb-4">${post.title}</h1>
+                <p class="text-sm text-gray-500 mb-8">${post.date}</p>
+                <div class="prose max-w-none text-gray-700 leading-relaxed">${post.content}</div>
+              </article>
+            `;
+          } else {
+            container.innerHTML = `
+              <div class="text-center text-gray-500 mt-20">
+                <h2 class="text-2xl font-bold mb-4">Post Not Found</h2>
+                <p>Sorry, we couldn’t find the article you were looking for.</p>
+                <a href="blog.html" class="text-primary hover:underline mt-4 inline-block">← Back to Blog</a>
+              </div>
+            `;
+          }
+        } catch (err) {
           container.innerHTML = `
-            <article class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-              <img src="${post.image}" alt="${post.title}" class="rounded-xl mb-6 w-full h-auto" />
-              <h1 class="text-4xl font-bold text-primary mb-4">${post.title}</h1>
-              <p class="text-sm text-gray-500 mb-8">${post.date}</p>
-              <div class="prose max-w-none text-gray-700 leading-relaxed">${post.content}</div>
-            </article>
-          `;
-        } else {
-          container.innerHTML = `
-            <div class="text-center text-gray-500 mt-20">
-              <h2 class="text-2xl font-bold mb-4">Post Not Found</h2>
-              <p>Sorry, we couldn’t find the article you were looking for.</p>
-              <a href="blog.html" class="text-primary hover:underline mt-4 inline-block">← Back to Blog</a>
+            <div class="text-center text-red-500 mt-20">
+              <h2 class="text-2xl font-bold mb-4">Error Loading Post Data</h2>
+              <p>${err.message}</p>
             </div>
           `;
         }
