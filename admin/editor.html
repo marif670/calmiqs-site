@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blog Editor - Calmiqs</title>
+    <title>Calmiqs Blog Editor</title>
 
-    <!-- Tailwind -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -23,200 +23,250 @@
         },
       };
     </script>
-
-    <link rel="stylesheet" href="/assets/css/style.css" />
+    <link rel="stylesheet" href="/assets/css/style.css?v=12" />
   </head>
   <body class="bg-[#F9FAFB] text-gray-800 font-sans min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-      <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
-        <h1 class="text-2xl font-bold text-primary">Calmiqs Admin</h1>
-      </div>
-    </header>
-
-    <main class="max-w-6xl mx-auto py-8 px-4">
-      <!-- Login -->
-      <div id="loginSection" class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md">
-        <h2 class="text-2xl font-semibold mb-4">Admin Login</h2>
+    <!-- 🔒 Login Section -->
+    <section id="authSection" class="flex items-center justify-center min-h-screen">
+      <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md text-center">
+        <h1 class="text-3xl font-bold text-primary mb-4">🔒 Calmiqs Admin Login</h1>
         <input
+          id="passwordInput"
           type="password"
-          id="adminPassword"
           placeholder="Enter password"
-          class="w-full p-3 border rounded-lg mb-4"
+          class="w-full border rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-primary"
         />
         <button
-          onclick="login()"
-          class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-tech transition w-full"
+          id="loginBtn"
+          class="bg-primary hover:bg-tech text-white font-medium px-6 py-2 rounded-lg transition w-full"
         >
           Login
         </button>
-        <p id="loginError" class="text-red-600 mt-3 hidden">Incorrect password.</p>
+      </div>
+    </section>
+
+    <!-- 📝 Editor Section -->
+    <section id="editorSection" class="hidden max-w-5xl mx-auto p-6">
+      <h1 class="text-4xl font-bold text-primary mb-6 text-center">🪶 Calmiqs Blog Editor</h1>
+
+      <!-- File Controls -->
+      <div class="flex justify-between items-center mb-4">
+        <button
+          id="loadBtn"
+          class="bg-accent text-gray-800 px-4 py-2 rounded-lg shadow hover:bg-yellow-400 transition"
+        >
+          Load Posts
+        </button>
+        <button
+          id="saveBtn"
+          class="bg-primary text-white px-4 py-2 rounded-lg shadow hover:bg-tech transition"
+        >
+          Save Changes
+        </button>
       </div>
 
-      <!-- Editor -->
-      <div id="editorSection" class="hidden">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-3xl font-semibold">📝 Blog Editor</h2>
-          <button
-            onclick="logout()"
-            class="text-sm text-red-500 border border-red-500 px-3 py-1 rounded hover:bg-red-50"
-          >
-            Logout
-          </button>
+      <!-- Posts Dropdown -->
+      <div class="mb-4">
+        <label for="postSelect" class="block text-sm font-medium mb-1">Select Post:</label>
+        <select
+          id="postSelect"
+          class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+        ></select>
+      </div>
+
+      <!-- Editor Form -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium mb-1">Post Key (slug)</label>
+          <input
+            id="key"
+            type="text"
+            placeholder="e.g., mindful-breathing"
+            class="w-full border rounded-lg px-4 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+
+          <label class="block text-sm font-medium mb-1">Title</label>
+          <input
+            id="title"
+            type="text"
+            placeholder="Article title"
+            class="w-full border rounded-lg px-4 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+
+          <label class="block text-sm font-medium mb-1">Date</label>
+          <input
+            id="date"
+            type="text"
+            placeholder="e.g., November 2, 2025"
+            class="w-full border rounded-lg px-4 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+
+          <label class="block text-sm font-medium mb-1">Image URL</label>
+          <input
+            id="image"
+            type="text"
+            placeholder="https://..."
+            class="w-full border rounded-lg px-4 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-primary"
+          />
         </div>
 
-        <div class="grid md:grid-cols-2 gap-8">
-          <!-- Blog Form -->
-          <div class="bg-white p-6 rounded-xl shadow-md">
-            <h3 class="text-xl font-semibold mb-4">Add / Edit Post</h3>
-            <input type="hidden" id="postId" />
-            <input
-              type="text"
-              id="title"
-              placeholder="Post Title"
-              class="w-full p-3 border rounded-lg mb-3"
-            />
-            <textarea
-              id="content"
-              placeholder="Write content..."
-              rows="6"
-              class="w-full p-3 border rounded-lg mb-3"
-            ></textarea>
-            <input
-              type="text"
-              id="image"
-              placeholder="Image URL (optional)"
-              class="w-full p-3 border rounded-lg mb-3"
-            />
-            <div class="flex gap-3">
-              <button
-                onclick="savePost()"
-                class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-tech transition"
-              >
-                Save Post
-              </button>
-              <button
-                onclick="clearForm()"
-                class="border border-gray-400 px-6 py-3 rounded-lg hover:bg-gray-100 transition"
-              >
-                Clear
-              </button>
-            </div>
-          </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Excerpt</label>
+          <textarea
+            id="excerpt"
+            rows="3"
+            placeholder="Short preview text..."
+            class="w-full border rounded-lg px-4 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-primary"
+          ></textarea>
 
-          <!-- Existing Posts -->
-          <div class="bg-white p-6 rounded-xl shadow-md">
-            <h3 class="text-xl font-semibold mb-4">Existing Posts</h3>
-            <ul id="postsList" class="space-y-3 max-h-[500px] overflow-y-auto"></ul>
-          </div>
+          <label class="block text-sm font-medium mb-1">Content (HTML allowed)</label>
+          <textarea
+            id="content"
+            rows="10"
+            placeholder="<p>Your article here...</p>"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+          ></textarea>
         </div>
       </div>
-    </main>
+
+      <!-- Toggle Button -->
+      <button
+        onclick="document.getElementById('previewContainer').classList.toggle('hidden')"
+        class="mt-6 bg-primary text-white px-4 py-2 rounded-lg hover:bg-tech transition"
+      >
+        Toggle Preview
+      </button>
+
+      <!-- 🪶 Live Preview -->
+      <h2 class="text-2xl font-semibold mt-8 mb-4">🪶 Live Preview</h2>
+      <div id="previewContainer" class="bg-white shadow-lg rounded-xl p-6 border border-gray-100">
+        <div id="previewContent" class="prose max-w-none"></div>
+      </div>
+    </section>
 
     <script>
-      const PASSWORD = "admin123"; // 🔒 Change this to your password
-      const loginSection = document.getElementById("loginSection");
+      // === Configuration ===
+      const PASSWORD = "calmiqs2025";
+      const DATA_URL = "/assets/data/posts.json";
+      let posts = {};
+
+      const authSection = document.getElementById("authSection");
       const editorSection = document.getElementById("editorSection");
-      const postsList = document.getElementById("postsList");
+      const passwordInput = document.getElementById("passwordInput");
+      const loginBtn = document.getElementById("loginBtn");
+      const postSelect = document.getElementById("postSelect");
 
-      async function loadPosts() {
-        try {
-          const res = await fetch("/assets/data/posts.json?v=" + Date.now());
-          const posts = await res.json();
-
-          postsList.innerHTML = "";
-
-          posts.forEach((post, index) => {
-            const li = document.createElement("li");
-            li.className = "border border-gray-200 p-4 rounded-lg hover:bg-gray-50 transition";
-            li.innerHTML = `
-              <h4 class="font-semibold text-lg text-primary">${post.title}</h4>
-              <p class="text-sm text-gray-500 mb-2">${new Date(post.date).toLocaleDateString()}</p>
-              <div class="flex gap-3">
-                <button onclick="editPost(${index})" class="text-sm text-blue-500 hover:underline">Edit</button>
-                <button onclick="deletePost(${index})" class="text-sm text-red-500 hover:underline">Delete</button>
-              </div>
-            `;
-            postsList.appendChild(li);
-          });
-
-          window.blogPosts = posts;
-        } catch (error) {
-          console.error("Error loading posts:", error);
-        }
-      }
-
-      function login() {
-        const password = document.getElementById("adminPassword").value;
-        if (password === PASSWORD) {
-          loginSection.classList.add("hidden");
+      // === Login ===
+      loginBtn.addEventListener("click", () => {
+        const input = passwordInput.value.trim();
+        if (input === PASSWORD) {
+          localStorage.setItem("calmiqsAuth", "true");
+          authSection.classList.add("hidden");
           editorSection.classList.remove("hidden");
           loadPosts();
         } else {
-          document.getElementById("loginError").classList.remove("hidden");
+          alert("Incorrect password.");
         }
-      }
+      });
 
-      function logout() {
-        editorSection.classList.add("hidden");
-        loginSection.classList.remove("hidden");
-      }
-
-      function clearForm() {
-        document.getElementById("postId").value = "";
-        document.getElementById("title").value = "";
-        document.getElementById("content").value = "";
-        document.getElementById("image").value = "";
-      }
-
-      function editPost(index) {
-        const post = window.blogPosts[index];
-        document.getElementById("postId").value = index;
-        document.getElementById("title").value = post.title;
-        document.getElementById("content").value = post.content;
-        document.getElementById("image").value = post.image || "";
-      }
-
-      async function savePost() {
-        const id = document.getElementById("postId").value;
-        const title = document.getElementById("title").value.trim();
-        const content = document.getElementById("content").value.trim();
-        const image = document.getElementById("image").value.trim();
-
-        if (!title || !content) {
-          alert("Please enter title and content");
-          return;
-        }
-
-        const newPost = {
-          title,
-          content,
-          image,
-          date: new Date().toISOString(),
-        };
-
-        if (id) {
-          window.blogPosts[id] = newPost;
-        } else {
-          window.blogPosts.push(newPost);
-        }
-
-        await fetch("/assets/data/posts.json", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(window.blogPosts, null, 2),
-        }).catch(() => console.log("⚠️ Local save only (no backend)"));
-
-        clearForm();
+      // Auto-login if previously logged in
+      if (localStorage.getItem("calmiqsAuth") === "true") {
+        authSection.classList.add("hidden");
+        editorSection.classList.remove("hidden");
         loadPosts();
       }
 
-      function deletePost(index) {
-        if (confirm("Are you sure you want to delete this post?")) {
-          window.blogPosts.splice(index, 1);
-          loadPosts();
-        }
+      // === Load Posts ===
+      async function loadPosts() {
+        const response = await fetch(DATA_URL + "?v=" + Date.now());
+        posts = await response.json();
+        populateSelect();
       }
+
+      function populateSelect() {
+        postSelect.innerHTML =
+          '<option value="">➕ New Post</option>' +
+          Object.keys(posts)
+            .map((key) => `<option value="${key}">${key}</option>`)
+            .join("");
+      }
+
+      // === Populate Form ===
+      postSelect.addEventListener("change", () => {
+        const key = postSelect.value;
+        if (!key) {
+          clearForm();
+          return;
+        }
+        const post = posts[key];
+        document.getElementById("key").value = key;
+        document.getElementById("title").value = post.title || "";
+        document.getElementById("date").value = post.date || "";
+        document.getElementById("image").value = post.image || "";
+        document.getElementById("excerpt").value = post.excerpt || "";
+        document.getElementById("content").value = post.content || "";
+        updatePreview();
+      });
+
+      function clearForm() {
+        ["key", "title", "date", "image", "excerpt", "content"].forEach(
+          (id) => (document.getElementById(id).value = "")
+        );
+        updatePreview();
+      }
+
+      // === Save Posts ===
+      document.getElementById("saveBtn").addEventListener("click", () => {
+        const key = document.getElementById("key").value.trim();
+        if (!key) return alert("Please provide a key (slug).");
+
+        posts[key] = {
+          title: document.getElementById("title").value.trim(),
+          date: document.getElementById("date").value.trim(),
+          image: document.getElementById("image").value.trim(),
+          excerpt: document.getElementById("excerpt").value.trim(),
+          content: document.getElementById("content").value.trim(),
+        };
+
+        const blob = new Blob([JSON.stringify(posts, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "posts.json";
+        a.click();
+        URL.revokeObjectURL(url);
+
+        alert("✅ Downloaded updated posts.json. Replace it in /assets/data/ to apply changes.");
+      });
+
+      // === 🧠 Live Preview Logic ===
+      const titleInput = document.getElementById("title");
+      const dateInput = document.getElementById("date");
+      const imageInput = document.getElementById("image");
+      const contentInput = document.getElementById("content");
+      const preview = document.getElementById("previewContent");
+
+      function updatePreview() {
+        const title = titleInput.value || "Untitled Post";
+        const date = dateInput.value || "No date set";
+        const image = imageInput.value || "https://via.placeholder.com/800x400?text=Preview";
+        const content = contentInput.value || "<p>Start typing your article...</p>";
+
+        preview.innerHTML = `
+          <img src="${image}" alt="${title}" class="rounded-xl mb-4 shadow-md w-full max-h-96 object-cover" />
+          <h3 class="text-3xl font-bold mb-2 text-primary">${title}</h3>
+          <p class="text-gray-500 mb-6">${date}</p>
+          <div class="text-gray-800 leading-relaxed">${content}</div>
+        `;
+      }
+
+      [titleInput, dateInput, imageInput, contentInput].forEach((el) =>
+        el.addEventListener("input", updatePreview)
+      );
+
+      updatePreview();
     </script>
   </body>
 </html>
