@@ -1,9 +1,4 @@
 name = "calmiqs-site"
 compatibility_date = "2024-11-01"
 pages_build_output_dir = "."
-
-[vars]
-NODE_VERSION = "20"
-
-[site]
-bucket = "."
+main = "./functions/update-posts.js"
