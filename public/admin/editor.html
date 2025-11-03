@@ -160,7 +160,7 @@
       loginBtn.addEventListener("click", () => {
         const input = passwordInput.value.trim();
         if (input === PASSWORD) {
-          localStorage.setItem("calmiqsAuth", "true");
+          sessionStorage.setItem("calmiqsAuth", "true");
           authSection.classList.add("hidden");
           editorSection.classList.remove("hidden");
           loadPosts();
@@ -170,7 +170,7 @@
       });
 
       // Auto-login if previously logged in
-      if (localStorage.getItem("calmiqsAuth") === "true") {
+      if (sessionStorage.getItem("calmiqsAuth") === "true") {
         authSection.classList.add("hidden");
         editorSection.classList.remove("hidden");
         loadPosts();
