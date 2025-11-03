@@ -281,5 +281,109 @@
 
       updatePreview();
     </script>
+    <script>
+      async function savePost() {
+        const key = document.getElementById("slug").value.trim();
+        const title = document.getElementById("title").value.trim();
+        const date = document.getElementById("date").value.trim();
+        const image = document.getElementById("image").value.trim();
+        const excerpt = document.getElementById("excerpt").value.trim();
+        const content = document.getElementById("content").value.trim();
+
+        if (!key || !title) {
+          alert("Please provide both a slug and title.");
+          return;
+        }
+
+        const data = { title, date, image, excerpt, content };
+
+        try {
+          const res = await fetch("/api/posts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key, data }),
+          });
+
+          const result = await res.json();
+          if (result.success) {
+            alert("✅ Post saved successfully!");
+            loadPosts();
+          } else {
+            alert("⚠️ Error saving post: " + (result.error || "Unknown error"));
+          }
+        } catch (err) {
+          console.error(err);
+          alert("❌ Failed to save post.");
+        }
+      }
+
+      async function deletePost(key) {
+        if (!confirm("Are you sure you want to delete this post?")) return;
+        try {
+          const res = await fetch(`/api/posts?key=${encodeURIComponent(key)}`, {
+            method: "DELETE",
+          });
+          const result = await res.json();
+          if (result.success) {
+            alert("🗑️ Post deleted.");
+            loadPosts();
+          } else {
+            alert("⚠️ Error deleting post: " + (result.error || "Unknown error"));
+          }
+        } catch (err) {
+          console.error(err);
+          alert("❌ Failed to delete post.");
+        }
+      }
+
+      async function loadPosts() {
+        try {
+          const res = await fetch("/api/posts");
+          if (!res.ok) throw new Error("KV fetch failed");
+          const posts = await res.json();
+          const list = document.getElementById("postList");
+          list.innerHTML = "";
+
+          Object.keys(posts).forEach((key) => {
+            const post = posts[key];
+            const li = document.createElement("li");
+            li.className = "my-2 flex justify-between items-center";
+            li.innerHTML = `
+        <span><strong>${post.title}</strong></span>
+        <div>
+          <button onclick="editPost('${key}')">Edit</button>
+          <button onclick="deletePost('${key}')">Delete</button>
+        </div>
+      `;
+            list.appendChild(li);
+          });
+        } catch (err) {
+          console.error(err);
+          alert("❌ Could not load posts from KV.");
+        }
+      }
+
+      async function editPost(key) {
+        try {
+          const res = await fetch(`/api/posts?key=${encodeURIComponent(key)}`);
+          const post = await res.json();
+          if (post.error) {
+            alert("⚠️ Post not found.");
+            return;
+          }
+          document.getElementById("slug").value = key;
+          document.getElementById("title").value = post.title;
+          document.getElementById("date").value = post.date;
+          document.getElementById("image").value = post.image;
+          document.getElementById("excerpt").value = post.excerpt;
+          document.getElementById("content").value = post.content;
+        } catch (err) {
+          console.error(err);
+          alert("❌ Failed to load post for editing.");
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", loadPosts);
+    </script>
   </body>
 </html>

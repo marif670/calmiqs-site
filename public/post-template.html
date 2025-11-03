@@ -84,14 +84,20 @@
           },
         };
 
-        async function loadPosts() {
-          try {
-            const res = await fetch("/assets/data/posts.json");
-            if (!res.ok) throw new Error("No JSON");
-            return await res.json();
-          } catch {
-            return embeddedPosts;
+        async function loadPost() {
+          const params = new URLSearchParams(window.location.search);
+          const key = params.get("post");
+          const res = await fetch(`/api/posts?key=${key}`);
+          const post = await res.json();
+          if (!post || post.error) {
+            document.getElementById("postContent").innerHTML = "<p>Post not found.</p>";
+            return;
           }
+          document.title = post.title;
+          document.getElementById("postTitle").textContent = post.title;
+          document.getElementById("postDate").textContent = post.date;
+          document.getElementById("postImage").src = post.image;
+          document.getElementById("postContent").innerHTML = post.content;
         }
 
         loadPosts().then((posts) => {
