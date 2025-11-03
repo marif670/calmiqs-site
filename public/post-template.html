@@ -53,10 +53,11 @@
     </footer>
 
     <script>
-      (() => {
+      (async () => {
         const postContainer = document.getElementById("postContainer");
         const postNav = document.getElementById("postNav");
 
+        // Fallback embedded posts
         const embeddedPosts = {
           "mindful-breathing": {
             title: "The Art of Mindful Breathing",
@@ -84,61 +85,67 @@
           },
         };
 
+        // Load posts from KV
         async function loadPosts() {
           try {
-            const res = await fetch("/assets/data/posts.json");
-            if (!res.ok) throw new Error("No JSON");
+            const res = await fetch("/posts"); // KV endpoint
+            if (!res.ok) throw new Error("KV fetch failed");
             return await res.json();
-          } catch {
+          } catch (err) {
+            console.error("KV fetch failed, using fallback:", err);
             return embeddedPosts;
           }
         }
 
-        loadPosts().then((posts) => {
-          const params = new URLSearchParams(window.location.search);
-          const keys = Object.keys(posts);
-          const key = params.get("post") || keys[0];
-          const post = posts[key];
+        const posts = await loadPosts();
 
-          if (!post) {
-            postContainer.innerHTML = `<p class="text-gray-500">Post not found.</p>`;
-            return;
-          }
+        // Get post key from URL
+        const params = new URLSearchParams(window.location.search);
+        const keys = Object.keys(posts);
+        const key = params.get("post") || keys[0];
+        const post = posts[key];
 
-          postContainer.innerHTML = `
-            <h1 class="text-4xl font-bold text-primary mb-4">${post.title}</h1>
-            <p class="text-gray-500 mb-6">${post.date}</p>
-            <img src="${post.image}" alt="${post.title}" class="rounded-xl mb-8 shadow-lg mx-auto" />
-            <div class="text-lg leading-relaxed text-left max-w-3xl mx-auto">${post.content}</div>
-            <div class="mt-10 text-center">
-              <a href="blog.html"
-                 class="inline-block bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-accent transition shadow">
-                 ← Back to Blog
-              </a>
-            </div>
-          `;
+        if (!post) {
+          postContainer.innerHTML = `<p class="text-gray-500">Post not found.</p>`;
+          return;
+        }
 
-          const currentIndex = keys.indexOf(key);
-          const prevKey = keys[currentIndex - 1];
-          const nextKey = keys[currentIndex + 1];
+        postContainer.innerHTML = `
+          <h1 class="text-4xl font-bold text-primary mb-4">${post.title}</h1>
+          <p class="text-gray-500 mb-6">${post.date}</p>
+          <img src="${post.image || "https://via.placeholder.com/800x400?text=No+Image"}" alt="${
+          post.title
+        }" class="rounded-xl mb-8 shadow-lg mx-auto" />
+          <div class="text-lg leading-relaxed text-left max-w-3xl mx-auto">${post.content}</div>
+          <div class="mt-10 text-center">
+            <a href="blog.html"
+               class="inline-block bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-accent transition shadow">
+               ← Back to Blog
+            </a>
+          </div>
+        `;
 
-          postNav.innerHTML = `
-            <div>
-              ${
-                prevKey
-                  ? `<a href="post-template.html?post=${prevKey}" class="text-primary hover:underline">← ${posts[prevKey].title}</a>`
-                  : ""
-              }
-            </div>
-            <div>
-              ${
-                nextKey
-                  ? `<a href="post-template.html?post=${nextKey}" class="text-primary hover:underline">${posts[nextKey].title} →</a>`
-                  : ""
-              }
-            </div>
-          `;
-        });
+        // Previous / Next navigation
+        const currentIndex = keys.indexOf(key);
+        const prevKey = keys[currentIndex - 1];
+        const nextKey = keys[currentIndex + 1];
+
+        postNav.innerHTML = `
+          <div>
+            ${
+              prevKey
+                ? `<a href="post-template.html?post=${prevKey}" class="text-primary hover:underline">← ${posts[prevKey].title}</a>`
+                : ""
+            }
+          </div>
+          <div>
+            ${
+              nextKey
+                ? `<a href="post-template.html?post=${nextKey}" class="text-primary hover:underline">${posts[nextKey].title} →</a>`
+                : ""
+            }
+          </div>
+        `;
       })();
     </script>
   </body>
