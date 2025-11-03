@@ -1,18 +1,9 @@
 name = "calmiqs-site"
-main = "./functions"   # points to your functions folder
+main = "./functions"
 
-# KV namespace binding
-[[kv_namespaces]]
-binding = "CALMIQS_POSTS"
-id = "7bceea0c0fe9419b81c41b54231acc11"
+[env.production]
+kv_namespaces = [
+  { binding = "CALMIQS_POSTS", id = "7bceea0c0fe9419b81c41b54231acc11" }
+]
 
-# Optional: Specify Pages build output directory if needed
 pages_build_output_dir = "public"
-
-# Optional: Add environment variables (if needed)
-# [vars]
-# GITHUB_TOKEN = "your_github_token_here"
-
-# Optional: Branch-specific overrides
-# [env.production]
-# Automatic production settings can go here
