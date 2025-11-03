@@ -98,7 +98,7 @@
 
         async function loadPosts() {
           try {
-            const res = await fetch("/api/posts");
+            const res = await fetch("/posts");
             if (!res.ok) throw new Error("KV fetch failed");
             return await res.json();
           } catch {

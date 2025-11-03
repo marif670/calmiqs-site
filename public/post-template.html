@@ -87,7 +87,7 @@
         async function loadPost() {
           const params = new URLSearchParams(window.location.search);
           const key = params.get("post");
-          const res = await fetch(`/api/posts?key=${key}`);
+          const res = await fetch(`/posts?key=${key}`);
           const post = await res.json();
           if (!post || post.error) {
             document.getElementById("postContent").innerHTML = "<p>Post not found.</p>";
