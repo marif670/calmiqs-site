@@ -4,141 +4,155 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calmiqs Blog</title>
-
-    <!-- Tailwind CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: "#4FA49A",
-              accent: "#FFD580",
-              tech: "#5A67D8",
-            },
-            fontFamily: { sans: ["Poppins", "sans-serif"] },
-          },
-        },
-      };
-    </script>
-
-    <link rel="stylesheet" href="/assets/css/style.css?v=12" />
+    <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <meta
+      name="description"
+      content="Explore Calmiqs sustainability insights, eco guides, and innovative green solutions."
+    />
   </head>
-  <body class="font-sans bg-[#F9FAFB] text-gray-800">
+  <body class="bg-gray-50 text-gray-900 font-sans">
     <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-      <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
-        <h1 class="text-2xl font-bold text-primary">
-          <a href="index.html">Calmiqs</a>
-        </h1>
-        <nav>
-          <ul class="flex gap-6 text-gray-700">
-            <li><a href="index.html" class="hover:text-primary">Home</a></li>
-            <li><a href="tools.html" class="hover:text-primary">Tools</a></li>
-            <li><a href="blog.html" class="text-primary font-semibold">Blog</a></li>
-            <li><a href="about.html" class="hover:text-primary">About</a></li>
-            <li><a href="contact.html" class="hover:text-primary">Contact</a></li>
-          </ul>
+    <header class="bg-white shadow sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto flex items-center justify-between py-4 px-6">
+        <a href="/" class="text-2xl font-bold text-green-700">Calmiqs</a>
+        <nav class="space-x-6 text-gray-600">
+          <a href="/index.html" class="hover:text-green-700">Home</a>
+          <a href="/blog-list.html" class="hover:text-green-700">All Blogs</a>
+          <a href="/about.html" class="hover:text-green-700">About</a>
+          <a href="/contact.html" class="hover:text-green-700">Contact</a>
         </nav>
       </div>
     </header>
 
-    <!-- Hero -->
-    <section
-      class="relative text-center py-20 px-6 text-white overflow-hidden bg-gradient-to-br from-primary via-accent to-tech animate-gradient bg-[length:400%_400%]"
-    >
-      <div class="relative z-10">
-        <h2 class="text-4xl sm:text-5xl font-bold mb-4 drop-shadow-lg">Calmiqs Wellness Blog</h2>
-        <p class="max-w-2xl mx-auto mb-6 text-lg">
-          Explore stories and tools that bring calm, balance, and sustainability into your life.
-        </p>
-      </div>
-    </section>
-
     <!-- Blog Section -->
-    <main class="max-w-6xl mx-auto py-16 px-6">
-      <div class="mb-10 text-center">
-        <input
-          id="searchInput"
-          type="text"
-          placeholder="Search articles..."
-          class="w-full sm:w-1/2 px-4 py-3 border rounded-xl shadow focus:outline-none focus:ring-2 focus:ring-primary"
-        />
-      </div>
+    <main class="max-w-4xl mx-auto px-6 py-10">
+      <article id="blog-article" class="bg-white p-8 rounded-xl shadow-md">
+        <h1 id="blog-title" class="text-3xl font-bold mb-4 text-gray-900"></h1>
+        <div class="flex items-center text-sm text-gray-500 mb-6">
+          <span id="blog-date"></span>
+        </div>
+        <img id="blog-image" class="rounded-lg mb-6 w-full hidden" alt="Blog image" />
+        <div
+          id="blog-content"
+          class="prose prose-green max-w-none leading-relaxed text-gray-800"
+        ></div>
 
-      <div id="blogGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        <!-- Share Buttons -->
+        <div class="mt-10 flex items-center justify-between border-t pt-6">
+          <div class="flex space-x-4">
+            <a id="share-twitter" class="text-blue-500 hover:text-blue-600">Twitter</a>
+            <a id="share-facebook" class="text-blue-700 hover:text-blue-800">Facebook</a>
+            <a id="share-linkedin" class="text-blue-600 hover:text-blue-700">LinkedIn</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Navigation -->
+      <div class="flex justify-between mt-10">
+        <button
+          id="prev-btn"
+          class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg"
+        >
+          ← Previous
+        </button>
+        <button
+          id="next-btn"
+          class="hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+        >
+          Next →
+        </button>
+      </div>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-100 py-8 mt-16 text-center text-gray-600">
-      <p>© 2025 Calmiqs — Wellness Meets Sustainability</p>
+    <footer class="bg-gray-900 text-gray-300 py-8 mt-12">
+      <div class="max-w-6xl mx-auto px-6 text-center">
+        <p>
+          &copy;
+          <span id="year"></span>
+          Calmiqs. All rights reserved.
+        </p>
+      </div>
     </footer>
 
-    <!-- Script -->
     <script>
-      (() => {
-        const blogGrid = document.getElementById("blogGrid");
-        const searchInput = document.getElementById("searchInput");
+      document.getElementById("year").textContent = new Date().getFullYear();
 
-        const embeddedPosts = {
-          "mindful-breathing": {
-            title: "The Art of Mindful Breathing",
-            date: "November 2, 2025",
-            image: "https://via.placeholder.com/400x250?text=Mindful+Breathing",
-            excerpt: "Learn how controlled breathing enhances mindfulness and calm.",
-          },
-          "eco-habits": {
-            title: "5 Small Eco Habits That Reduce Stress",
-            date: "November 4, 2025",
-            image: "https://via.placeholder.com/400x250?text=Eco+Habits",
-            excerpt:
-              "Simple sustainability practices to boost serenity and reduce your carbon footprint.",
-          },
-        };
-
-        async function loadPosts() {
-          try {
-            const response = await fetch("/assets/data/posts.json");
-            if (!response.ok) throw new Error("No JSON");
-            return await response.json();
-          } catch {
-            return embeddedPosts; // fallback
-          }
+      async function loadBlog() {
+        const params = new URLSearchParams(window.location.search);
+        const slug = params.get("id"); // now using string key, not numeric
+        if (!slug) {
+          document.getElementById("blog-article").innerHTML =
+            "<p class='text-center text-gray-600'>Invalid blog link.</p>";
+          return;
         }
 
-        function renderPosts(posts, filter = "") {
-          blogGrid.innerHTML = "";
-          const filtered = Object.entries(posts).filter(([key, post]) =>
-            post.title.toLowerCase().includes(filter.toLowerCase())
-          );
+        try {
+          const response = await fetch("/assets/data/posts.json");
+          const posts = await response.json();
 
-          if (filtered.length === 0) {
-            blogGrid.innerHTML =
-              '<p class="text-gray-500 text-center col-span-full">No posts found.</p>';
+          const keys = Object.keys(posts);
+          const post = posts[slug];
+          if (!post) {
+            document.getElementById("blog-article").innerHTML =
+              "<p class='text-center text-gray-600'>Blog post not found.</p>";
             return;
           }
 
-          filtered.forEach(([key, post]) => {
-            const card = document.createElement("a");
-            card.href = `post-template.html?post=${key}`;
-            card.className =
-              "bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 block";
-            card.innerHTML = `
-              <img src="${post.image}" alt="${post.title}" class="w-full h-48 object-cover" />
-              <div class="p-5">
-                <h3 class="text-xl font-semibold text-primary mb-2">${post.title}</h3>
-                <p class="text-gray-600 mb-3">${post.excerpt}</p>
-                <p class="text-sm text-gray-400">${post.date}</p>
-              </div>`;
-            blogGrid.appendChild(card);
-          });
-        }
+          // Update content
+          document.getElementById("blog-title").textContent = post.title;
+          document.getElementById("blog-date").textContent = post.date || "";
+          document.getElementById("blog-content").innerHTML = post.content || "";
+          if (post.image) {
+            const img = document.getElementById("blog-image");
+            img.src = post.image;
+            img.classList.remove("hidden");
+          }
 
-        loadPosts().then((posts) => {
-          renderPosts(posts);
-          searchInput.addEventListener("input", (e) => renderPosts(posts, e.target.value));
-        });
-      })();
+          // Sharing links
+          const url = window.location.href;
+          document.getElementById(
+            "share-twitter"
+          ).href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+            post.title
+          )}&url=${encodeURIComponent(url)}`;
+          document.getElementById(
+            "share-facebook"
+          ).href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+          document.getElementById(
+            "share-linkedin"
+          ).href = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
+            url
+          )}&title=${encodeURIComponent(post.title)}`;
+
+          // Next / Prev
+          const index = keys.indexOf(slug);
+          const prevKey = keys[index - 1];
+          const nextKey = keys[index + 1];
+
+          if (prevKey) {
+            const prevBtn = document.getElementById("prev-btn");
+            prevBtn.classList.remove("hidden");
+            prevBtn.onclick = () => (window.location.href = `/blog.html?id=${prevKey}`);
+          }
+
+          if (nextKey) {
+            const nextBtn = document.getElementById("next-btn");
+            nextBtn.classList.remove("hidden");
+            nextBtn.onclick = () => (window.location.href = `/blog.html?id=${nextKey}`);
+          }
+        } catch (error) {
+          console.error("Error loading blog:", error);
+          document.getElementById("blog-article").innerHTML =
+            "<p class='text-center text-red-500'>Failed to load blog content.</p>";
+        }
+      }
+
+      loadBlog();
     </script>
   </body>
 </html>
