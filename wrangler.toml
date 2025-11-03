@@ -3,5 +3,5 @@ main = "./functions"
 
 [env.production]
 kv_namespaces = [
-  { binding = "CALMIQS_POSTS", id = "your_namespace_id_here" }
+  { binding = "CALMIQS_POSTS", id = "7bceea0c0fe9419b81c41b54231acc11" }
 ]
