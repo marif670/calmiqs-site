@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calmiqs – Wellness & Eco Balance</title>
+
+    <!-- Tailwind CDN (dev only) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind custom config -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4FA49A",
+              accent: "#FFD580",
+              tech: "#5A67D8",
+            },
+            fontFamily: {
+              sans: ["Poppins", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- IMPORTANT: use absolute root path to avoid duplicated relative paths -->
+    <link rel="stylesheet" href="/assets/css/style.css?v=12" />
+  </head>
+  <style>
+    @keyframes gradientMove {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+    .animate-gradient {
+      animation: gradientMove 12s ease infinite;
+    }
+  </style>
+
+  <body class="font-sans bg-[#F9FAFB] text-gray-800">
+    <!-- 🌿 Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
+        <h1 class="text-2xl font-bold text-primary">
+          <a href="index.html">Calmiqs</a>
+        </h1>
+        <nav>
+          <ul class="flex gap-6 text-gray-700">
+            <li><a href="index.html" class="hover:text-primary">Home</a></li>
+            <li><a href="tools.html" class="hover:text-primary">Tools</a></li>
+            <li><a href="blog.html" class="hover:text-primary">Blog</a></li>
+            <li><a href="about.html" class="hover:text-primary">About</a></li>
+            <li><a href="contact.html" class="hover:text-primary">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- 🌤️ Hero Section -->
+    <section class="relative text-center py-24 px-6 text-white overflow-hidden">
+      <!-- Moving gradient background -->
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-primary via-accent to-tech animate-gradient bg-[length:400%_400%]"
+      ></div>
+
+      <!-- Text content -->
+      <div class="relative z-10">
+        <h2 class="text-4xl sm:text-5xl font-bold mb-6 drop-shadow-lg">
+          Calm Your Mind & Grow Your Balance
+        </h2>
+        <p class="max-w-2xl mx-auto mb-8 text-lg">
+          Explore AI-powered wellness tools and eco-friendly insights designed to help you breathe
+          better, think clearer, and live greener.
+        </p>
+        <a
+          href="tools.html"
+          class="bg-white text-primary px-6 py-3 rounded-xl font-medium hover:bg-accent hover:text-white transition shadow-md hover:shadow-lg"
+        >
+          🌿 Try CalmBreath Now
+        </a>
+      </div>
+    </section>
+
+    <!-- 🌱 Features Section -->
+    <section
+      class="max-w-6xl mx-auto py-20 px-6 grid md:grid-cols-3 gap-10 text-center perspective"
+    >
+      <div
+        class="card relative p-6 bg-white rounded-2xl shadow-lg transform transition-transform duration-500 hover:rotate-x-6 hover:rotate-y-6 hover:scale-105 hover:shadow-2xl"
+      >
+        <div class="card-orb orb-blue"></div>
+        <div class="relative z-10"></div>
+        <h3 class="text-xl font-semibold text-primary mb-3">Mind Tools</h3>
+        <p>Interactive AI games and breathing apps for daily stress relief and focus training.</p>
+        <div class="card-light"></div>
+      </div>
+      <div
+        class="card relative p-6 bg-white rounded-2xl shadow-lg transform transition-transform duration-500 hover:rotate-x-6 hover:rotate-y-6 hover:scale-105 hover:shadow-2xl"
+      >
+        <div class="card-orb orb-green"></div>
+        <div class="relative z-10"></div>
+        <h3 class="text-xl font-semibold text-primary mb-3">Green Living</h3>
+
+        <p>Practical eco tips and sustainable habits for a healthier planet and you.</p>
+        <div class="card-light"></div>
+      </div>
+      <div
+        class="card relative p-6 bg-white rounded-2xl shadow-lg transform transition-transform duration-500 hover:rotate-x-6 hover:rotate-y-6 hover:scale-105 hover:shadow-2xl"
+      >
+        <div class="card-orb orb-purple"></div>
+        <div class="relative z-10"></div>
+        <h3 class="text-xl font-semibold text-primary mb-3">AI Insights</h3>
+        <p>Smart recommendations and personalized guides for better mental wellness.</p>
+        <div class="card-light"></div>
+      </div>
+    </section>
+
+    <!-- 🌿 Footer -->
+    <footer class="bg-white border-t border-gray-200 text-center py-6 text-gray-500">
+      © 2025 Calmiqs · Breathe Better. Live Greener.
+    </footer>
+  </body>
+</html>
