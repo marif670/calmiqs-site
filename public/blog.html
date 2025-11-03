@@ -98,11 +98,28 @@
 
         async function loadPosts() {
           try {
-            const response = await fetch("/assets/data/posts.json");
-            if (!response.ok) throw new Error("No JSON");
-            return await response.json();
-          } catch {
-            return embeddedPosts; // fallback
+            // 🔹 Try fetching from Cloudflare KV via the get-posts function
+            const response = await fetch("/get-posts");
+            if (!response.ok) throw new Error("KV fetch failed");
+            const data = await response.json();
+
+            if (Array.isArray(data)) {
+              console.log("Loaded posts from KV");
+              return data;
+            } else {
+              throw new Error("Invalid data format from KV");
+            }
+          } catch (err) {
+            console.warn("Falling back to local posts.json:", err.message);
+            try {
+              // 🔹 Fallback: use static posts.json
+              const response = await fetch("/assets/data/posts.json");
+              if (!response.ok) throw new Error("No JSON file found");
+              return await response.json();
+            } catch {
+              console.error("Failed to load both KV and local data.");
+              return embeddedPosts || []; // final fallback if defined
+            }
           }
         }
 
