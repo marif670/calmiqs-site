@@ -1,8 +1,7 @@
 name = "calmiqs-site"
-compatibility_date = "2024-11-01"
+main = "./functions"
 
-# ✅ This tells Cloudflare where your static files are
-pages_build_output_dir = "public"
-
-# ✅ Declare the functions folder
-functions = "./functions"
+[env.production]
+kv_namespaces = [
+  { binding = "CALMIQS_POSTS", id = "your_namespace_id_here" }
+]
