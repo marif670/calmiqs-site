@@ -1,88 +1,70 @@
 export async function onRequest(context) {
   const { request, env } = context;
   const { CALMIQS_POSTS } = env;
+  const url = new URL(request.url);
+  const keyParam = url.searchParams.get("key");
 
   try {
-    // GET request — fetch all posts or a single post
+    // GET requests
     if (request.method === "GET") {
-      const url = new URL(request.url);
-      const key = url.searchParams.get("key");
-
-      const posts = (await CALMIQS_POSTS.get("posts", "json")) || {};
-
-      if (key) {
-        if (!posts[key]) {
+      if (keyParam) {
+        // Return single post
+        const post = await CALMIQS_POSTS.get(keyParam, "json");
+        if (!post) {
           return new Response(JSON.stringify({ error: "Post not found" }), {
             status: 404,
             headers: { "Content-Type": "application/json" },
           });
         }
-        return new Response(JSON.stringify(posts[key]), {
+        return new Response(JSON.stringify(post), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      } else {
+        // Return all posts
+        const list = await CALMIQS_POSTS.list();
+        const posts = {};
+        for (const item of list.keys) {
+          const value = await CALMIQS_POSTS.get(item.name, "json");
+          posts[item.name] = value;
+        }
+        return new Response(JSON.stringify(posts), {
           status: 200,
           headers: { "Content-Type": "application/json" },
         });
       }
+    }
 
-      // Return all posts
-      return new Response(JSON.stringify(posts), {
+    // POST requests → create/update a post
+    if (request.method === "POST") {
+      const body = await request.json();
+      const { key, data } = body;
+      if (!key || !data) {
+        return new Response(JSON.stringify({ error: "Missing key or data" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      await CALMIQS_POSTS.put(key, JSON.stringify(data));
+      return new Response(JSON.stringify({ success: true }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    // POST request — add/update a post
-    if (request.method === "POST") {
-      const body = await request.json();
-      const { key, data } = body;
-
-      if (!key || !data) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Missing key or data" }),
-          { status: 400, headers: { "Content-Type": "application/json" } }
-        );
-      }
-
-      const posts = (await CALMIQS_POSTS.get("posts", "json")) || {};
-      posts[key] = data;
-
-      await CALMIQS_POSTS.put("posts", JSON.stringify(posts));
-
-      return new Response(
-        JSON.stringify({ success: true, message: "Post saved successfully!" }),
-        { status: 200, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    // DELETE request — remove a post
+    // DELETE requests → remove a post
     if (request.method === "DELETE") {
-      const url = new URL(request.url);
-      const key = url.searchParams.get("key");
-
-      if (!key) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Missing key" }),
-          { status: 400, headers: { "Content-Type": "application/json" } }
-        );
+      if (!keyParam) {
+        return new Response(JSON.stringify({ error: "Missing key" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
       }
-
-      const posts = (await CALMIQS_POSTS.get("posts", "json")) || {};
-      if (!posts[key]) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Post not found" }),
-          { status: 404, headers: { "Content-Type": "application/json" } }
-        );
-      }
-
-      delete posts[key];
-      await CALMIQS_POSTS.put("posts", JSON.stringify(posts));
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: "Post deleted successfully!",
-        }),
-        { status: 200, headers: { "Content-Type": "application/json" } }
-      );
+      await CALMIQS_POSTS.delete(keyParam);
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Method not allowed
