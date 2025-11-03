@@ -84,7 +84,8 @@
 
       async function loadBlog() {
         const params = new URLSearchParams(window.location.search);
-        const slug = params.get("id"); // now using string key, not numeric
+        // ✅ FIXED: use “post” (your actual query param name)
+        const slug = params.get("post");
         if (!slug) {
           document.getElementById("blog-article").innerHTML =
             "<p class='text-center text-gray-600'>Invalid blog link.</p>";
@@ -94,16 +95,16 @@
         try {
           const response = await fetch("/assets/data/posts.json");
           const posts = await response.json();
-
           const keys = Object.keys(posts);
           const post = posts[slug];
+
           if (!post) {
             document.getElementById("blog-article").innerHTML =
               "<p class='text-center text-gray-600'>Blog post not found.</p>";
             return;
           }
 
-          // Update content
+          // Fill blog content
           document.getElementById("blog-title").textContent = post.title;
           document.getElementById("blog-date").textContent = post.date || "";
           document.getElementById("blog-content").innerHTML = post.content || "";
@@ -113,7 +114,7 @@
             img.classList.remove("hidden");
           }
 
-          // Sharing links
+          // Share links
           const url = window.location.href;
           document.getElementById(
             "share-twitter"
@@ -129,7 +130,7 @@
             url
           )}&title=${encodeURIComponent(post.title)}`;
 
-          // Next / Prev
+          // Prev / Next
           const index = keys.indexOf(slug);
           const prevKey = keys[index - 1];
           const nextKey = keys[index + 1];
@@ -137,13 +138,13 @@
           if (prevKey) {
             const prevBtn = document.getElementById("prev-btn");
             prevBtn.classList.remove("hidden");
-            prevBtn.onclick = () => (window.location.href = `/blog.html?id=${prevKey}`);
+            prevBtn.onclick = () => (window.location.href = `/post-template?post=${prevKey}`);
           }
 
           if (nextKey) {
             const nextBtn = document.getElementById("next-btn");
             nextBtn.classList.remove("hidden");
-            nextBtn.onclick = () => (window.location.href = `/blog.html?id=${nextKey}`);
+            nextBtn.onclick = () => (window.location.href = `/post-template?post=${nextKey}`);
           }
         } catch (error) {
           console.error("Error loading blog:", error);
