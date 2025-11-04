@@ -284,7 +284,7 @@
       const titleInput = document.getElementById("title");
       const dateInput = document.getElementById("date");
       const imageInput = document.getElementById("image");
-      const imageAltInput = document.getelementById("imageAlt");
+      const imageAltInput = document.getElementById("imageAlt");
       const contentInput = document.getElementById("content");
       const preview = document.getElementById("previewContent");
 
@@ -292,7 +292,7 @@
         const title = titleInput.value || "Untitled Post";
         const date = dateInput.value || "No date set";
         const image = imageInput.value || "https://via.placeholder.com/800x400?text=Preview";
-        const imageAlt = imageAltinput.value || "https://via.placeholder.com/800x400?text=Preview";
+        const imageAlt = imageAltInput.value || "https://via.placeholder.com/800x400?text=Preview";
         const content = contentInput.value || "<p>Start typing your article...</p>";
         preview.innerHTML = `
           <img src="${image}" alt="${title}" class="rounded-xl mb-4 shadow-md w-full max-h-96 object-cover" />
@@ -302,7 +302,7 @@
         `;
       }
 
-      [titleInput, dateInput, imageInput, contentInput].forEach((el) =>
+      [titleInput, dateInput, imageInput, imageAltInput, contentInput].forEach((el) =>
         el.addEventListener("input", updatePreview)
       );
       updatePreview();
