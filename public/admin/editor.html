@@ -319,8 +319,9 @@
 
           if (result.success) {
             alert("✅ Image uploaded!");
-            document.getElementById("image").value = result.url;
-            document.getElementById("imageAlt").value = file.name;
+            document.getElementById("image").value = response.url;
+            document.getElementById("imageAlt").value =
+              altTextInput.value.trim() || "Descriptive alt text";
             updatePreview();
           } else {
             alert("❌ Failed to upload image: " + (result.error || "Unknown error"));
