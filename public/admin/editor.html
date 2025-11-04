@@ -216,9 +216,8 @@
         if (!key) return clearForm();
         const post = posts[key];
         // Set the slug from the dropdown key
-        document.getElementById("imageAlt").value = post.imageAlt || "";
         document.getElementById("key").value = key;
-        ["title", "date", "image", "excerpt", "content"].forEach(
+        ["title", "date", "image", "imageAlt", "excerpt", "content"].forEach(
           (id) => (document.getElementById(id).value = post[id] || "")
         );
         updatePreview();
