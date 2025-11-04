@@ -1,9 +1,8 @@
 name = "calmiqs-site"
-main = "./functions"
 pages_build_output_dir = "public"
 
 [env.production]
 kv_namespaces = [
   { binding = "CALMIQS_POSTS", id = "7bceea0c0fe9419b81c41b54231acc11" },
-  { binding = "CALMIQS_IMAGES", id = "cdab54f42fde47db8ea06123a7b686eb" }
+  { binding = "CALMIQS_IMAGES", id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" }
 ]
