@@ -1,22 +1,23 @@
-export async function POST(request) {
+export async function onRequestPost({ request, env }) {
   const formData = await request.formData();
   const file = formData.get("file");
 
-  if (!file)
+  if (!file) {
     return new Response(
-      JSON.stringify({ success: false, error: "No file provided" }),
-      { status: 400 }
+      JSON.stringify({ success: false, error: "No file uploaded" }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      }
     );
+  }
 
   const id = Date.now().toString();
-  await CALMIQS_IMAGES.put(id, await file.arrayBuffer(), {
-    metadata: { name: file.name, type: file.type },
+  await env.CALMIQS_IMAGES.put(id, file.stream(), {
+    metadata: { filename: file.name, type: file.type },
   });
 
-  return new Response(
-    JSON.stringify({ success: true, id, url: `/api/images/${id}` }),
-    {
-      headers: { "Content-Type": "application/json" },
-    }
-  );
+  return new Response(JSON.stringify({ success: true, id }), {
+    headers: { "Content-Type": "application/json" },
+  });
 }
