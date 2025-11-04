@@ -1,17 +1,21 @@
-export async function onRequestGet({ params, env }) {
-  const id = params.id;
-  const kv = env.CALMIQS_IMAGES;
+export const onRequestGet = async ({ params, env }) => {
+  try {
+    const key = params.id; // "postSlug/timestamp-filename.jpg"
+    const value = await env.CALMIQS_IMAGES.get(key, { type: "arrayBuffer" });
 
-  // Get the image from KV
-  const stored = await kv.get(id, { type: "arrayBuffer" });
-  if (!stored) return new Response("Image not found", { status: 404 });
+    if (!value) {
+      return new Response("Image not found", { status: 404 });
+    }
 
-  // Get MIME type metadata
-  const metaRaw = await kv.get(id + ":meta", { type: "json" });
-  const mime = metaRaw?.mime || "application/octet-stream";
+    const metadata = await env.CALMIQS_IMAGES.get(key, { type: "json" });
+    const headers = {
+      "Content-Type": metadata?.mime || "application/octet-stream",
+      "Cache-Control": "public, max-age=31536000",
+    };
 
-  return new Response(stored, {
-    status: 200,
-    headers: { "Content-Type": mime },
-  });
-}
+    return new Response(value, { headers });
+  } catch (err) {
+    console.error(err);
+    return new Response("Error loading image", { status: 500 });
+  }
+};
