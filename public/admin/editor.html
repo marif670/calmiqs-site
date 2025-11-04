@@ -136,6 +136,14 @@
           ></textarea>
 
           <label class="block text-sm font-medium mb-1">Content (HTML allowed)</label>
+          <button
+            type="button"
+            id="insertImageBtn"
+            class="mb-3 bg-accent text-gray-800 px-3 py-1 rounded hover:bg-yellow-400 transition"
+          >
+            ➕ Insert Image Template
+          </button>
+
           <textarea
             id="content"
             rows="10"
@@ -306,6 +314,19 @@
           <p class="mt-4 text-sm text-gray-500 italic">Alt text: ${imageAlt}</p>
         `;
       }
+      // === Insert Inline Image Snippet ===
+      const insertImageBtn = document.getElementById("insertImageBtn");
+      insertImageBtn.addEventListener("click", () => {
+        const contentBox = document.getElementById("content");
+        const cursorPos = contentBox.selectionStart;
+        const template = `\n<img src="https://via.placeholder.com/800x400" alt="Describe the image" class="my-4 rounded-lg shadow-md" />\n`;
+
+        const currentText = contentBox.value;
+        contentBox.value =
+          currentText.slice(0, cursorPos) + template + currentText.slice(cursorPos);
+        contentBox.focus();
+        updatePreview();
+      });
 
       [titleInput, dateInput, imageInput, imageAltInput, contentInput].forEach((el) =>
         el.addEventListener("input", updatePreview)
