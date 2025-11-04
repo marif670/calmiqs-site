@@ -1,14 +1,26 @@
 // functions/images/upload.js
-export async function onRequestPost({ request, env }) {
+
+export const onRequestPost = async ({ request, env }) => {
   try {
+    // Only accept POST
+    if (request.method !== "POST") {
+      return new Response(
+        JSON.stringify({ success: false, error: "Method not allowed" }),
+        {
+          status: 405,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Parse form-data
     const formData = await request.formData();
     const file = formData.get("file");
-    const alt = formData.get("alt") || file.name;
-    const postSlug = formData.get("postSlug") || "";
+    let alt = formData.get("alt") || "";
 
-    if (!file) {
+    if (!file || !file.name || !file.arrayBuffer) {
       return new Response(
-        JSON.stringify({ success: false, error: "No file uploaded" }),
+        JSON.stringify({ success: false, error: "No file provided" }),
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
@@ -16,42 +28,52 @@ export async function onRequestPost({ request, env }) {
       );
     }
 
-    // Generate a unique ID: timestamp + random suffix
-    const id = `${Date.now()}-${crypto.randomUUID().slice(0, 6)}`;
-    const fileExt = file.name.split(".").pop() || "jpg";
-    const key = `${id}.${fileExt}`;
+    // Generate unique ID for KV key
+    const id = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
 
+    // Convert file to ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
 
-    // Save to KV
-    await env.CALMIQS_IMAGES.put(key, arrayBuffer, {
+    // Save file in KV
+    await env.CALMIQS_IMAGES.put(id, arrayBuffer, {
       metadata: {
-        originalName: file.name,
         mime: file.type,
-        alt,
-        postSlug,
+        originalName: file.name,
+        alt: alt,
         uploadedAt: new Date().toISOString(),
       },
     });
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        id: key,
+    // Construct URL (Pages function endpoint)
+    const url = `/images/${id}`;
+
+    // Response structure
+    const response = {
+      success: true,
+      id: id,
+      url: url,
+      meta: {
+        id,
         mime: file.type,
         originalName: file.name,
-        alt,
-        postSlug,
+        alt: alt,
         uploadedAt: new Date().toISOString(),
-        url: `/images/${key}`,
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
+        url: url,
+      },
+    };
+
+    return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (err) {
     console.error(err);
     return new Response(
-      JSON.stringify({ success: false, error: err.message || "Upload failed" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({ success: false, error: err.message }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
     );
   }
-}
+};
