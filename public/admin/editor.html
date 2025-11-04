@@ -116,7 +116,7 @@
             placeholder="https://..."
             class="w-full border rounded-lg px-4 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-primary"
           />
-
+          <!-- NEW: Image Alt Text -->
           <label class="block text-sm font-medium mb-1">Image Alt Text</label>
           <input
             id="imageAlt"
@@ -124,16 +124,6 @@
             placeholder="Describe the image (for accessibility)"
             class="w-full border rounded-lg px-4 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-primary"
           />
-
-          <!-- ✅ File Upload -->
-          <label class="block text-sm font-medium mb-1">Upload Image</label>
-          <input id="uploadFile" type="file" accept="image/*" class="mb-3" />
-          <button
-            id="uploadBtn"
-            class="bg-primary text-white px-4 py-2 rounded-lg mb-4 hover:bg-tech transition"
-          >
-            Upload Image
-          </button>
         </div>
 
         <div>
@@ -151,7 +141,7 @@
             id="insertImageBtn"
             class="mb-3 bg-accent text-gray-800 px-3 py-1 rounded hover:bg-yellow-400 transition"
           >
-            ➕ Insert Image Template
+            ➕ Insert Image
           </button>
 
           <textarea
@@ -179,8 +169,9 @@
     </section>
 
     <script>
+      // === Configuration ===
       const PASSWORD = "calmiqs2025";
-      const KV_URL = "/posts";
+      const KV_URL = "/posts"; // KV function endpoint
       let posts = {};
 
       const authSection = document.getElementById("authSection");
@@ -191,7 +182,7 @@
       const saveBtn = document.getElementById("saveBtn");
       const deleteBtn = document.getElementById("deleteBtn");
 
-      // Login
+      // === Login Logic ===
       loginBtn.addEventListener("click", () => {
         if (passwordInput.value.trim() === PASSWORD) {
           sessionStorage.setItem("calmiqsAuth", "true");
@@ -207,7 +198,7 @@
         loadPosts();
       }
 
-      // KV Integration
+      // === KV Integration ===
       async function loadPosts() {
         try {
           const res = await fetch(KV_URL);
@@ -247,7 +238,7 @@
         updatePreview();
       }
 
-      // Save Post
+      // === Save Post ===
       async function savePost() {
         const key = document.getElementById("key").value.trim();
         if (!key) return alert("Please provide a key (slug).");
@@ -256,6 +247,7 @@
           obj[id] = document.getElementById(id).value.trim();
           return obj;
         }, {});
+
         data.imageAlt = document.getElementById("imageAlt").value.trim();
 
         try {
@@ -268,14 +260,16 @@
           if (result.success) {
             alert("✅ Post saved successfully!");
             loadPosts();
-          } else alert("⚠️ Error saving post: " + (result.error || "Unknown error"));
+          } else {
+            alert("⚠️ Error saving post: " + (result.error || "Unknown error"));
+          }
         } catch (err) {
           console.error(err);
           alert("❌ Failed to save post.");
         }
       }
 
-      // Delete Post
+      // === Delete Post ===
       async function deletePost() {
         const key = postSelect.value;
         if (!key) return alert("Select a post to delete");
@@ -295,7 +289,7 @@
         }
       }
 
-      // Live Preview
+      // === Live Preview ===
       const titleInput = document.getElementById("title");
       const dateInput = document.getElementById("date");
       const imageInput = document.getElementById("image");
@@ -318,47 +312,47 @@
         `;
       }
 
-      // Insert Image Template
-      const insertImageBtn = document.getElementById("insertImageBtn");
-      insertImageBtn.addEventListener("click", () => {
-        const contentBox = document.getElementById("content");
-        const cursorPos = contentBox.selectionStart;
-        const template = `\n<img src="https://via.placeholder.com/800x400" alt="Describe the image" class="my-4 rounded-lg shadow-md" />\n`;
+      // === Insert Inline Image Snippet & Upload ===
+      insertImageBtn.addEventListener("click", async () => {
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = "image/*";
+        fileInput.click();
 
-        const currentText = contentBox.value;
-        contentBox.value =
-          currentText.slice(0, cursorPos) + template + currentText.slice(cursorPos);
-        contentBox.focus();
-        updatePreview();
-      });
+        fileInput.onchange = async () => {
+          const file = fileInput.files[0];
+          if (!file) return;
 
-      // === File Upload Logic ===
-      const uploadBtn = document.getElementById("uploadBtn");
-      const uploadFile = document.getElementById("uploadFile");
+          const formData = new FormData();
+          formData.append("file", file);
 
-      uploadBtn.addEventListener("click", async () => {
-        if (!uploadFile.files.length) return alert("Select a file first");
+          try {
+            const res = await fetch("/api/images/upload", {
+              method: "POST",
+              body: formData,
+            });
 
-        const formData = new FormData();
-        formData.append("file", uploadFile.files[0]);
+            if (!res.ok) throw new Error("Upload failed with status " + res.status);
+            const data = await res.json();
+            if (!data.success) throw new Error("Upload failed: " + (data.error || "Unknown"));
 
-        try {
-          const res = await fetch("/api/images/upload", {
-            method: "POST",
-            body: formData,
-          });
-          const data = await res.json();
-          if (data.success) {
-            alert("✅ Image uploaded! URL: " + data.url);
-            // Insert into content automatically
             const contentBox = document.getElementById("content");
-            contentBox.value += `\n<img src="${data.url}" alt="${uploadFile.files[0].name}" class="my-4 rounded-lg shadow-md" />\n`;
+            const cursorPos = contentBox.selectionStart;
+            const template = `\n<img src="${data.url}" alt="${file.name}" class="my-4 rounded-lg shadow-md" />\n`;
+
+            const currentText = contentBox.value;
+            contentBox.value =
+              currentText.slice(0, cursorPos) + template + currentText.slice(cursorPos);
+
+            contentBox.focus();
             updatePreview();
-          } else alert("❌ Failed to upload image: " + (data.error || "unknown"));
-        } catch (err) {
-          console.error(err);
-          alert("❌ Failed to upload image.");
-        }
+
+            alert("✅ Image uploaded and inserted successfully!");
+          } catch (err) {
+            console.error(err);
+            alert("❌ Failed to upload image: " + err.message);
+          }
+        };
       });
 
       [titleInput, dateInput, imageInput, imageAltInput, contentInput].forEach((el) =>
@@ -366,7 +360,7 @@
       );
       updatePreview();
 
-      // Event Listeners
+      // === Event Listeners ===
       document.getElementById("loadBtn").addEventListener("click", loadPosts);
       saveBtn.addEventListener("click", savePost);
       deleteBtn.addEventListener("click", deletePost);
