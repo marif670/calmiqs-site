@@ -23,32 +23,6 @@
       };
     </script>
     <link rel="stylesheet" href="/assets/css/style.css?v=12" />
-    <style>
-      /* Inline image styling for contenteditable editor */
-      #editor img {
-        max-width: 800px;
-        margin: 1rem 0;
-        border-radius: 0.5rem;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      }
-      #editor img.float-left {
-        float: left;
-        margin-right: 0.5rem;
-      }
-      #editor img.float-right {
-        float: right;
-        margin-left: 0.5rem;
-      }
-      #editor img.mx-auto {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      #editor:empty:before {
-        content: attr(placeholder);
-        color: gray;
-      }
-    </style>
   </head>
   <body class="bg-[#F9FAFB] text-gray-800 font-sans min-h-screen">
     <!-- 🔒 Login Section -->
@@ -172,28 +146,78 @@
         <div>
           <label class="block text-sm font-medium mb-1">Content</label>
 
-          <!-- Contenteditable editor -->
+          <!-- Formatting Toolbar -->
+          <div class="flex gap-2 mb-2">
+            <button
+              type="button"
+              data-action="bold"
+              class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              B
+            </button>
+            <button
+              type="button"
+              data-action="italic"
+              class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              I
+            </button>
+            <button
+              type="button"
+              data-action="h2"
+              class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              H2
+            </button>
+            <button
+              type="button"
+              data-action="h3"
+              class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              H3
+            </button>
+            <button
+              type="button"
+              data-action="ul"
+              class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              UL
+            </button>
+            <button
+              type="button"
+              data-action="ol"
+              class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              OL
+            </button>
+            <button
+              type="button"
+              data-action="link"
+              class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              Link
+            </button>
+          </div>
+
           <div
             id="editor"
             contenteditable="true"
-            class="w-full h-96 border rounded-lg p-4 mb-3 bg-white overflow-auto"
-            placeholder="<p>Your article here...</p>"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary mb-3 min-h-[300px]"
           ></div>
 
-          <!-- Toolbar -->
-          <div class="flex flex-wrap gap-2 mb-3">
-            <button data-action="bold" class="px-2 py-1 bg-gray-200 rounded">Bold</button>
-            <button data-action="italic" class="px-2 py-1 bg-gray-200 rounded">Italic</button>
-            <button data-action="h2" class="px-2 py-1 bg-gray-200 rounded">H2</button>
-            <button data-action="h3" class="px-2 py-1 bg-gray-200 rounded">H3</button>
-            <button data-action="ul" class="px-2 py-1 bg-gray-200 rounded">UL</button>
-            <button data-action="ol" class="px-2 py-1 bg-gray-200 rounded">OL</button>
-            <button data-action="link" class="px-2 py-1 bg-gray-200 rounded">Link</button>
-            <button id="insertImageBtn" class="px-2 py-1 bg-accent rounded">➕ Inline Image</button>
-          </div>
-
-          <!-- Inline Image File Upload -->
+          <label class="block text-sm font-medium mb-1">Inline Image</label>
           <input type="file" id="inlineImageFile" class="mb-2" />
+          <select id="inlineImageAlign" class="border rounded px-2 py-1 mb-2 w-full">
+            <option value="mx-auto">Center</option>
+            <option value="float-left mr-4">Left</option>
+            <option value="float-right ml-4">Right</option>
+          </select>
+          <button
+            id="insertImageBtn"
+            class="bg-accent text-gray-800 px-3 py-1 rounded hover:bg-yellow-400 transition mb-3"
+          >
+            ➕ Upload & Insert Inline Image
+          </button>
         </div>
       </div>
 
@@ -212,238 +236,7 @@
       </div>
     </section>
 
-    <script>
-      // === CONFIG ===
-      const PASSWORD = "calmiqs2025";
-      const KV_URL = "/posts";
-      const IMAGE_UPLOAD_URL = "/images/upload";
-
-      let posts = {};
-
-      const authSection = document.getElementById("authSection");
-      const editorSection = document.getElementById("editorSection");
-      const passwordInput = document.getElementById("passwordInput");
-      const loginBtn = document.getElementById("loginBtn");
-      const postSelect = document.getElementById("postSelect");
-      const saveBtn = document.getElementById("saveBtn");
-      const deleteBtn = document.getElementById("deleteBtn");
-
-      // === LOGIN ===
-      loginBtn.addEventListener("click", () => {
-        if (passwordInput.value.trim() === PASSWORD) {
-          sessionStorage.setItem("calmiqsAuth", "true");
-          authSection.classList.add("hidden");
-          editorSection.classList.remove("hidden");
-          loadPosts();
-        } else alert("Incorrect password.");
-      });
-
-      if (sessionStorage.getItem("calmiqsAuth") === "true") {
-        authSection.classList.add("hidden");
-        editorSection.classList.remove("hidden");
-        loadPosts();
-      }
-
-      // === KV POSTS ===
-      async function loadPosts() {
-        try {
-          const res = await fetch(KV_URL);
-          if (!res.ok) throw new Error("Could not load posts from KV");
-          posts = await res.json();
-          populateSelect();
-        } catch (err) {
-          console.error(err);
-          alert("❌ Could not load posts from KV.");
-        }
-      }
-
-      function populateSelect() {
-        postSelect.innerHTML =
-          '<option value="">➕ New Post</option>' +
-          Object.keys(posts)
-            .map((key) => `<option value="${key}">${key}</option>`)
-            .join("");
-      }
-
-      postSelect.addEventListener("change", () => {
-        const key = postSelect.value;
-        if (!key) return clearForm();
-        const post = posts[key];
-        document.getElementById("key").value = key;
-        ["title", "date", "image", "imageAlt", "excerpt"].forEach((id) => {
-          document.getElementById(id).value = post[id] || "";
-        });
-        document.getElementById("editor").innerHTML = post.content || "";
-        updatePreview();
-      });
-
-      function clearForm() {
-        document.getElementById("key").value = "";
-        ["title", "date", "image", "imageAlt", "excerpt"].forEach((id) => {
-          document.getElementById(id).value = "";
-        });
-        document.getElementById("editor").innerHTML = "";
-        updatePreview();
-      }
-
-      // === SAVE POST ===
-      async function savePost() {
-        const key = document.getElementById("key").value.trim();
-        if (!key) return alert("Provide a key (slug)");
-        const data = ["title", "date", "image", "excerpt"].reduce((obj, id) => {
-          obj[id] = document.getElementById(id).value.trim();
-          return obj;
-        }, {});
-        data.imageAlt = document.getElementById("imageAlt").value.trim();
-        data.content = document.getElementById("editor").innerHTML;
-        try {
-          const res = await fetch(KV_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ key, data }),
-          });
-          const result = await res.json();
-          if (result.success) {
-            alert("✅ Post saved!");
-            loadPosts();
-          } else alert("⚠️ " + (result.error || "Unknown error"));
-        } catch (err) {
-          console.error(err);
-          alert("❌ Failed to save post.");
-        }
-      }
-
-      // === DELETE POST ===
-      async function deletePost() {
-        const key = postSelect.value;
-        if (!key) return alert("Select a post");
-        if (!confirm(`Delete '${key}'?`)) return;
-        try {
-          const res = await fetch(`${KV_URL}?key=${encodeURIComponent(key)}`, { method: "DELETE" });
-          const result = await res.json();
-          if (result.success) {
-            alert("🗑️ Post deleted");
-            clearForm();
-            loadPosts();
-          } else alert("⚠️ " + (result.error || "Unknown error"));
-        } catch (err) {
-          console.error(err);
-          alert("❌ Failed to delete post.");
-        }
-      }
-
-      // === HERO IMAGE UPLOAD ===
-      document.getElementById("uploadHeroBtn").addEventListener("click", async () => {
-        const fileInput = document.getElementById("heroImageFile");
-        const altInput = document.getElementById("imageAlt");
-        if (!fileInput.files[0]) return alert("Select a file");
-
-        const formData = new FormData();
-        formData.append("file", fileInput.files[0]);
-        formData.append("alt", altInput.value || "");
-
-        try {
-          const res = await fetch(IMAGE_UPLOAD_URL, { method: "POST", body: formData });
-          const result = await res.json();
-          if (result.success) {
-            document.getElementById("image").value = result.url;
-            document.getElementById("imageAlt").value = result.meta.alt || "";
-            alert("✅ Hero image uploaded");
-            updatePreview();
-          } else alert("❌ Failed to upload image: " + (result.error || "Unknown error"));
-        } catch (err) {
-          console.error(err);
-          alert("❌ Failed to upload image.");
-        }
-      });
-
-      // === INLINE IMAGE UPLOAD ===
-      document.getElementById("insertImageBtn").addEventListener("click", async () => {
-        const fileInput = document.getElementById("inlineImageFile");
-        if (!fileInput.files[0]) return alert("Select a file");
-
-        const altText =
-          prompt("Enter alt text for this image:", fileInput.files[0].name) ||
-          fileInput.files[0].name;
-        const alignment = prompt("Enter alignment (left, right, center):", "center") || "center";
-
-        const formData = new FormData();
-        formData.append("file", fileInput.files[0]);
-        formData.append("alt", altText);
-        formData.append("alignment", alignment);
-
-        try {
-          const res = await fetch(IMAGE_UPLOAD_URL, { method: "POST", body: formData });
-          const result = await res.json();
-          if (result.success) {
-            const editor = document.getElementById("editor");
-            const imgHTML = `<img src="${result.url}" alt="${result.meta.alt}" class="my-4 rounded-lg shadow-md ${result.meta.alignment}" />`;
-            insertAtCursor(editor, imgHTML);
-            updatePreview();
-            alert("✅ Inline image inserted");
-          } else alert("❌ Failed to insert inline image: " + (result.error || "Unknown error"));
-        } catch (err) {
-          console.error(err);
-          alert("❌ Failed to insert inline image.");
-        }
-      });
-
-      function insertAtCursor(editor, html) {
-        editor.focus();
-        const sel = window.getSelection();
-        if (!sel.rangeCount) return;
-        const range = sel.getRangeAt(0);
-        range.deleteContents();
-        const frag = document.createRange().createContextualFragment(html);
-        range.insertNode(frag);
-        range.collapse(false);
-      }
-
-      // === LIVE PREVIEW ===
-      const titleInput = document.getElementById("title");
-      const dateInput = document.getElementById("date");
-      const imageInput = document.getElementById("image");
-      const imageAltInput = document.getElementById("imageAlt");
-      const editorDiv = document.getElementById("editor");
-      const preview = document.getElementById("previewContent");
-
-      function updatePreview() {
-        const title = titleInput.value || "Untitled Post";
-        const date = dateInput.value || "No date set";
-        const image = imageInput.value || "https://via.placeholder.com/800x400?text=Preview";
-        const imageAlt = imageAltInput.value || "Preview image";
-        const content = editorDiv.innerHTML || "<p>Start typing...</p>";
-        preview.innerHTML = `
-          <img src="${image}" alt="${imageAlt}" class="rounded-xl mb-4 shadow-md w-full max-h-96 object-cover" />
-          <h3 class="text-3xl font-bold mb-2 text-primary">${title}</h3>
-          <p class="text-gray-500 mb-6">${date}</p>
-          <div class="text-gray-800 leading-relaxed">${content}</div>
-        `;
-      }
-
-      [titleInput, dateInput, imageInput, imageAltInput, editorDiv].forEach((el) =>
-        el.addEventListener("input", updatePreview)
-      );
-      updatePreview();
-
-      // === BUTTON EVENTS ===
-      document.getElementById("loadBtn").addEventListener("click", loadPosts);
-      saveBtn.addEventListener("click", savePost);
-      deleteBtn.addEventListener("click", deletePost);
-
-      // === TOOLBAR FORMATTING ===
-      document.querySelectorAll("[data-action]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const action = btn.getAttribute("data-action");
-          if (action === "link") {
-            const url = prompt("Enter URL:", "https://");
-            if (url) document.execCommand("createLink", false, url);
-          } else {
-            document.execCommand(action, false, null);
-          }
-          updatePreview();
-        });
-      });
-    </script>
+    <!-- Link to external JS -->
+    <script src="editor.js"></script>
   </body>
 </html>
