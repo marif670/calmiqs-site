@@ -1,38 +1,63 @@
-<!-- Footer Component -->
-<footer class="bg-gray-900 text-gray-300 py-10 mt-20">
-  <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-10">
+<!-- footer.html -->
+<footer class="bg-gray-50 dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 mt-12">
+  <div class="max-w-6xl mx-auto px-4 py-10 grid md:grid-cols-3 gap-8">
+    <!-- Column 1: About -->
     <div>
-      <h3 class="text-xl font-semibold text-white mb-3">Calmiqs</h3>
-      <p class="text-sm leading-relaxed">
-        Empowering sustainable innovation through AI and smart technology.
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">About Calmiqs</h3>
+      <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+        Calmiqs is dedicated to sustainable innovation — combining technology and environmental
+        mindfulness to build a better future.
       </p>
     </div>
 
+    <!-- Column 2: Links -->
     <div>
-      <h4 class="text-lg font-semibold text-white mb-3">Quick Links</h4>
-      <ul class="space-y-2">
-        <li><a href="/about.html" class="hover:text-primary">About</a></li>
-        <li><a href="/blog.html" class="hover:text-primary">Blog</a></li>
-        <li><a href="/contact.html" class="hover:text-primary">Contact</a></li>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Quick Links</h3>
+      <ul class="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
+        <li><a href="/about.html" class="hover:text-green-600 transition">About Us</a></li>
+        <li><a href="/blog.html" class="hover:text-green-600 transition">Blog</a></li>
+        <li><a href="/privacy.html" class="hover:text-green-600 transition">Privacy Policy</a></li>
+        <li><a href="/terms.html" class="hover:text-green-600 transition">Terms of Service</a></li>
+        <li><a href="/contact.html" class="hover:text-green-600 transition">Contact</a></li>
       </ul>
     </div>
 
+    <!-- Column 3: Social / Newsletter -->
     <div>
-      <h4 class="text-lg font-semibold text-white mb-3">Legal</h4>
-      <ul class="space-y-2">
-        <li><a href="/privacy.html" class="hover:text-primary">Privacy Policy</a></li>
-        <li><a href="/terms.html" class="hover:text-primary">Terms & Conditions</a></li>
-        <li><a href="/disclaimer.html" class="hover:text-primary">Disclaimer</a></li>
-      </ul>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Stay Connected</h3>
+      <div class="flex space-x-4 mb-4">
+        <a href="#" class="text-gray-600 hover:text-green-600 transition">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M22.23 0H1.77A1.78 1.78 0 000 1.77v20.46A1.78 1.78 0 001.77 24h11V14.7H9.69v-3.63h3.08V8.41c0-3.05 1.86-4.72 4.58-4.72 1.3 0 2.41.1 2.73.14v3.17h-1.88c-1.47 0-1.76.7-1.76 1.73v2.27h3.52l-.46 3.63h-3.06V24h6a1.78 1.78 0 001.77-1.77V1.77A1.78 1.78 0 0022.23 0z"
+            />
+          </svg>
+        </a>
+        <a href="#" class="text-gray-600 hover:text-green-600 transition">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 2.163c3.204 0 3.584.012 4.849.07 1.17.054 1.97.24 2.434.403a4.92 4.92 0 011.675 1.092 4.92 4.92 0 011.092 1.675c.163.464.349 1.264.403 2.434.058 1.265.07 1.645.07 4.849s-.012 3.584-.07 4.849c-.054 1.17-.24 1.97-.403 2.434a4.92 4.92 0 01-1.092 1.675 4.92 4.92 0 01-1.675 1.092c-.464.163-1.264.349-2.434.403-1.265.058-1.645.07-4.849.07s-3.584-.012-4.849-.07c-1.17-.054-1.97-.24-2.434-.403a4.92 4.92 0 01-1.675-1.092 4.92 4.92 0 01-1.092-1.675c-.163-.464-.349-1.264-.403-2.434C2.175 15.747 2.163 15.367 2.163 12s.012-3.584.07-4.849c.054-1.17.24-1.97.403-2.434a4.92 4.92 0 011.092-1.675A4.92 4.92 0 015.403 1.77c.464-.163 1.264-.349 2.434-.403C8.103 1.312 8.483 1.3 12 1.3zM12 5.838a6.162 6.162 0 100 12.324A6.162 6.162 0 0012 5.838zm0 10.162a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 11-2.881 0 1.44 1.44 0 012.881 0z"
+            />
+          </svg>
+        </a>
+      </div>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        ©
+        <span id="year"></span>
+        Calmiqs. All rights reserved.
+      </p>
     </div>
   </div>
-
-  <div class="text-center text-gray-500 text-sm mt-10">
-    ©
-    <span id="year"></span>
-    Calmiqs. All rights reserved.
-  </div>
-
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>

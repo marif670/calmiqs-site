@@ -1,23 +1,78 @@
-<!-- Header Component -->
-<header class="bg-white shadow-md fixed top-0 left-0 w-full z-50">
-  <nav class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
-    <a href="/" class="text-2xl font-bold text-primary hover:text-tech transition">Calmiqs</a>
-    <ul class="hidden md:flex space-x-6 text-gray-700 font-medium">
-      <li><a href="/" class="hover:text-primary">Home</a></li>
-      <li><a href="/about.html" class="hover:text-primary">About</a></li>
-      <li><a href="/blog.html" class="hover:text-primary">Blog</a></li>
-      <li><a href="/contact.html" class="hover:text-primary">Contact</a></li>
-    </ul>
-    <button class="md:hidden text-primary focus:outline-none" id="menu-btn">☰</button>
+<!-- header.html -->
+<header class="w-full bg-white/80 dark:bg-gray-950/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+  <div class="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
+    <!-- Logo -->
+    <a href="/" class="flex items-center space-x-2">
+      <img src="/assets/logo.svg" alt="Calmiqs Logo" class="h-8 w-8" />
+      <span class="text-xl font-semibold text-gray-900 dark:text-gray-100 tracking-wide">
+        Calmiqs
+      </span>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <nav class="hidden md:flex items-center space-x-6 text-gray-700 dark:text-gray-200 font-medium">
+      <a href="/" class="hover:text-green-600 transition">Home</a>
+      <a href="/about.html" class="hover:text-green-600 transition">About</a>
+      <a href="/blog.html" class="hover:text-green-600 transition">Blog</a>
+      <a href="/contact.html" class="hover:text-green-600 transition">Contact</a>
+    </nav>
+
+    <!-- CMS / Admin Link -->
+    <a
+      href="/admin/index.html"
+      class="hidden md:inline-flex bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl shadow-md transition"
+    >
+      CMS
+    </a>
+
+    <!-- Mobile Menu Button -->
+    <button
+      id="mobile-menu-toggle"
+      class="md:hidden flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6 text-gray-800 dark:text-gray-200"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          id="menu-icon"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16"
+        />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <nav
+    id="mobile-menu"
+    class="hidden md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800"
+  >
+    <div class="flex flex-col space-y-2 px-4 py-3 text-gray-700 dark:text-gray-200 font-medium">
+      <a href="/" class="hover:text-green-600 transition">Home</a>
+      <a href="/about.html" class="hover:text-green-600 transition">About</a>
+      <a href="/blog.html" class="hover:text-green-600 transition">Blog</a>
+      <a href="/contact.html" class="hover:text-green-600 transition">Contact</a>
+      <a
+        href="/admin/index.html"
+        class="bg-green-600 text-white px-3 py-2 rounded-lg text-center hover:bg-green-700 transition"
+      >
+        CMS
+      </a>
+    </div>
   </nav>
+
+  <script>
+    // Mobile menu toggle
+    const toggle = document.getElementById("mobile-menu-toggle");
+    const menu = document.getElementById("mobile-menu");
+    toggle.addEventListener("click", () => {
+      menu.classList.toggle("hidden");
+    });
+  </script>
 </header>
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const menuBtn = document.getElementById("menu-btn");
-    if (menuBtn) {
-      menuBtn.addEventListener("click", () => {
-        alert("Mobile menu to be added later");
-      });
-    }
-  });
-</script>
