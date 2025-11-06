@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Privacy Policy | Calmiqs</title>
 
-    <!-- Tailwind (same setup as other pages) -->
+    <!-- Tailwind config & fonts (same as site) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
-            colors: {
-              primary: "#4FA49A",
-              accent: "#FFD580",
-              tech: "#5A67D8",
-            },
+            colors: { primary: "#4FA49A", accent: "#FFD580", tech: "#5A67D8" },
             fontFamily: { sans: ["Poppins", "sans-serif"] },
             animation: { gradient: "gradientBG 8s ease infinite" },
             keyframes: {
@@ -34,21 +30,10 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <script defer src="/assets/js/main.js"></script>
   </head>
   <body class="font-sans text-gray-800 bg-gray-50">
-    <!-- Header (shared) -->
-    <header class="bg-white shadow-md fixed top-0 w-full z-50">
-      <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-        <a href="/" class="text-2xl font-semibold text-primary">Calmiqs</a>
-        <nav class="space-x-6 text-sm font-medium">
-          <a href="/" class="hover:text-primary">Home</a>
-          <a href="/about.html" class="hover:text-primary">About</a>
-          <a href="/blog.html" class="hover:text-primary">Blog</a>
-          <a href="/contact.html" class="hover:text-primary">Contact</a>
-        </nav>
-      </div>
-    </header>
+    <!-- Header placeholder -->
+    <header id="navbar-container" class="sticky top-0 z-50"></header>
 
     <!-- Hero -->
     <section
@@ -60,39 +45,26 @@
       </div>
     </section>
 
-    <!-- Main - content injected here -->
+    <!-- Main content placeholder -->
     <main class="max-w-5xl mx-auto px-6 py-16">
-      <div id="privacy-content" class="bg-white rounded-2xl shadow-xl p-10 md:p-12">
+      <div id="content" class="bg-white rounded-2xl shadow-xl p-10 md:p-12">
         <p class="text-center text-gray-400">Loading Privacy Policy…</p>
       </div>
     </main>
 
-    <!-- Footer (update later to include Disclaimer link) -->
-    <footer class="bg-gray-900 text-gray-300 py-10">
-      <div class="max-w-7xl mx-auto px-6 text-center">
-        <p class="text-sm">
-          &copy;
-          <span id="year"></span>
-          Calmiqs. All rights reserved.
-        </p>
-        <div class="mt-4 space-x-6">
-          <a href="/privacy.html" class="hover:text-white">Privacy</a>
-          <a href="/terms.html" class="hover:text-white">Terms</a>
-          <!-- add disclaimer link later -->
-        </div>
-      </div>
-    </footer>
+    <!-- Footer placeholder -->
+    <footer id="footer-container" class="bg-gray-900 text-gray-300 py-10"></footer>
 
-    <script>
-      document.getElementById("year").textContent = new Date().getFullYear();
-    </script>
-
-    // load content fragment
+    <!-- load helper first -->
     <script src="/assets/js/main.js"></script>
+
+    <!-- call loader after DOM ready to be robust -->
     <script>
-      loadFragment("/assets/components/header.html", "#navbar-container");
-      loadFragment("/assets/components/footer.html", "#footer-container");
-      loadFragment("/assets/content/privacy.html", "#content");
+      document.addEventListener("DOMContentLoaded", function () {
+        loadFragment("/assets/components/header.html", "#navbar-container");
+        loadFragment("/assets/components/footer.html", "#footer-container");
+        loadFragment("/assets/content/privacy.html", "#content");
+      });
     </script>
   </body>
 </html>
