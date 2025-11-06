@@ -3,6 +3,13 @@
   --text: #111;
   --accent: #2b8a7a;
 }
+/* Remove default browser margin/padding globally */
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
 * {
   box-sizing: border-box;
 }
