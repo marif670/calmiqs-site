@@ -8,10 +8,29 @@
       content="Terms and Conditions for Calmiqs - Understand the rules and responsibilities when using our website and services."
     />
     <title>Terms & Conditions | Calmiqs</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css"
-    />
+    <!-- TailwindCSS (via CDN for development) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind custom configuration -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4FA49A",
+              accent: "#FFD580",
+              tech: "#5A67D8",
+            },
+            fontFamily: {
+              sans: ["Poppins", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Custom site CSS -->
+    <link rel="stylesheet" href="/public/assets/css/style.css" />
   </head>
   <body class="bg-gray-50 text-gray-800 leading-relaxed">
     <!-- Header -->
