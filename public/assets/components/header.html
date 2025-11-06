@@ -1,0 +1,23 @@
+<!-- Header Component -->
+<header class="bg-white shadow-md fixed top-0 left-0 w-full z-50">
+  <nav class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+    <a href="/" class="text-2xl font-bold text-primary hover:text-tech transition">Calmiqs</a>
+    <ul class="hidden md:flex space-x-6 text-gray-700 font-medium">
+      <li><a href="/" class="hover:text-primary">Home</a></li>
+      <li><a href="/about.html" class="hover:text-primary">About</a></li>
+      <li><a href="/blog.html" class="hover:text-primary">Blog</a></li>
+      <li><a href="/contact.html" class="hover:text-primary">Contact</a></li>
+    </ul>
+    <button class="md:hidden text-primary focus:outline-none" id="menu-btn">☰</button>
+  </nav>
+</header>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const menuBtn = document.getElementById("menu-btn");
+    if (menuBtn) {
+      menuBtn.addEventListener("click", () => {
+        alert("Mobile menu to be added later");
+      });
+    }
+  });
+</script>
