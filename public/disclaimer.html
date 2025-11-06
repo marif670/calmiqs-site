@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Disclaimer | Calmiqs</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#4FA49A", accent: "#FFD580", tech: "#5A67D8" },
+            fontFamily: { sans: ["Poppins", "sans-serif"] },
+            animation: { gradient: "gradientBG 8s ease infinite" },
+          },
+        },
+      };
+    </script>
+
+    <link rel="stylesheet" href="/assets/css/style.css?v=12" />
+    <script defer src="/assets/js/main.js"></script>
+  </head>
+  <body class="font-sans text-gray-800 bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-md fixed top-0 w-full z-50">
+      <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
+        <a href="/" class="text-2xl font-semibold text-primary">Calmiqs</a>
+        <nav class="space-x-6 text-sm font-medium">
+          <a href="/" class="hover:text-primary">Home</a>
+          <a href="/about.html" class="hover:text-primary">About</a>
+          <a href="/blog.html" class="hover:text-primary">Blog</a>
+          <a href="/contact.html" class="hover:text-primary">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section
+      class="h-40 flex items-center justify-center text-center text-white mt-16 bg-gradient-to-r from-primary via-tech to-accent bg-[length:200%_200%] animate-gradient"
+    >
+      <div>
+        <h1 class="text-3xl font-semibold">Disclaimer</h1>
+        <p class="text-sm opacity-90">Important legal and content disclosures.</p>
+      </div>
+    </section>
+
+    <!-- Main -->
+    <main class="max-w-4xl mx-auto px-6 py-16">
+      <div id="disclaimer-content" class="bg-white rounded-2xl shadow-md p-10">
+        <p class="text-center text-gray-400">Loading disclaimer…</p>
+      </div>
+    </main>
+
+    <!-- Footer updated -->
+    <footer class="bg-gray-900 text-gray-300 py-10">
+      <div class="max-w-7xl mx-auto px-6 text-center">
+        <p class="text-sm">
+          &copy;
+          <span id="year"></span>
+          Calmiqs. All rights reserved.
+        </p>
+        <div class="mt-4 space-x-6">
+          <a href="/privacy.html" class="hover:text-white">Privacy</a>
+          <a href="/terms.html" class="hover:text-white">Terms</a>
+          <a href="/disclaimer.html" class="hover:text-white">Disclaimer</a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+
+    <script>
+      loadFragment("/assets/content/disclaimer.html", "#disclaimer-content");
+    </script>
+  </body>
+</html>
