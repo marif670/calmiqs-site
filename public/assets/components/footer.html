@@ -1,40 +1,27 @@
-<footer class="bg-[#0a1a3a] text-gray-200 mt-12">
-  <div class="container mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
-    <div>
-      <h3 class="text-lg font-semibold mb-3 text-white">Calmiqs</h3>
-      <p class="text-gray-300 leading-relaxed">
-        Innovating sustainable solutions through technology, research, and awareness. Join us on our
-        journey towards a smarter, greener future.
-      </p>
+<footer class="bg-[#0a1a3a] text-gray-200 py-8 mt-12">
+  <div class="container mx-auto px-6">
+    <!-- Footer Top: Links & CTA -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+      <p class="text-sm md:text-base">&copy; 2025 Calmiqs. All rights reserved.</p>
+
+      <div class="flex flex-wrap space-x-4 mt-3 md:mt-0">
+        <a href="/privacy.html" class="hover:text-primary transition">Privacy Policy</a>
+        <a href="/terms.html" class="hover:text-primary transition">Terms & Conditions</a>
+        <a href="/disclaimer.html" class="hover:text-primary transition">Disclaimer</a>
+        <a href="/contact.html" class="hover:text-primary transition">Contact</a>
+      </div>
     </div>
 
-    <div>
-      <h4 class="text-md font-semibold mb-3 text-white">Quick Links</h4>
-      <ul class="space-y-2">
-        <li><a href="/about.html" class="hover:text-white transition">About</a></li>
-        <li><a href="/blog.html" class="hover:text-white transition">Blog</a></li>
-        <li><a href="/tools.html" class="hover:text-white transition">Tools</a></li>
-        <li><a href="/contact.html" class="hover:text-white transition">Contact</a></li>
-      </ul>
-    </div>
-
-    <div>
-      <h4 class="text-md font-semibold mb-3 text-white">Legal</h4>
-      <ul class="space-y-2">
-        <li><a href="/privacy.html" class="hover:text-white transition">Privacy Policy</a></li>
-        <li><a href="/terms.html" class="hover:text-white transition">Terms & Conditions</a></li>
-        <li><a href="/disclaimer.html" class="hover:text-white transition">Disclaimer</a></li>
-      </ul>
+    <!-- Footer Bottom: Social / Optional -->
+    <div
+      class="flex flex-col md:flex-row justify-between items-center border-t border-gray-700 pt-4 mt-4 text-sm md:text-base"
+    >
+      <p class="mb-2 md:mb-0">Follow us:</p>
+      <div class="flex space-x-4">
+        <a href="#" class="hover:text-primary transition">Twitter</a>
+        <a href="#" class="hover:text-primary transition">LinkedIn</a>
+        <a href="#" class="hover:text-primary transition">GitHub</a>
+      </div>
     </div>
   </div>
-
-  <div class="border-t border-gray-700 mt-6 py-4 text-center text-xs text-gray-400">
-    ©
-    <span id="year"></span>
-    Calmiqs. All rights reserved.
-  </div>
-
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
 </footer>
