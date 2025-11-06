@@ -1,55 +1,93 @@
-<header class="bg-[#0a1a3a] text-gray-100 shadow-md">
-  <div class="container mx-auto flex justify-between items-center py-4 px-6">
-    <!-- Logo / Brand -->
-    <a
-      href="/index.html"
-      class="text-2xl font-bold text-white tracking-wide hover:text-gray-200 transition"
-    >
-      Calmiqs
-    </a>
+<header class="bg-white shadow-md fixed top-0 w-full z-50">
+  <nav class="container mx-auto flex items-center justify-between py-4 px-6">
+    <!-- Logo -->
+    <a href="/index.html" class="text-2xl font-bold text-primary">Calmiqs</a>
 
-    <!-- Navigation Menu -->
-    <nav class="hidden md:flex space-x-6 text-sm font-medium">
-      <a href="/index.html" class="hover:text-white transition">Home</a>
-      <a href="/about.html" class="hover:text-white transition">About</a>
-      <a href="/blog.html" class="hover:text-white transition">Blog</a>
-      <a href="/tools.html" class="hover:text-white transition">Tools</a>
-      <a href="/contact.html" class="hover:text-white transition">Contact</a>
-      <a href="/admin/editor.html" class="text-yellow-300 hover:text-yellow-200 transition">CMS</a>
-    </nav>
+    <!-- Desktop Navigation -->
+    <div class="hidden md:flex space-x-6 font-medium text-gray-700">
+      <a href="/about.html" class="hover:text-primary transition">About</a>
+      <a href="/blog.html" class="hover:text-primary transition">Blog</a>
+      <a href="/tools.html" class="hover:text-primary transition">Tools</a>
+      <a href="/contact.html" class="hover:text-primary transition">Contact</a>
+      <a href="/privacy.html" class="hover:text-primary transition">Privacy</a>
+      <a href="/terms.html" class="hover:text-primary transition">Terms</a>
+      <a href="/disclaimer.html" class="hover:text-primary transition">Disclaimer</a>
+
+      <!-- CMS Button (hidden by default) -->
+      <a
+        id="cms-link"
+        href="/admin/editor.html"
+        class="hidden px-4 py-2 bg-tech text-white rounded-lg hover:bg-primary transition"
+      >
+        CMS
+      </a>
+    </div>
 
     <!-- Mobile Menu Button -->
-    <button id="menu-toggle" class="md:hidden text-gray-200 focus:outline-none">
+    <button
+      id="menu-btn"
+      class="md:hidden text-gray-700 hover:text-primary focus:outline-none"
+      aria-label="Toggle menu"
+    >
       <svg
-        xmlns="http://www.w3.org/2000/svg"
         class="w-6 h-6"
         fill="none"
-        viewBox="0 0 24 24"
         stroke="currentColor"
-        stroke-width="2"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16m-7 6h7"
+        ></path>
       </svg>
     </button>
-  </div>
-
-  <!-- Mobile Menu -->
-  <nav id="mobile-menu" class="hidden bg-[#0a1a3a] border-t border-gray-700 md:hidden">
-    <div class="flex flex-col space-y-2 px-6 py-4 text-sm">
-      <a href="/index.html" class="hover:text-white transition">Home</a>
-      <a href="/about.html" class="hover:text-white transition">About</a>
-      <a href="/blog.html" class="hover:text-white transition">Blog</a>
-      <a href="/tools.html" class="hover:text-white transition">Tools</a>
-      <a href="/contact.html" class="hover:text-white transition">Contact</a>
-      <a href="/admin/editor.html" class="text-yellow-300 hover:text-yellow-200 transition">CMS</a>
-    </div>
   </nav>
 
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="hidden bg-white shadow-md md:hidden">
+    <div class="flex flex-col space-y-3 py-4 px-6 text-gray-700 font-medium">
+      <a href="/about.html" class="hover:text-primary transition">About</a>
+      <a href="/blog.html" class="hover:text-primary transition">Blog</a>
+      <a href="/tools.html" class="hover:text-primary transition">Tools</a>
+      <a href="/contact.html" class="hover:text-primary transition">Contact</a>
+      <a href="/privacy.html" class="hover:text-primary transition">Privacy</a>
+      <a href="/terms.html" class="hover:text-primary transition">Terms</a>
+      <a href="/disclaimer.html" class="hover:text-primary transition">Disclaimer</a>
+
+      <!-- CMS Link (Hidden by Default) -->
+      <a
+        id="cms-link-mobile"
+        href="/admin/editor.html"
+        class="hidden px-4 py-2 bg-tech text-white rounded-lg hover:bg-primary transition text-center"
+      >
+        CMS
+      </a>
+    </div>
+  </div>
+
   <script>
-    // Mobile menu toggle
-    document.getElementById("menu-toggle").addEventListener("click", () => {
-      const menu = document.getElementById("mobile-menu");
-      menu.classList.toggle("hidden");
+    // --- CMS Visibility Logic ---
+    document.addEventListener("DOMContentLoaded", () => {
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+      const cmsDesktop = document.getElementById("cms-link");
+      const cmsMobile = document.getElementById("cms-link-mobile");
+      if (isAdmin) {
+        if (cmsDesktop) cmsDesktop.classList.remove("hidden");
+        if (cmsMobile) cmsMobile.classList.remove("hidden");
+      }
     });
+
+    // --- Mobile Menu Toggle ---
+    const menuBtn = document.getElementById("menu-btn");
+    const mobileMenu = document.getElementById("mobile-menu");
+
+    if (menuBtn && mobileMenu) {
+      menuBtn.addEventListener("click", () => {
+        mobileMenu.classList.toggle("hidden");
+      });
+    }
   </script>
 </header>

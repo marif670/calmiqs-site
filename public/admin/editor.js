@@ -35,6 +35,7 @@ const applyInlineBtn = document.getElementById("applyInlineFormat");
 loginBtn.addEventListener("click", () => {
   if (passwordInput.value.trim() === PASSWORD) {
     sessionStorage.setItem("calmiqsAuth", "true");
+    localStorage.setItem("isAdmin", "true");
     authSection.classList.add("hidden");
     editorSection.classList.remove("hidden");
     loadPosts();
@@ -42,6 +43,7 @@ loginBtn.addEventListener("click", () => {
 });
 
 if (sessionStorage.getItem("calmiqsAuth") === "true") {
+  localStorage.setItem("isAdmin", "true");
   authSection.classList.add("hidden");
   editorSection.classList.remove("hidden");
   loadPosts();
@@ -304,3 +306,8 @@ deleteBtn.addEventListener("click", deletePost);
   el.addEventListener("input", updatePreview);
 });
 updatePreview();
+logoutBtn.addEventListener("click", () => {
+  sessionStorage.removeItem("calmiqsAuth");
+  localStorage.removeItem("isAdmin");
+  location.reload();
+});
