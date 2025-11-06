@@ -69,3 +69,19 @@ cards.forEach((card) => {
     card.style.transform = "rotateX(0deg) rotateY(0deg) scale(1)";
   });
 });
+// Simple fragment loader used by privacy/terms/disclaimer wrappers
+async function loadFragment(url, selector) {
+  try {
+    const res = await fetch(url, { cache: "no-cache" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const html = await res.text();
+    const el = document.querySelector(selector);
+    if (el) el.innerHTML = html;
+  } catch (err) {
+    console.error("Failed to load fragment:", url, err);
+    const el = document.querySelector(selector);
+    if (el)
+      el.innerHTML =
+        "<p class='text-center text-red-500'>Content failed to load. Please try again later.</p>";
+  }
+}

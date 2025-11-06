@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Privacy Policy | Calmiqs</title>
 
     <!-- Tailwind (same setup as other pages) -->
@@ -16,12 +16,8 @@
               accent: "#FFD580",
               tech: "#5A67D8",
             },
-            fontFamily: {
-              sans: ["Poppins", "sans-serif"],
-            },
-            animation: {
-              gradient: "gradientBG 8s ease infinite",
-            },
+            fontFamily: { sans: ["Poppins", "sans-serif"] },
+            animation: { gradient: "gradientBG 8s ease infinite" },
             keyframes: {
               gradientBG: {
                 "0%,100%": { backgroundPosition: "0% 50%" },
@@ -38,14 +34,15 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script defer src="/assets/js/main.js"></script>
   </head>
-
-  <body class="font-sans text-gray-800">
-    <!-- Header (reuse your existing navigation) -->
+  <body class="font-sans text-gray-800 bg-gray-50">
+    <!-- Header (shared) -->
     <header class="bg-white shadow-md fixed top-0 w-full z-50">
-      <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
         <a href="/" class="text-2xl font-semibold text-primary">Calmiqs</a>
-        <nav class="space-x-6 text-gray-700">
+        <nav class="space-x-6 text-sm font-medium">
+          <a href="/" class="hover:text-primary">Home</a>
           <a href="/about.html" class="hover:text-primary">About</a>
           <a href="/blog.html" class="hover:text-primary">Blog</a>
           <a href="/contact.html" class="hover:text-primary">Contact</a>
@@ -53,42 +50,46 @@
       </div>
     </header>
 
-    <!-- Hero Banner -->
+    <!-- Hero -->
     <section
-      class="relative bg-gradient-to-r from-primary via-tech to-accent bg-[length:200%_200%] animate-gradient text-white text-center py-24 mt-16"
+      class="h-64 md:h-80 flex items-center justify-center text-center text-white mt-16 bg-gradient-to-r from-primary via-tech to-accent bg-[length:200%_200%] animate-gradient"
     >
-      <h1 class="text-4xl font-bold mb-2">Privacy Policy</h1>
-      <p class="text-lg opacity-90">
-        Transparency, trust, and data protection are core to Calmiqs.
-      </p>
+      <div class="px-6">
+        <h1 class="text-4xl md:text-5xl font-bold mb-3">Privacy Policy</h1>
+        <p class="text-lg max-w-2xl mx-auto">How we collect, use, and protect your data.</p>
+      </div>
     </section>
 
-    <!-- Content Container -->
-    <main class="max-w-5xl mx-auto px-6 py-12 space-y-6" id="privacy-content">
-      <p class="text-gray-500 text-center">Loading policy details...</p>
+    <!-- Main - content injected here -->
+    <main class="max-w-5xl mx-auto px-6 py-16">
+      <div id="privacy-content" class="bg-white rounded-2xl shadow-xl p-10 md:p-12">
+        <p class="text-center text-gray-400">Loading Privacy Policy…</p>
+      </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-100 text-center py-10 mt-16 text-sm text-gray-600">
-      <div class="flex justify-center space-x-6">
-        <a href="/privacy.html" class="hover:text-primary">Privacy Policy</a>
-        <span>|</span>
-        <a href="/terms.html" class="hover:text-primary">Terms &amp; Conditions</a>
+    <!-- Footer (update later to include Disclaimer link) -->
+    <footer class="bg-gray-900 text-gray-300 py-10">
+      <div class="max-w-7xl mx-auto px-6 text-center">
+        <p class="text-sm">
+          &copy;
+          <span id="year"></span>
+          Calmiqs. All rights reserved.
+        </p>
+        <div class="mt-4 space-x-6">
+          <a href="/privacy.html" class="hover:text-white">Privacy</a>
+          <a href="/terms.html" class="hover:text-white">Terms</a>
+          <!-- add disclaimer link later -->
+        </div>
       </div>
-      <p class="mt-4 text-xs text-gray-500">© 2025 Calmiqs. All rights reserved.</p>
     </footer>
 
-    <!-- Dynamic Content Loader -->
     <script>
-      fetch("/assets/content/privacy.html")
-        .then((res) => res.text())
-        .then((data) => {
-          document.getElementById("privacy-content").innerHTML = data;
-        })
-        .catch(() => {
-          document.getElementById("privacy-content").innerHTML =
-            "<p class='text-center text-red-500'>Unable to load privacy content.</p>";
-        });
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+
+    <script>
+      // load content fragment
+      loadFragment("/assets/content/privacy.html", "#privacy-content");
     </script>
   </body>
 </html>
