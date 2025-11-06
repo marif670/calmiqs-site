@@ -1,10 +1,14 @@
-<header class="bg-[#0a1a3a] w-full fixed top-0 z-50 shadow-md">
-  <nav class="container mx-auto flex items-center justify-between h-16 px-6">
+<header class="w-full bg-[#0a1a3a]/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
+  <div class="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
     <!-- Logo -->
-    <a href="/index.html" class="text-2xl font-bold text-white flex items-center h-full">Calmiqs</a>
+    <a href="/" class="flex items-center space-x-2">
+      <img src="/assets/logo.svg" alt="Calmiqs Logo" class="h-8 w-8" />
+      <span class="text-xl font-semibold text-white tracking-wide">Calmiqs</span>
+    </a>
 
     <!-- Desktop Navigation -->
-    <div class="hidden md:flex space-x-6 font-medium text-gray-200 items-center h-full">
+    <nav class="hidden md:flex items-center space-x-6 font-medium text-gray-200">
+      <a href="/" class="hover:text-primary transition">Home</a>
       <a href="/about.html" class="hover:text-primary transition">About</a>
       <a href="/blog.html" class="hover:text-primary transition">Blog</a>
       <a href="/tools.html" class="hover:text-primary transition">Tools</a>
@@ -12,37 +16,43 @@
       <a href="/privacy.html" class="hover:text-primary transition">Privacy</a>
       <a href="/terms.html" class="hover:text-primary transition">Terms</a>
       <a href="/disclaimer.html" class="hover:text-primary transition">Disclaimer</a>
+    </nav>
 
-      <!-- CMS Button -->
-      <a
-        id="cms-link"
-        href="/admin/editor.html"
-        class="hidden px-4 py-1 bg-tech text-white rounded-lg hover:bg-primary transition"
-      >
-        CMS
-      </a>
-    </div>
+    <!-- CMS / Admin Link -->
+    <a
+      href="/admin/editor.html"
+      class="hidden md:inline-flex bg-tech hover:bg-primary text-white px-4 py-2 rounded-xl shadow-md transition"
+    >
+      CMS
+    </a>
 
     <!-- Mobile Menu Button -->
     <button
-      id="menu-btn"
-      class="md:hidden text-gray-200 hover:text-primary focus:outline-none"
-      aria-label="Toggle menu"
+      id="mobile-menu-toggle"
+      class="md:hidden flex items-center justify-center p-2 rounded-lg hover:bg-gray-700 transition"
     >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6 text-white"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
         <path
+          id="menu-icon"
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
-          d="M4 6h16M4 12h16m-7 6h7"
-        ></path>
+          d="M4 6h16M4 12h16M4 18h16"
+        />
       </svg>
     </button>
-  </nav>
+  </div>
 
-  <!-- Mobile Menu -->
-  <div id="mobile-menu" class="hidden bg-[#0a1a3a] shadow-md md:hidden">
-    <div class="flex flex-col space-y-3 py-4 px-6 text-gray-200 font-medium">
+  <!-- Mobile Navigation -->
+  <nav id="mobile-menu" class="hidden md:hidden bg-[#0a1a3a] border-t border-gray-800">
+    <div class="flex flex-col space-y-2 px-4 py-3 font-medium text-gray-200">
+      <a href="/" class="hover:text-primary transition">Home</a>
       <a href="/about.html" class="hover:text-primary transition">About</a>
       <a href="/blog.html" class="hover:text-primary transition">Blog</a>
       <a href="/tools.html" class="hover:text-primary transition">Tools</a>
@@ -51,21 +61,20 @@
       <a href="/terms.html" class="hover:text-primary transition">Terms</a>
       <a href="/disclaimer.html" class="hover:text-primary transition">Disclaimer</a>
       <a
-        id="cms-link-mobile"
         href="/admin/editor.html"
-        class="hidden px-4 py-1 bg-tech text-white rounded-lg hover:bg-primary transition text-center"
+        class="bg-tech text-white px-3 py-2 rounded-lg text-center hover:bg-primary transition"
       >
         CMS
       </a>
     </div>
-  </div>
+  </nav>
 
   <script>
     // CMS visibility logic
     document.addEventListener("DOMContentLoaded", () => {
       const isAdmin = localStorage.getItem("isAdmin") === "true";
-      const cmsDesktop = document.getElementById("cms-link");
-      const cmsMobile = document.getElementById("cms-link-mobile");
+      const cmsDesktop = document.querySelector("a[href='/admin/editor.html'].md\\:inline-flex");
+      const cmsMobile = document.querySelector("#mobile-menu a[href='/admin/editor.html']");
       if (isAdmin) {
         cmsDesktop?.classList.remove("hidden");
         cmsMobile?.classList.remove("hidden");
@@ -73,10 +82,10 @@
     });
 
     // Mobile menu toggle
-    const menuBtn = document.getElementById("menu-btn");
-    const mobileMenu = document.getElementById("mobile-menu");
-    menuBtn?.addEventListener("click", () => {
-      mobileMenu.classList.toggle("hidden");
+    const toggle = document.getElementById("mobile-menu-toggle");
+    const menu = document.getElementById("mobile-menu");
+    toggle.addEventListener("click", () => {
+      menu.classList.toggle("hidden");
     });
   </script>
 </header>
