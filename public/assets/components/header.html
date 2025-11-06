@@ -1,13 +1,13 @@
-<header class="w-full bg-[#0a1a3a]/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
-  <div class="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
-    <!-- Logo -->
+<header class="w-full bg-[#0a1a3a] shadow-md sticky top-0 z-50">
+  <div class="flex items-center justify-between px-6 py-2">
+    <!-- Logo Left -->
     <a href="/" class="flex items-center space-x-2">
       <img src="/assets/logo.svg" alt="Calmiqs Logo" class="h-8 w-8" />
       <span class="text-xl font-semibold text-white tracking-wide">Calmiqs</span>
     </a>
 
-    <!-- Desktop Navigation -->
-    <nav class="hidden md:flex items-center space-x-6 font-medium text-gray-200">
+    <!-- Navigation Right -->
+    <nav class="hidden md:flex items-center space-x-6 font-medium text-gray-200 ml-auto">
       <a href="/" class="hover:text-primary transition">Home</a>
       <a href="/about.html" class="hover:text-primary transition">About</a>
       <a href="/blog.html" class="hover:text-primary transition">Blog</a>
@@ -16,15 +16,13 @@
       <a href="/privacy.html" class="hover:text-primary transition">Privacy</a>
       <a href="/terms.html" class="hover:text-primary transition">Terms</a>
       <a href="/disclaimer.html" class="hover:text-primary transition">Disclaimer</a>
+      <a
+        href="/admin/editor.html"
+        class="hidden px-4 py-1 bg-tech text-white rounded-lg hover:bg-primary transition"
+      >
+        CMS
+      </a>
     </nav>
-
-    <!-- CMS / Admin Link -->
-    <a
-      href="/admin/editor.html"
-      class="hidden md:inline-flex bg-tech hover:bg-primary text-white px-4 py-2 rounded-xl shadow-md transition"
-    >
-      CMS
-    </a>
 
     <!-- Mobile Menu Button -->
     <button
@@ -39,7 +37,6 @@
         stroke="currentColor"
       >
         <path
-          id="menu-icon"
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
@@ -73,7 +70,7 @@
     // CMS visibility logic
     document.addEventListener("DOMContentLoaded", () => {
       const isAdmin = localStorage.getItem("isAdmin") === "true";
-      const cmsDesktop = document.querySelector("a[href='/admin/editor.html'].md\\:inline-flex");
+      const cmsDesktop = document.querySelector("nav a[href='/admin/editor.html']");
       const cmsMobile = document.querySelector("#mobile-menu a[href='/admin/editor.html']");
       if (isAdmin) {
         cmsDesktop?.classList.remove("hidden");
