@@ -1,44 +1,42 @@
-<!-- header.html -->
-<header class="w-full bg-white/80 dark:bg-gray-950/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
-  <div class="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
-    <!-- Logo -->
-    <a href="/" class="flex items-center space-x-2">
-      <img src="/assets/logo.svg" alt="Calmiqs Logo" class="h-8 w-8" />
-      <span class="text-xl font-semibold text-gray-900 dark:text-gray-100 tracking-wide">
-        Calmiqs
-      </span>
+<!-- /assets/components/header.html -->
+<header
+  class="bg-gradient-to-r from-primary via-tech to-primary animate-gradient text-white shadow-md"
+>
+  <nav class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+    <!-- Logo / Brand -->
+    <a href="/index.html" class="text-2xl font-semibold tracking-wide hover:text-accent transition">
+      Calmiqs
     </a>
 
-    <!-- Desktop Navigation -->
-    <nav class="hidden md:flex items-center space-x-6 text-gray-700 dark:text-gray-200 font-medium">
-      <a href="/" class="hover:text-green-600 transition">Home</a>
-      <a href="/about.html" class="hover:text-green-600 transition">About</a>
-      <a href="/blog.html" class="hover:text-green-600 transition">Blog</a>
-      <a href="/contact.html" class="hover:text-green-600 transition">Contact</a>
-    </nav>
+    <!-- Desktop Menu -->
+    <div class="hidden md:flex space-x-8 text-base font-medium">
+      <a href="/index.html" class="hover:text-accent transition">Home</a>
+      <a href="/about.html" class="hover:text-accent transition">About</a>
+      <a href="/tools.html" class="hover:text-accent transition">Tools</a>
+      <a href="/blog.html" class="hover:text-accent transition">Blog</a>
+      <a href="/contact.html" class="hover:text-accent transition">Contact</a>
+    </div>
 
-    <!-- CMS / Admin Link -->
-    <a
-      href="/admin/index.html"
-      class="hidden md:inline-flex bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl shadow-md transition"
-    >
-      CMS
-    </a>
+    <!-- Right Buttons -->
+    <div class="hidden md:flex space-x-3">
+      <a
+        href="/assets/admin/index.html"
+        class="bg-white text-tech font-medium px-4 py-2 rounded-lg shadow hover:bg-accent hover:text-gray-900 transition"
+      >
+        CMS
+      </a>
+    </div>
 
     <!-- Mobile Menu Button -->
-    <button
-      id="mobile-menu-toggle"
-      class="md:hidden flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-    >
+    <button id="menu-toggle" class="md:hidden flex items-center focus:outline-none">
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="h-6 w-6 text-gray-800 dark:text-gray-200"
+        class="h-6 w-6 text-white"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
       >
         <path
-          id="menu-icon"
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
@@ -46,32 +44,30 @@
         />
       </svg>
     </button>
-  </div>
-
-  <!-- Mobile Navigation -->
-  <nav
-    id="mobile-menu"
-    class="hidden md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800"
-  >
-    <div class="flex flex-col space-y-2 px-4 py-3 text-gray-700 dark:text-gray-200 font-medium">
-      <a href="/" class="hover:text-green-600 transition">Home</a>
-      <a href="/about.html" class="hover:text-green-600 transition">About</a>
-      <a href="/blog.html" class="hover:text-green-600 transition">Blog</a>
-      <a href="/contact.html" class="hover:text-green-600 transition">Contact</a>
-      <a
-        href="/assets/admin/editor.html"
-        class="px-4 py-2 rounded-lg bg-tech text-white hover:bg-primary transition"
-      >
-        CMS
-      </a>
-    </div>
   </nav>
 
+  <!-- Mobile Dropdown -->
+  <div
+    id="mobile-menu"
+    class="hidden flex flex-col bg-tech bg-opacity-95 text-white md:hidden px-6 pb-4 space-y-2"
+  >
+    <a href="/index.html" class="hover:text-accent transition">Home</a>
+    <a href="/about.html" class="hover:text-accent transition">About</a>
+    <a href="/tools.html" class="hover:text-accent transition">Tools</a>
+    <a href="/blog.html" class="hover:text-accent transition">Blog</a>
+    <a href="/contact.html" class="hover:text-accent transition">Contact</a>
+    <a
+      href="/admin/editor.html"
+      class="mt-2 bg-white text-tech text-center py-2 rounded-lg font-medium shadow hover:bg-accent hover:text-gray-900 transition"
+    >
+      CMS
+    </a>
+  </div>
+
   <script>
-    // Mobile menu toggle
-    const toggle = document.getElementById("mobile-menu-toggle");
-    const menu = document.getElementById("mobile-menu");
-    toggle.addEventListener("click", () => {
+    // Mobile Menu Toggle
+    document.getElementById("menu-toggle").addEventListener("click", function () {
+      const menu = document.getElementById("mobile-menu");
       menu.classList.toggle("hidden");
     });
   </script>
