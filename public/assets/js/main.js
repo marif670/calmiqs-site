@@ -69,17 +69,20 @@ cards.forEach((card) => {
     card.style.transform = "rotateX(0deg) rotateY(0deg) scale(1)";
   });
 });
+// /assets/js/main.js
 window.loadFragment = async function (path, selector) {
   try {
-    const res = await fetch(path, { cache: "no-cache" });
-    if (!res.ok) throw new Error(`Failed to load ${path} (status ${res.status})`);
-    const html = await res.text();
+    const response = await fetch(path, { cache: "no-cache" });
+    if (!response.ok) throw new Error(`Failed to load ${path} (${response.status})`);
+    const html = await response.text();
     const container = document.querySelector(selector);
     if (container) container.innerHTML = html;
-  } catch (err) {
-    console.error(err);
+    else console.warn(`Container ${selector} not found for ${path}`);
+  } catch (error) {
+    console.error(error);
     const container = document.querySelector(selector);
     if (container)
-      container.innerHTML = '<p class="text-red-500 text-center">Failed to load content.</p>';
+      container.innerHTML =
+        '<p class="text-red-500 text-center mt-4">⚠️ Failed to load content.</p>';
   }
 };

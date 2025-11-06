@@ -55,12 +55,13 @@
     <!-- Footer placeholder -->
     <footer id="footer-container" class="bg-gray-900 text-gray-300 py-10"></footer>
 
-    <!-- load helper first -->
+    <!-- JS helper -->
     <script src="/assets/js/main.js"></script>
 
-    <!-- call loader after DOM ready to be robust -->
+    <!-- Fragment loader -->
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
+      window.addEventListener("DOMContentLoaded", () => {
+        console.log("DOM ready — loading fragments");
         loadFragment("/assets/components/header.html", "#navbar-container");
         loadFragment("/assets/components/footer.html", "#footer-container");
         loadFragment("/assets/content/privacy.html", "#content");
