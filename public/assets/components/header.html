@@ -16,8 +16,8 @@
 
       <a
         href="/admin/editor.html"
-        id="cmsBtnDesktop"
         class="cmsBtn hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl shadow-md transition"
+        id="cmsBtnDesktop"
       >
         CMS
       </a>
@@ -56,8 +56,8 @@
 
       <a
         href="/admin/editor.html"
-        id="cmsBtnMobile"
         class="cmsBtn hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl shadow-md transition"
+        id="cmsBtnMobile"
       >
         CMS
       </a>
@@ -69,11 +69,10 @@
     const toggle = document.getElementById("mobile-menu-toggle");
     const menu = document.getElementById("mobile-menu");
     toggle.addEventListener("click", () => menu.classList.toggle("hidden"));
-  </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const cmsButtons = document.querySelectorAll(".cmsBtn");
 
+    // CMS Button logic
+    function showCMSButtons() {
+      const cmsButtons = document.querySelectorAll(".cmsBtn");
       const isAdmin =
         sessionStorage.getItem("calmiqsAuth") === "true" ||
         sessionStorage.getItem("isAdmin") === "true" ||
@@ -83,6 +82,17 @@
       if (isAdmin) {
         cmsButtons.forEach((btn) => btn.classList.remove("hidden"));
       }
-    });
+    }
+
+    // Wait for DOM + dynamic content
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", showCMSButtons);
+    } else {
+      showCMSButtons();
+    }
+
+    // Optional: observe dynamically added buttons
+    const observer = new MutationObserver(showCMSButtons);
+    observer.observe(document.body, { childList: true, subtree: true });
   </script>
 </header>
