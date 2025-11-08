@@ -118,5 +118,17 @@
       loadFragment("/assets/components/header.html", "#navbar-container");
       loadFragment("/assets/components/footer.html", "#footer-container");
     </script>
+    <script>
+      // Show CMS button if admin is logged in
+      if (
+        localStorage.getItem("isAdmin") === "true" ||
+        sessionStorage.getItem("calmiqsAuth") === "true"
+      ) {
+        const cmsDesktop = document.getElementById("cmsBtnDesktop");
+        const cmsMobile = document.getElementById("cmsBtnMobile");
+        if (cmsDesktop) cmsDesktop.classList.remove("hidden");
+        if (cmsMobile) cmsMobile.classList.remove("hidden");
+      }
+    </script>
   </body>
 </html>
