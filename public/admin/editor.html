@@ -25,7 +25,7 @@
     </script>
 
     <!-- Custom Editor CSS -->
-    <link rel="stylesheet" href="/assets/css/editor.css?v=1" />
+    <link rel="stylesheet" href="editor.css?v=1" />
   </head>
   <body class="bg-[#F9FAFB] text-gray-800 font-sans min-h-screen">
     <!-- 🔒 Login Section -->
@@ -206,20 +206,17 @@
         Toggle Preview
       </button>
 
+      <!-- SEO / Accessibility Warnings -->
+      <div id="seoWarnings" class="text-sm text-red-600 mt-2"></div>
+
       <!-- Live Preview -->
       <h2 class="text-2xl font-semibold mt-8 mb-4">🪶 Live Preview</h2>
-      <div
-        id="previewContainer"
-        class="bg-white shadow-lg rounded-xl p-6 border border-gray-100 hidden"
-      >
+      <div id="previewContainer" class="bg-white shadow-lg rounded-xl p-6 border border-gray-100">
         <div id="previewContent" class="prose max-w-none"></div>
       </div>
     </section>
 
-    <!-- Footer placeholder -->
-    <div id="footer-container"></div>
-
-    <!-- Editor JS -->
-    <script src="/assets/admin/editor.js?v=1" defer></script>
+    <!-- JS -->
+    <script src="editor.js?v=1"></script>
   </body>
 </html>
