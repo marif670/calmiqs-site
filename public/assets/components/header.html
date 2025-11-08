@@ -16,8 +16,7 @@
 
       <a
         href="/admin/editor.html"
-        id="cmsBtnDesktop"
-        class="hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl shadow-md transition"
+        class="cmsBtn hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl shadow-md transition"
       >
         CMS
       </a>
@@ -56,8 +55,7 @@
 
       <a
         href="/admin/editor.html"
-        id="cmsBtnDesktop"
-        class="hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl shadow-md transition"
+        class="cmsBtn hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl shadow-md transition"
       >
         CMS
       </a>
@@ -72,7 +70,8 @@
   </script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // Check both session and local storage for admin
+      const cmsButtons = document.querySelectorAll(".cmsBtn");
+
       const isAdmin =
         sessionStorage.getItem("isAdmin") === "true" ||
         sessionStorage.getItem("calmiqsAuth") === "true" ||
@@ -80,7 +79,7 @@
         localStorage.getItem("calmiqsAuth") === "true";
 
       if (isAdmin) {
-        document.getElementById("cmsBtn")?.classList.remove("hidden");
+        cmsButtons.forEach((btn) => btn.classList.remove("hidden"));
       }
     });
   </script>
