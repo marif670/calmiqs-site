@@ -15,7 +15,6 @@
               primary: "#4FA49A",
               accent: "#FFD580",
               tech: "#5A67D8",
-              navy: "#1A1F3D",
             },
             fontFamily: {
               sans: ["Poppins", "sans-serif"],
@@ -26,15 +25,11 @@
     </script>
 
     <!-- Custom Editor CSS -->
-    <link rel="stylesheet" href="/assets/css/style.css?v=12" />
     <link rel="stylesheet" href="/assets/css/editor.css?v=1" />
   </head>
-  <body class="bg-[#F9FAFB] text-gray-800 font-sans min-h-screen flex flex-col">
-    <!-- Include Header -->
-    <div id="header-container"></div>
-
+  <body class="bg-[#F9FAFB] text-gray-800 font-sans min-h-screen">
     <!-- 🔒 Login Section -->
-    <section id="authSection" class="flex items-center justify-center flex-grow">
+    <section id="authSection" class="flex items-center justify-center min-h-screen">
       <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md text-center">
         <h1 class="text-3xl font-bold text-primary mb-4">🔒 Calmiqs Admin Login</h1>
         <input
@@ -53,7 +48,7 @@
     </section>
 
     <!-- 📝 Editor Section -->
-    <section id="editorSection" class="hidden max-w-5xl mx-auto p-6 flex-grow">
+    <section id="editorSection" class="hidden max-w-5xl mx-auto p-6">
       <h1 class="text-4xl font-bold text-primary mb-6 text-center">🪶 Calmiqs Blog Editor</h1>
 
       <!-- File Controls -->
@@ -153,7 +148,7 @@
         <!-- Content & Inline Images -->
         <div>
           <!-- Formatting Toolbar -->
-          <div class="mb-2 flex flex-wrap gap-1">
+          <div class="mb-2">
             <button class="format-btn" data-command="bold"><strong>B</strong></button>
             <button class="format-btn" data-command="italic"><em>I</em></button>
             <button class="format-btn" data-command="formatBlock" data-value="h2">H2</button>
@@ -221,25 +216,10 @@
       </div>
     </section>
 
-    <!-- Footer Include -->
+    <!-- Footer placeholder -->
     <div id="footer-container"></div>
 
-    <!-- JS -->
-    <script src="/assets/admin/editor.js?v=1"></script>
-    <script>
-      // Load header/footer dynamically
-      async function loadFragment(url, selector) {
-        try {
-          const res = await fetch(url);
-          const html = await res.text();
-          document.querySelector(selector).innerHTML = html;
-        } catch (e) {
-          console.error(`Error loading ${url}:`, e);
-        }
-      }
-
-      loadFragment("/assets/components/header.html", "#header-container");
-      loadFragment("/assets/components/footer.html", "#footer-container");
-    </script>
+    <!-- Editor JS -->
+    <script src="/assets/admin/editor.js?v=1" defer></script>
   </body>
 </html>
