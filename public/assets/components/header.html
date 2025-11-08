@@ -72,17 +72,15 @@
   </script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // Check both session and local storage for admin
       const isAdmin =
-        localStorage.getItem("isAdmin") === "true" ||
         sessionStorage.getItem("isAdmin") === "true" ||
-        localStorage.getItem("calmiqsAuth") === "true" ||
-        sessionStorage.getItem("calmiqsAuth") === "true";
+        sessionStorage.getItem("calmiqsAuth") === "true" ||
+        localStorage.getItem("isAdmin") === "true" ||
+        localStorage.getItem("calmiqsAuth") === "true";
 
       if (isAdmin) {
-        const cmsDesktop = document.getElementById("cmsBtnDesktop");
-        const cmsMobile = document.getElementById("cmsBtnMobile");
-        if (cmsDesktop) cmsDesktop.classList.remove("hidden");
-        if (cmsMobile) cmsMobile.classList.remove("hidden");
+        document.getElementById("cmsBtn")?.classList.remove("hidden");
       }
     });
   </script>

@@ -38,6 +38,7 @@ loginBtn.addEventListener("click", () => {
     sessionStorage.setItem("isAdmin", "true"); // add this
     localStorage.setItem("calmiqsAuth", "true"); // add this
     localStorage.setItem("isAdmin", "true"); // add this
+
     authSection.classList.add("hidden");
     editorSection.classList.remove("hidden");
     loadPosts();
