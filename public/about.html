@@ -143,23 +143,8 @@
     <!-- FOOTER -->
     <div id="footer-container"></div>
 
-    <script>
-      document.getElementById("year").textContent = new Date().getFullYear();
-    </script>
-    <script>
-      async function loadFragment(url, selector) {
-        try {
-          const response = await fetch(url);
-          if (!response.ok) throw new Error("Failed to load " + url);
-          const html = await response.text();
-          document.querySelector(selector).innerHTML = html;
-        } catch (err) {
-          console.error(err);
-        }
-      }
-
-      loadFragment("/assets/components/header.html", "#navbar-container");
-      loadFragment("/assets/components/footer.html", "#footer-container");
-    </script>
+    <!-- JS Loader -->
+    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/header-loader.js"></script>
   </body>
 </html>
