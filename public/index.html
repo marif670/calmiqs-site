@@ -130,29 +130,25 @@
         if (cmsMobile) cmsMobile.classList.remove("hidden");
       }
     </script>
+    <!-- Header Loader -->
     <script>
-      fetch("/header.html")
+      fetch("/header.html?v=4")
         .then((res) => res.text())
         .then((html) => {
           document.getElementById("navbar-container").innerHTML = html;
 
-          // After header is loaded:
-          const toggle = document.getElementById("mobile-menu-toggle");
-          const menu = document.getElementById("mobile-menu");
-          if (toggle && menu) {
-            toggle.addEventListener("click", () => menu.classList.toggle("hidden"));
-          }
+          // Re-check after small delay to ensure all DOM is ready
+          setTimeout(() => {
+            const cmsButtons = document.querySelectorAll(".cmsBtn");
+            const isAdmin =
+              sessionStorage.getItem("calmiqsAuth") === "true" ||
+              sessionStorage.getItem("isAdmin") === "true" ||
+              localStorage.getItem("calmiqsAuth") === "true" ||
+              localStorage.getItem("isAdmin") === "true";
 
-          // CMS Button visibility logic
-          const isAdmin =
-            sessionStorage.getItem("calmiqsAuth") === "true" ||
-            sessionStorage.getItem("isAdmin") === "true" ||
-            localStorage.getItem("calmiqsAuth") === "true" ||
-            localStorage.getItem("isAdmin") === "true";
-
-          if (isAdmin) {
-            document.querySelectorAll(".cmsBtn").forEach((btn) => btn.classList.remove("hidden"));
-          }
+            console.log("CMS check → isAdmin:", isAdmin, "buttons found:", cmsButtons.length);
+            if (isAdmin) cmsButtons.forEach((btn) => btn.classList.remove("hidden"));
+          }, 300);
         })
         .catch((err) => console.error("Header load failed:", err));
     </script>
