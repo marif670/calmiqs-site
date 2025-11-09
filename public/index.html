@@ -114,43 +114,6 @@
 
     <!-- JS Loader -->
     <script src="/assets/js/main.js"></script>
-    <script>
-      loadFragment("/assets/components/header.html", "#navbar-container");
-      loadFragment("/assets/components/footer.html", "#footer-container");
-    </script>
-    <script>
-      // Show CMS button if admin is logged in
-      if (
-        localStorage.getItem("isAdmin") === "true" ||
-        sessionStorage.getItem("calmiqsAuth") === "true"
-      ) {
-        const cmsDesktop = document.getElementById("cmsBtnDesktop");
-        const cmsMobile = document.getElementById("cmsBtnMobile");
-        if (cmsDesktop) cmsDesktop.classList.remove("hidden");
-        if (cmsMobile) cmsMobile.classList.remove("hidden");
-      }
-    </script>
-    <!-- Header Loader -->
-    <script>
-      fetch("/header.html?v=4")
-        .then((res) => res.text())
-        .then((html) => {
-          document.getElementById("navbar-container").innerHTML = html;
-
-          // Re-check after small delay to ensure all DOM is ready
-          setTimeout(() => {
-            const cmsButtons = document.querySelectorAll(".cmsBtn");
-            const isAdmin =
-              sessionStorage.getItem("calmiqsAuth") === "true" ||
-              sessionStorage.getItem("isAdmin") === "true" ||
-              localStorage.getItem("calmiqsAuth") === "true" ||
-              localStorage.getItem("isAdmin") === "true";
-
-            console.log("CMS check → isAdmin:", isAdmin, "buttons found:", cmsButtons.length);
-            if (isAdmin) cmsButtons.forEach((btn) => btn.classList.remove("hidden"));
-          }, 300);
-        })
-        .catch((err) => console.error("Header load failed:", err));
-    </script>
+    <script src="/assets/js/header-loader.js"></script>
   </body>
 </html>

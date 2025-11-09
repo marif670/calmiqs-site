@@ -28,6 +28,8 @@
     <link rel="stylesheet" href="editor.css?v=1" />
   </head>
   <body class="bg-[#F9FAFB] text-gray-800 font-sans min-h-screen">
+    <!-- Header Placeholder -->
+    <div id="navbar-container"></div>
     <!-- 🔒 Login Section -->
     <section id="authSection" class="flex items-center justify-center min-h-screen">
       <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md text-center">
@@ -215,8 +217,17 @@
         <div id="previewContent" class="prose max-w-none"></div>
       </div>
     </section>
+    <!-- Footer Placeholder -->
+    <div id="footer-container"></div>
 
     <!-- JS -->
+    <!-- 1. Header/Footer loader & CMS button -->
+    <script src="/assets/js/header-loader.js"></script>
+
+    <!-- 2. Admin authentication -->
+    <script src="/admin/auth.js"></script>
+
+    <!-- 3. Editor functionality -->
     <script src="editor.js?v=1"></script>
   </body>
 </html>

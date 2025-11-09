@@ -14,9 +14,9 @@
       <a href="/tools.html" class="hover:text-primary transition">Tools</a>
       <a href="/contact.html" class="hover:text-primary transition">Contact</a>
 
-      <!-- CMS Button -->
+      <!-- CMS button for desktop -->
       <a
-        href="/admin/"
+        href="/admin/editor.html"
         class="cmsBtn hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl shadow-md transition"
       >
         CMS
@@ -54,45 +54,13 @@
       <a href="/tools.html" class="hover:text-primary transition">Tools</a>
       <a href="/contact.html" class="hover:text-primary transition">Contact</a>
 
-      <!-- CMS Button Mobile -->
+      <!-- CMS button for mobile -->
       <a
-        href="/admin/"
+        href="/admin/editor.html"
         class="cmsBtn hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl shadow-md transition"
       >
         CMS
       </a>
     </div>
   </nav>
-
-  <script>
-    // Mobile menu toggle
-    const toggle = document.getElementById("mobile-menu-toggle");
-    const menu = document.getElementById("mobile-menu");
-    toggle.addEventListener("click", () => menu.classList.toggle("hidden"));
-
-    // CMS Button logic - works on dynamically injected headers
-    function showCMSButtons() {
-      const cmsButtons = document.querySelectorAll(".cmsBtn");
-      const isAdmin =
-        sessionStorage.getItem("calmiqsAuth") === "true" ||
-        sessionStorage.getItem("isAdmin") === "true" ||
-        localStorage.getItem("calmiqsAuth") === "true" ||
-        localStorage.getItem("isAdmin") === "true";
-
-      if (isAdmin) {
-        cmsButtons.forEach((btn) => btn.classList.remove("hidden"));
-      }
-    }
-
-    // Trigger on DOM ready
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", showCMSButtons);
-    } else {
-      showCMSButtons();
-    }
-
-    // Observe dynamically added elements (in case header is injected via JS)
-    const observer = new MutationObserver(showCMSButtons);
-    observer.observe(document.body, { childList: true, subtree: true });
-  </script>
 </header>
