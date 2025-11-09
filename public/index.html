@@ -51,14 +51,19 @@
     <div id="navbar-container"></div>
 
     <script>
-      // Load header.html dynamically
-      fetch("/header.html?v=2")
+      fetch("/header.html")
         .then((res) => res.text())
         .then((html) => {
           document.getElementById("navbar-container").innerHTML = html;
 
-          // Re-run CMS button logic after header is loaded
-          const cmsButtons = document.querySelectorAll(".cmsBtn");
+          // After header is loaded:
+          const toggle = document.getElementById("mobile-menu-toggle");
+          const menu = document.getElementById("mobile-menu");
+          if (toggle && menu) {
+            toggle.addEventListener("click", () => menu.classList.toggle("hidden"));
+          }
+
+          // CMS Button visibility logic
           const isAdmin =
             sessionStorage.getItem("calmiqsAuth") === "true" ||
             sessionStorage.getItem("isAdmin") === "true" ||
@@ -66,17 +71,10 @@
             localStorage.getItem("isAdmin") === "true";
 
           if (isAdmin) {
-            cmsButtons.forEach((btn) => btn.classList.remove("hidden"));
-          }
-
-          // Attach mobile menu toggle (since it’s in header.html)
-          const toggle = document.getElementById("mobile-menu-toggle");
-          const menu = document.getElementById("mobile-menu");
-          if (toggle && menu) {
-            toggle.addEventListener("click", () => menu.classList.toggle("hidden"));
+            document.querySelectorAll(".cmsBtn").forEach((btn) => btn.classList.remove("hidden"));
           }
         })
-        .catch((err) => console.error("Failed to load header:", err));
+        .catch((err) => console.error("Header load failed:", err));
     </script>
 
     <!-- 🌤️ Hero Section -->
