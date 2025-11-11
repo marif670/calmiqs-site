@@ -286,7 +286,6 @@
     <div id="footer-container"></div>
     <!-- Calmiqs Admin Token for Worker Authentication -->
     <script>
-      // ⚠️ Must match the ADMIN_SECRET you set in Cloudflare Worker
       window.CALMIQS_ADMIN_TOKEN = "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Hadia@2017_Ayesha@2007";
     </script>
 
@@ -295,10 +294,10 @@
     <script src="/assets/js/header-loader.js"></script>
 
     <!-- 2. Admin authentication -->
-    <script src="/admin/auth.js"></script>
+    <script type="module" src="/admin/auth.js"></script>
 
     <!-- 3. Editor functionality -->
-    <script src="editor.js?v=1"></script>
+    <script src="/admin/editor.js?v=5"></script>
     <script src="/assets/js/editor-images.js" defer></script>
   </body>
 </html>
