@@ -5,15 +5,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Calmiqs Editor</title>
     <style>
-      /* Minimal styling (self-contained). Add your Tailwind build later if desired. */
-      :root {
-        --bg: #0f1724;
-        --card: #0b1220;
-        --muted: #94a3b8;
-        --accent: #3b82f6;
-      }
       body {
-        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
         background: #f8fafc;
         color: #0f1724;
         padding: 16px;
@@ -27,21 +20,16 @@
       .btn {
         padding: 6px 10px;
         border-radius: 6px;
-        border: 1px solid #e6edf3;
+        border: 1px solid #dbe3eb;
         background: #fff;
         cursor: pointer;
       }
       .btn.primary {
-        background: var(--accent);
+        background: #3b82f6;
         color: #fff;
-        border-color: var(--accent);
-      }
-      .editor-wrap {
-        display: flex;
-        gap: 16px;
+        border-color: #3b82f6;
       }
       .editor {
-        flex: 1;
         background: #fff;
         border: 1px solid #e6edf3;
         border-radius: 8px;
@@ -51,58 +39,31 @@
       .editor:focus {
         outline: 2px solid #cfe7ff;
       }
-      .meta {
-        width: 320px;
-      }
-      .modal {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1200;
-      }
-      .modal-card {
-        background: #fff;
-        padding: 16px;
-        border-radius: 8px;
-        max-width: 920px;
-        width: calc(100% - 32px);
-        max-height: 80vh;
-        overflow: auto;
-      }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
-      }
-      .thumb {
-        width: 100%;
-        height: 120px;
-        object-fit: cover;
-        border-radius: 6px;
-        border: 1px solid #e6edf3;
-        cursor: pointer;
+      .small {
+        font-size: 13px;
+        color: #64748b;
       }
       .inline-img {
-        display: block;
-        margin: 12px auto;
         max-width: 100%;
         height: auto;
+        border-radius: 4px;
+        margin: 12px auto;
+        display: block;
+      }
+      .inline-img.left {
+        float: left;
+        margin: 0 12px 12px 0;
+      }
+      .inline-img.right {
+        float: right;
+        margin: 0 0 12px 12px;
+      }
+      .inline-img.center {
+        display: block;
+        margin: 12px auto;
       }
       .img-selected {
         outline: 3px solid rgba(59, 130, 246, 0.35);
-      }
-      .small {
-        font-size: 13px;
-        color: var(--muted);
-      }
-      .input {
-        width: 100%;
-        padding: 8px;
-        border-radius: 6px;
-        border: 1px solid #e6edf3;
       }
       .inline-toolbar {
         position: absolute;
@@ -113,113 +74,108 @@
         z-index: 1500;
         box-shadow: 0 4px 14px rgba(2, 6, 23, 0.08);
       }
-      .resizer {
-        position: absolute;
-        width: 12px;
-        height: 12px;
-        background: #fff;
-        border: 2px solid #0f1724;
-        border-radius: 2px;
-        right: 4px;
-        bottom: 4px;
-        cursor: se-resize;
-      }
-      .html-view {
-        width: 100%;
-        height: 300px;
-        font-family: monospace;
-        padding: 8px;
+      .input {
+        padding: 6px;
+        border-radius: 4px;
         border: 1px solid #e6edf3;
-        border-radius: 6px;
-        background: #fff;
       }
-      table {
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+      .thumb {
         width: 100%;
-        border-collapse: collapse;
-      }
-      td,
-      th {
-        border: 1px solid #dbe7f0;
-        padding: 8px;
+        height: 120px;
+        object-fit: cover;
+        border: 1px solid #dbe3eb;
+        border-radius: 4px;
+        cursor: pointer;
       }
     </style>
   </head>
   <body>
-    <!-- IMPORTANT: Replace the token below with your ADMIN_SECRET from Cloudflare Worker.
-       Only expose this token on the admin/editor page (do not put it on public pages). -->
     <script>
       window.CALMIQS_ADMIN_TOKEN = "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Hadia@2017_Ayesha@2007";
-      // Worker base - change if different
       const WORKER_BASE = "https://calmiqs-images-worker.techaipet.workers.dev";
-      const LIST_URL = `${WORKER_BASE}/list`;
-      const UPLOAD_URL = `${WORKER_BASE}/upload`;
-      const UPDATE_URL = `${WORKER_BASE}/update`;
+      const POST_BASE = WORKER_BASE + "/posts";
+      const IMAGE_BASE = WORKER_BASE + "/files/";
+      const UPLOAD_URL = WORKER_BASE + "/upload";
+      const LIST_URL = WORKER_BASE + "/list";
+      const UPDATE_URL = WORKER_BASE + "/update";
     </script>
 
-    <h1 style="margin: 0 0 12px 0">Calmiqs — Editor</h1>
+    <h1>Calmiqs — Editor</h1>
 
-    <!-- Toolbar -->
-    <div class="toolbar" role="toolbar" aria-label="Editor toolbar">
-      <button class="btn" data-cmd="bold"><strong>B</strong></button>
-      <button class="btn" data-cmd="italic"><em>I</em></button>
+    <!-- Blog control toolbar -->
+    <div class="toolbar">
+      <input id="postTitle" class="input" placeholder="Post Title" style="width: 220px" />
+      <button id="newBtn" class="btn">New</button>
+      <button id="loadBtn" class="btn">Load</button>
+      <button id="saveBtn" class="btn primary">Save</button>
+      <button id="deleteBtn" class="btn">Delete</button>
+    </div>
+
+    <!-- Formatting toolbar -->
+    <div class="toolbar">
+      <button class="btn" data-cmd="bold"><b>B</b></button>
+      <button class="btn" data-cmd="italic"><i>I</i></button>
       <button class="btn" data-cmd="h1">H1</button>
       <button class="btn" data-cmd="h2">H2</button>
+      <button class="btn" data-cmd="h3">H3</button>
       <button class="btn" data-cmd="p">P</button>
       <button class="btn" data-cmd="link">Link</button>
-      <button class="btn" id="insertTableBtn">Table</button>
-
       <div style="flex: 1"></div>
-
-      <button class="btn" id="toggleHtmlBtn">Show HTML</button>
-      <button class="btn primary" id="saveBtn">Save</button>
+      <button id="toggleHtmlBtn" class="btn">Show HTML</button>
     </div>
 
-    <div class="editor-wrap">
-      <!-- Editor area -->
-      <div style="flex: 1">
-        <div id="editor" class="editor" contenteditable="true" aria-label="Article editor">
-          <p>Start writing here...</p>
-        </div>
+    <div id="editor" class="editor" contenteditable="true">
+      <p>Start writing your post...</p>
+    </div>
 
-        <!-- Inline image controls (choose/upload/select) -->
-        <div style="margin-top: 10px; display: flex; gap: 8px; align-items: center">
-          <input id="inlineImageFile" type="file" accept="image/*" />
-          <button id="insertInlineBtn" class="btn">Upload & Insert Inline Image</button>
-          <button id="selectImageBtn" class="btn">Select from Library</button>
-        </div>
+    <!-- Inline image controls -->
+    <div style="margin-top: 10px; display: flex; gap: 8px; align-items: center">
+      <input id="inlineImageFile" type="file" accept="image/*" />
+      <button id="insertInlineBtn" class="btn">Upload & Insert</button>
+      <button id="selectImageBtn" class="btn">Select from Library</button>
+    </div>
 
-        <!-- HTML view -->
-        <div id="htmlViewWrap" style="margin-top: 12px; display: none">
-          <label class="small">Raw HTML</label>
-          <textarea id="htmlView" class="html-view" spellcheck="false"></textarea>
-        </div>
+    <!-- Inline image toolbar -->
+    <div id="inlineToolbar" class="inline-toolbar" style="display: none">
+      <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap">
+        <input id="imgAlt" class="input" placeholder="Alt text" style="width: 180px" />
+        <input id="imgWidth" class="input" placeholder="Width (px or %)" style="width: 120px" />
+        <button id="alignLeft" class="btn">Left Wrap</button>
+        <button id="alignRight" class="btn">Right Wrap</button>
+        <button id="alignCenter" class="btn">No Wrap</button>
+        <button id="saveImageMeta" class="btn primary">Save</button>
       </div>
-
-      <!-- Right sidebar for metadata / preview -->
-      <aside class="meta">
-        <h3 style="margin: 0 0 8px 0">Preview</h3>
-        <div
-          id="preview"
-          style="
-            border: 1px solid #e6edf3;
-            padding: 8px;
-            border-radius: 6px;
-            background: #fff;
-            min-height: 200px;
-          "
-        ></div>
-
-        <h4 style="margin-top: 12px">Editor help</h4>
-        <p class="small">
-          Use toolbar to format. Click an image to edit alt/size/alignment. Toggle “Show HTML” to
-          view tags.
-        </p>
-      </aside>
     </div>
 
-    <!-- Image library modal -->
-    <div id="imageLibraryModal" class="modal" style="display: none" role="dialog" aria-modal="true">
-      <div class="modal-card">
+    <!-- Library modal -->
+    <div
+      id="libraryModal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 999;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: #fff;
+          border-radius: 6px;
+          padding: 16px;
+          max-width: 900px;
+          width: 90%;
+          max-height: 80vh;
+          overflow: auto;
+        "
+      >
         <div
           style="
             display: flex;
@@ -229,452 +185,199 @@
           "
         >
           <strong>Image Library</strong>
-          <div>
-            <button id="closeLibrary" class="btn">Close</button>
-          </div>
+          <button id="closeLibrary" class="btn">Close</button>
         </div>
         <div id="libraryGrid" class="grid"></div>
       </div>
     </div>
 
-    <!-- Inline image toolbar (floating) -->
-    <div id="inlineToolbar" class="inline-toolbar" style="display: none">
-      <div style="display: flex; gap: 6px; align-items: center">
-        <input id="imgUrl" class="input" placeholder="Image URL" style="width: 220px" />
-        <input id="imgAlt" class="input" placeholder="Alt text" style="width: 180px" />
-      </div>
-      <div style="margin-top: 8px; display: flex; gap: 6px; align-items: center">
-        <label class="small">Width</label>
-        <input id="imgWidth" class="input" style="width: 90px" placeholder="e.g. 500 or 50%" />
-        <button class="btn" id="alignLeft">Left</button>
-        <button class="btn" id="alignCenter">Center</button>
-        <button class="btn" id="alignRight">Right</button>
-        <button class="btn primary" id="saveImageMeta">Save</button>
-      </div>
-    </div>
-
     <script>
-      /* =========================
-     Editor core + image integration
-     Single-file, no build tools.
-     Assumes WORKER_BASE, LIST_URL, UPLOAD_URL, UPDATE_URL and window.CALMIQS_ADMIN_TOKEN set above.
-     ========================= */
-
-      (function () {
-        // Helpers
-        const editor = document.getElementById("editor");
-        const preview = document.getElementById("preview");
-        const htmlViewWrap = document.getElementById("htmlViewWrap");
-        const htmlView = document.getElementById("htmlView");
-        const inlineFile = document.getElementById("inlineImageFile");
-        const insertInlineBtn = document.getElementById("insertInlineBtn");
-        const selectImageBtn = document.getElementById("selectImageBtn");
-        const libraryModal = document.getElementById("imageLibraryModal");
-        const libraryGrid = document.getElementById("libraryGrid");
-        const closeLibrary = document.getElementById("closeLibrary");
+      (async function () {
+        const ed = document.getElementById("editor");
+        const toolbarBtns = document.querySelectorAll(".toolbar [data-cmd]");
+        const toggleHtmlBtn = document.getElementById("toggleHtmlBtn");
         const inlineToolbar = document.getElementById("inlineToolbar");
-        const imgUrlInput = document.getElementById("imgUrl");
         const imgAltInput = document.getElementById("imgAlt");
         const imgWidthInput = document.getElementById("imgWidth");
         const saveImageMetaBtn = document.getElementById("saveImageMeta");
+        let currentImg = null;
 
-        const toggleHtmlBtn = document.getElementById("toggleHtmlBtn");
-        const saveBtn = document.getElementById("saveBtn");
-        const previewUpdateDebounced = debounce(updatePreview, 250);
-
-        // Simple authenticated fetch wrapper
+        // Authenticated fetch helper
         async function authFetch(url, opts = {}) {
           opts.headers = opts.headers || {};
-          if (window.CALMIQS_ADMIN_TOKEN)
-            opts.headers["X-Admin-Token"] = window.CALMIQS_ADMIN_TOKEN;
+          opts.headers["X-Admin-Token"] = window.CALMIQS_ADMIN_TOKEN;
           return fetch(url, opts);
         }
 
-        // Toolbar actions (execCommand for basics)
-        document.querySelectorAll(".toolbar .btn").forEach((b) => {
+        // Toolbar commands
+        toolbarBtns.forEach((b) => {
           b.addEventListener("click", () => {
-            const cmd = b.getAttribute("data-cmd");
-            if (!cmd) return;
-            if (cmd === "link") {
-              const url = prompt("URL (https://...)");
-              if (url) document.execCommand("createLink", false, url);
-              return;
+            const c = b.dataset.cmd;
+            if (c === "link") {
+              const u = prompt("URL");
+              if (u) document.execCommand("createLink", false, u);
+            } else if (["h1", "h2", "h3", "p"].includes(c)) {
+              document.execCommand("formatBlock", false, c);
+            } else {
+              document.execCommand(c, false, null);
             }
-            if (cmd === "h1") {
-              document.execCommand("formatBlock", false, "h1");
-              return;
-            }
-            if (cmd === "h2") {
-              document.execCommand("formatBlock", false, "h2");
-              return;
-            }
-            if (cmd === "p") {
-              document.execCommand("formatBlock", false, "p");
-              return;
-            }
-            document.execCommand(cmd, false, null);
-            previewUpdateDebounced();
           });
         });
 
-        // Show HTML toggle
+        // Toggle HTML view
         toggleHtmlBtn.addEventListener("click", () => {
-          if (htmlViewWrap.style.display === "none" || htmlViewWrap.style.display === "") {
-            htmlView.value = editor.innerHTML;
-            htmlViewWrap.style.display = "block";
+          if (ed.contentEditable === "true") {
+            ed.textContent = ed.innerHTML;
+            ed.contentEditable = "false";
             toggleHtmlBtn.textContent = "Hide HTML";
           } else {
-            // Save HTML back to editor
-            editor.innerHTML = htmlView.value;
-            htmlViewWrap.style.display = "none";
+            ed.innerHTML = ed.textContent;
+            ed.contentEditable = "true";
             toggleHtmlBtn.textContent = "Show HTML";
-            previewUpdateDebounced();
           }
         });
 
-        // Update preview live
-        editor.addEventListener("input", previewUpdateDebounced);
-        editor.addEventListener("keyup", previewUpdateDebounced);
-
-        function updatePreview() {
-          preview.innerHTML = editor.innerHTML;
-        }
-
-        // Insert At Cursor helper (works with contentEditable)
-        function insertAtCursor(node) {
-          const sel = window.getSelection();
-          if (!sel || !sel.rangeCount) {
-            editor.appendChild(node);
-            return;
-          }
-          const range = sel.getRangeAt(0);
-          range.deleteContents();
-          range.insertNode(node);
-          // Move caret after node
-          range.setStartAfter(node);
-          range.collapse(true);
-          sel.removeAllRanges();
-          sel.addRange(range);
-          editor.focus();
-          // Ensure a paragraph after image for continued typing
-          ensureParagraphAfter(node);
-          previewUpdateDebounced();
-        }
-
-        function ensureParagraphAfter(node) {
-          // if nextSibling is null or not a paragraph, add a <p><br></p>
-          const next = node.nextSibling;
-          if (!next || next.nodeType === 3 || next.nodeName.toLowerCase() !== "p") {
-            const p = document.createElement("p");
-            p.innerHTML = "<br>";
-            if (node.parentNode) node.parentNode.insertBefore(p, node.nextSibling);
-          }
-        }
-
-        // Convert string or element to node for insertion convenience
-        function insertHTMLAtCursor(html) {
-          const temp = document.createElement("div");
-          temp.innerHTML = html;
-          const frag = document.createDocumentFragment();
-          while (temp.firstChild) frag.appendChild(temp.firstChild);
-          insertAtCursor(frag);
-        }
-
-        // Image upload flow
-        insertInlineBtn.addEventListener("click", async () => {
-          if (!inlineFile.files || inlineFile.files.length === 0)
-            return alert("Choose a file first");
-          await uploadAndInsert(inlineFile.files[0]);
+        // Upload + insert image
+        document.getElementById("insertInlineBtn").addEventListener("click", async () => {
+          const file = document.getElementById("inlineImageFile").files[0];
+          if (!file) return alert("Choose file");
+          const fd = new FormData();
+          fd.append("file", file);
+          const r = await authFetch(UPLOAD_URL, { method: "POST", body: fd });
+          const j = await r.json();
+          if (!r.ok) return alert(j.error || "Upload failed");
+          insertImage(j.url || IMAGE_BASE + encodeURIComponent(j.metadata.r2Key), j.metadata.alt);
         });
 
-        inlineFile.addEventListener("change", async (e) => {
-          // auto-upload on select (you can remove this behavior if you prefer manual upload)
-          if (inlineFile.files && inlineFile.files[0]) {
-            await uploadAndInsert(inlineFile.files[0]);
-          }
-        });
-
-        async function uploadAndInsert(file) {
-          try {
-            const fd = new FormData();
-            fd.append("file", file);
-            // optional metadata fields: title, alt, caption can be appended
-            const res = await authFetch(UPLOAD_URL, { method: "POST", body: fd });
-            const json = await res.json();
-            if (!res.ok) throw new Error(json.error || JSON.stringify(json));
-            // expect json.url to be worker-served file
-            const url =
-              json.url || WORKER_BASE + "/files/" + encodeURIComponent(json.metadata.r2Key);
+        // Library modal
+        const lib = document.getElementById("libraryModal");
+        document.getElementById("selectImageBtn").onclick = () => {
+          lib.style.display = "flex";
+          loadLibrary();
+        };
+        document.getElementById("closeLibrary").onclick = () => (lib.style.display = "none");
+        async function loadLibrary() {
+          const r = await authFetch(LIST_URL);
+          const j = await r.json();
+          const g = document.getElementById("libraryGrid");
+          g.innerHTML = "";
+          (j.images || []).forEach((m) => {
             const img = document.createElement("img");
-            img.src = url;
-            img.alt = json.metadata.alt || json.metadata.title || file.name;
-            img.className = "inline-img";
-            img.setAttribute("data-r2key", json.metadata.r2Key || json.metadata.r2Key);
-            attachImageHandlers(img, json.id);
-            insertAtCursor(img);
-          } catch (err) {
-            console.error("Upload failed", err);
-            alert("Image upload failed: " + (err.message || err));
-          }
+            img.src = IMAGE_BASE + encodeURIComponent(m.r2Key);
+            img.className = "thumb";
+            img.title = m.title || m.filename;
+            img.onclick = () => {
+              insertImage(img.src, m.alt);
+              lib.style.display = "none";
+            };
+            g.appendChild(img);
+          });
         }
 
-        // Image library (load from KV)
-        selectImageBtn.addEventListener("click", openLibrary);
-        closeLibrary.addEventListener("click", () => (libraryModal.style.display = "none"));
-
-        async function openLibrary() {
-          libraryGrid.innerHTML =
-            '<div style="grid-column:1/-1;padding:24px;text-align:center">Loading…</div>';
-          libraryModal.style.display = "flex";
-          try {
-            const res = await authFetch(LIST_URL);
-            if (!res.ok) throw new Error("Library load failed");
-            const json = await res.json();
-            libraryGrid.innerHTML = "";
-            if (!json.images || json.images.length === 0) {
-              libraryGrid.innerHTML =
-                '<div style="grid-column:1/-1;padding:36px;text-align:center">No images yet</div>';
-              return;
-            }
-            json.images.forEach((m) => {
-              const r2Key = m.r2Key || m.r2Key; // stored metadata key
-              const thumb = document.createElement("img");
-              thumb.src = WORKER_BASE + "/files/" + encodeURIComponent(r2Key);
-              thumb.className = "thumb";
-              thumb.alt = m.alt || m.title || m.filename;
-              thumb.title = m.title || m.filename;
-              const wrap = document.createElement("div");
-              wrap.appendChild(thumb);
-              const cap = document.createElement("div");
-              cap.className = "small";
-              cap.textContent = m.title || m.filename || "";
-              wrap.appendChild(cap);
-              thumb.addEventListener("click", () => {
-                const img = document.createElement("img");
-                img.src = thumb.src;
-                img.alt = thumb.alt;
-                img.className = "inline-img";
-                img.setAttribute("data-r2key", r2Key);
-                attachImageHandlers(img, m.id || null);
-                insertAtCursor(img);
-                libraryModal.style.display = "none";
-              });
-              libraryGrid.appendChild(wrap);
-            });
-          } catch (err) {
-            console.error(err);
-            libraryGrid.innerHTML =
-              '<div style="grid-column:1/-1;padding:12px;color:#d04437">Failed to load library</div>';
-          }
+        // Insert image
+        function insertImage(src, alt) {
+          const img = document.createElement("img");
+          img.src = src;
+          img.alt = alt || "";
+          img.className = "inline-img center";
+          ed.appendChild(img);
+          attachImg(img);
         }
 
-        // Attach handlers to images (click to open inline toolbar, resizable)
-        function attachImageHandlers(img, id = null) {
-          img.style.maxWidth = "100%";
-          img.style.height = "auto";
+        // Image toolbar + wrap
+        function attachImg(img) {
           img.addEventListener("click", (ev) => {
             ev.stopPropagation();
-            showToolbarForImage(img, id);
+            document
+              .querySelectorAll(".inline-img")
+              .forEach((i) => i.classList.remove("img-selected"));
+            img.classList.add("img-selected");
+            currentImg = img;
+            const r = img.getBoundingClientRect();
+            inlineToolbar.style.left = r.left + window.scrollX + "px";
+            inlineToolbar.style.top = r.bottom + window.scrollY + 6 + "px";
+            inlineToolbar.style.display = "block";
+            imgAltInput.value = img.alt;
+            imgWidthInput.value = img.style.width || "";
           });
-          // add simple resizer handle
-          const handle = document.createElement("div");
-          handle.className = "resizer";
-          handle.style.position = "absolute";
-          handle.style.display = "none";
-          document.body.appendChild(handle); // we'll position it when image selected
-          // store handle on image for cleanup if needed
-          img._resizer = handle;
-          // make image draggable-resize
-          makeResizable(img, handle);
         }
 
-        // Show inline toolbar anchored near image
-        let currentImage = null;
-        function showToolbarForImage(img, id) {
-          currentImage = { img, id };
-          // position toolbar near image
-          const rect = img.getBoundingClientRect();
-          inlineToolbar.style.left = rect.left + window.scrollX + "px";
-          inlineToolbar.style.top =
-            rect.top + window.scrollY - inlineToolbar.offsetHeight - 8 + "px";
-          inlineToolbar.style.display = "block";
-          imgUrlInput.value = img.src;
-          imgAltInput.value = img.alt || "";
-          imgWidthInput.value = img.style.width || (img.width ? img.width + "px" : "");
-          // mark selection
-          document
-            .querySelectorAll(".inline-img")
-            .forEach((el) => el.classList.remove("img-selected"));
-          img.classList.add("img-selected");
-        }
-
-        // Save metadata (update alt/url/width) and optionally persist to KV via /update
-        saveImageMetaBtn.addEventListener("click", async () => {
-          if (!currentImage) return;
-          const { img, id } = currentImage;
-          img.src = imgUrlInput.value.trim() || img.src;
-          img.alt = imgAltInput.value.trim();
-          const widthVal = imgWidthInput.value.trim();
-          if (widthVal) {
-            if (widthVal.endsWith("%") || widthVal.endsWith("px")) img.style.width = widthVal;
-            else if (!isNaN(Number(widthVal)))
-              img.style.width = widthVal + (widthVal.includes("%") ? "" : "px");
-            else img.style.width = widthVal;
-          }
-          // alignment handlers
-          // Save to KV if id present
-          if (id) {
-            try {
-              const body = { id, meta: { alt: img.alt, title: img.alt } };
-              const res = await authFetch(UPDATE_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-              });
-              if (!res.ok) console.warn("Metadata update failed", await res.text());
-            } catch (err) {
-              console.warn(err);
-            }
-          }
-          inlineToolbar.style.display = "none";
-          img.classList.remove("img-selected");
-          previewUpdateDebounced();
-        });
-
-        // Align buttons
-        document.getElementById("alignLeft").addEventListener("click", () => {
-          if (!currentImage) return;
-          const img = currentImage.img;
-          img.style.float = "left";
-          img.style.margin = "0 12px 12px 0";
-          inlineToolbar.style.display = "none";
-          previewUpdateDebounced();
-        });
-        document.getElementById("alignCenter").addEventListener("click", () => {
-          if (!currentImage) return;
-          const img = currentImage.img;
-          img.style.float = "none";
-          img.style.display = "block";
-          img.style.margin = "12px auto";
-          inlineToolbar.style.display = "none";
-          previewUpdateDebounced();
-        });
-        document.getElementById("alignRight").addEventListener("click", () => {
-          if (!currentImage) return;
-          const img = currentImage.img;
-          img.style.float = "right";
-          img.style.margin = "0 0 12px 12px";
-          inlineToolbar.style.display = "none";
-          previewUpdateDebounced();
-        });
-
-        // Click outside hides inline toolbar
+        ed.querySelectorAll("img.inline-img").forEach(attachImg);
         document.addEventListener("click", (e) => {
           if (!inlineToolbar.contains(e.target)) {
             inlineToolbar.style.display = "none";
             document
               .querySelectorAll(".inline-img")
-              .forEach((el) => el.classList.remove("img-selected"));
+              .forEach((i) => i.classList.remove("img-selected"));
           }
         });
 
-        // Make element resizable by dragging handle
-        function makeResizable(img, handle) {
-          let startX,
-            startY,
-            startW,
-            startH,
-            dragging = false;
-          handle.addEventListener("mousedown", (e) => {
-            e.preventDefault();
-            dragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            startW = img.clientWidth;
-            startH = img.clientHeight;
-            document.body.style.userSelect = "none";
-          });
-          window.addEventListener("mousemove", (e) => {
-            if (!dragging) return;
-            const dx = e.clientX - startX;
-            const newW = Math.max(30, startW + dx);
-            img.style.width = newW + "px";
-            // show live width in toolbar if open
-            if (currentImage && currentImage.img === img) imgWidthInput.value = img.style.width;
-          });
-          window.addEventListener("mouseup", () => {
-            if (dragging) {
-              dragging = false;
-              document.body.style.userSelect = "";
-              // ensure paragraph after
-              ensureParagraphAfter(img);
-              previewUpdateDebounced();
-            }
-          });
-          // Show handle when image clicked
-          img.addEventListener("mouseenter", () => {
-            // position handle
-            const rect = img.getBoundingClientRect();
-            handle.style.left = rect.right - 18 + "px";
-            handle.style.top = rect.bottom - 18 + "px";
-            handle.style.display = "block";
-          });
-          img.addEventListener("mouseleave", () => {
-            if (!dragging) handle.style.display = "none";
-          });
-          // reposition handle on scroll/resize
-          window.addEventListener("scroll", () => {
-            if (handle.style.display === "block" && img.getBoundingClientRect) {
-              const rect = img.getBoundingClientRect();
-              handle.style.left = rect.right - 18 + "px";
-              handle.style.top = rect.bottom - 18 + "px";
-            }
-          });
-        }
-
-        // Insert table utility
-        document.getElementById("insertTableBtn").addEventListener("click", () => {
-          const rows = parseInt(prompt("Rows", "2"), 10) || 2;
-          const cols = parseInt(prompt("Columns", "3"), 10) || 3;
-          const table = document.createElement("table");
-          const tbody = document.createElement("tbody");
-          for (let r = 0; r < rows; r++) {
-            const tr = document.createElement("tr");
-            for (let c = 0; c < cols; c++) {
-              const td = document.createElement("td");
-              td.innerHTML = "&nbsp;";
-              tr.appendChild(td);
-            }
-            tbody.appendChild(tr);
+        saveImageMetaBtn.onclick = () => {
+          if (!currentImg) return;
+          currentImg.alt = imgAltInput.value;
+          const w = imgWidthInput.value.trim();
+          if (w) currentImg.style.width = w.endsWith("%") || w.endsWith("px") ? w : w + "px";
+          inlineToolbar.style.display = "none";
+        };
+        document.getElementById("alignLeft").onclick = () => {
+          if (currentImg) {
+            currentImg.className = "inline-img left";
+            inlineToolbar.style.display = "none";
           }
-          table.appendChild(tbody);
-          insertAtCursor(table);
-        });
+        };
+        document.getElementById("alignRight").onclick = () => {
+          if (currentImg) {
+            currentImg.className = "inline-img right";
+            inlineToolbar.style.display = "none";
+          }
+        };
+        document.getElementById("alignCenter").onclick = () => {
+          if (currentImg) {
+            currentImg.className = "inline-img center";
+            inlineToolbar.style.display = "none";
+          }
+        };
 
-        // Save button (example: show raw HTML or send to your CMS save endpoint)
-        saveBtn.addEventListener("click", () => {
-          // For demo we show HTML in console and preview
-          console.log("Saved HTML:", editor.innerHTML);
-          alert("Content prepared. (Implement CMS save endpoint as needed.)");
-        });
+        // === Post operations ===
+        const titleEl = document.getElementById("postTitle");
+        const newBtn = document.getElementById("newBtn");
+        const loadBtn = document.getElementById("loadBtn");
+        const saveBtn = document.getElementById("saveBtn");
+        const deleteBtn = document.getElementById("deleteBtn");
 
-        // Small utility
-        function debounce(fn, t) {
-          let timer;
-          return (...a) => {
-            clearTimeout(timer);
-            timer = setTimeout(() => fn.apply(this, a), t);
-          };
-        }
-
-        // Initialize preview
-        updatePreview();
-
-        // Expose debug helper
-        window.calmiqsEditor = {
-          editor,
-          preview,
-          insertAtCursor,
+        newBtn.onclick = () => {
+          titleEl.value = "";
+          ed.innerHTML = "<p></p>";
+        };
+        loadBtn.onclick = async () => {
+          const slug = prompt("Enter post slug");
+          if (!slug) return;
+          const r = await authFetch(POST_BASE + "/" + slug);
+          const j = await r.json();
+          if (!r.ok) return alert("Not found");
+          titleEl.value = j.title;
+          ed.innerHTML = j.content || "";
+        };
+        saveBtn.onclick = async () => {
+          if (!titleEl.value.trim()) return alert("Enter title first");
+          const slug = titleEl.value
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "");
+          const body = { title: titleEl.value.trim(), slug, content: ed.innerHTML };
+          const r = await authFetch(POST_BASE, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          if (r.ok) alert("Saved!");
+          else alert("Save failed");
+        };
+        deleteBtn.onclick = async () => {
+          const slug = prompt("Enter slug to delete");
+          if (!slug) return;
+          const r = await authFetch(POST_BASE + "/" + slug, { method: "DELETE" });
+          alert(r.ok ? "Deleted" : "Failed");
         };
       })();
     </script>
