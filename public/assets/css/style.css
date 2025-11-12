@@ -599,3 +599,12 @@ section.features .card p {
   opacity: 0.9;
   filter: blur(50px);
 }
+.inline-img.selected {
+  outline: 3px solid rgba(59, 130, 246, 0.6);
+}
+#imageLibrary img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

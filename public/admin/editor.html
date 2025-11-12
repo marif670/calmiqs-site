@@ -206,6 +206,34 @@
                   </button>
                 </div>
               </div>
+              <!-- Inline image controls -->
+              <div class="flex items-center gap-2 my-2">
+                <input type="file" id="inlineImageFile" class="mb-2" accept="image/*" />
+                <button id="insertInlineBtn" class="px-3 py-1 bg-green-600 text-white rounded">
+                  Upload & Insert
+                </button>
+                <button id="selectImageBtn" class="px-3 py-1 bg-blue-600 text-white rounded">
+                  Select from Library
+                </button>
+              </div>
+
+              <!-- Image Library Modal (hidden by default) -->
+              <div
+                id="imageLibrary"
+                class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+              >
+                <div
+                  class="bg-white dark:bg-slate-900 rounded-lg p-4 w-11/12 max-w-4xl max-h-[85vh] overflow-auto"
+                >
+                  <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-lg font-medium">Image Library</h3>
+                    <button id="closeLibraryBtn" class="px-2 py-1 bg-gray-200 rounded">
+                      Close
+                    </button>
+                  </div>
+                  <div id="libraryGrid" class="grid grid-cols-4 gap-3"></div>
+                </div>
+              </div>
 
               <!-- Filter / Search -->
               <div class="p-3 border-b">
@@ -319,6 +347,6 @@
 
     <!-- 3. Editor functionality -->
     <script src="/admin/editor.js?v=5"></script>
-    <script src="/assets/js/editor-images.js"></script>
+    <script src="/assets/js/editor-images.js" defer></script>
   </body>
 </html>
