@@ -268,7 +268,7 @@
           />
           <button id="uploadHeroBtn" class="btn" style="margin-top: 8px">Upload Hero Image</button>
         </div>
-
+        <div id="heroPreview" style="margin-top: 8px"></div>
         <div style="margin-top: 12px">
           <label class="small">Excerpt</label>
           <textarea
@@ -688,6 +688,10 @@
               "Hero uploaded — you can insert via library or use the URL: " +
                 (j.url || ".../files/" + encodeURIComponent(j.metadata.r2Key))
             );
+            // after successful upload and json.url available
+            document.getElementById("heroPreview").innerHTML = `<img src="${
+              json.url || FILES_BASE + encodeURIComponent(json.metadata.r2Key)
+            }" alt="${json.metadata.alt || ""}" style="width:100%;border-radius:6px" />`;
           } catch (err) {
             console.error(err);
             alert("Hero upload failed: " + (err.message || err));
@@ -809,23 +813,99 @@
 
         // attach click handler for images that may already be in the editor on load
         function attachExistingImages() {
-          editor.querySelectorAll("img.inline-img, img").forEach((img) => {
-            if (!img.dataset._handled) {
-              attachImageHandlers(img);
-              img.dataset._handled = "1";
-            }
+          editor.querySelectorAll("img").forEach((img) => {
+            if (img.dataset._handled) return;
+            img.dataset._handled = "1";
+            attachImageHandlers(img);
           });
         }
-
-        // initial
-        updatePreview();
         attachExistingImages();
+        updatePreview();
 
         // ensure preview updates when window gets focus (helpful after external changes)
         window.addEventListener("focus", () => {
           updatePreview();
         });
       })();
+      document.getElementById("openPostsBtn").addEventListener("click", async () => {
+        document.getElementById("postsModal").style.display = "flex";
+        const grid = document.getElementById("postsGrid");
+        grid.innerHTML = "Loading...";
+        try {
+          const res = await authFetch(POSTS_URL);
+          const j = await res.json();
+          if (!res.ok) throw new Error("Failed");
+          grid.innerHTML = "";
+          (j.posts || []).forEach((p) => {
+            const div = document.createElement("div");
+            div.style.padding = "8px";
+            div.style.borderBottom = "1px solid #eef";
+            div.innerHTML = `<strong>${p.title}</strong><div class="small">${p.slug} · updated ${
+              p.updatedAt || p.createdAt || ""
+            }</div>
+        <div style="margin-top:6px">
+          <button class="btn" data-slug="${p.slug}" data-action="edit">Edit</button>
+          <button class="btn danger" data-slug="${p.slug}" data-action="delete">Delete</button>
+        </div>`;
+            grid.appendChild(div);
+          });
+          grid.addEventListener("click", async (e) => {
+            const btn = e.target.closest("button");
+            if (!btn) return;
+            const action = btn.getAttribute("data-action");
+            const slug = btn.getAttribute("data-slug");
+            if (action === "edit") {
+              const res2 = await authFetch(POSTS_URL + "/" + encodeURIComponent(slug));
+              if (!res2.ok) {
+                alert("Load failed");
+                return;
+              }
+              const post = await res2.json();
+              postTitle.value = post.title;
+              editor.innerHTML = post.content || "";
+              postExcerpt.value = post.excerpt || "";
+              attachExistingImages();
+              updatePreview();
+              document.getElementById("postsModal").style.display = "none";
+            } else if (action === "delete") {
+              if (!confirm("Delete " + slug + "?")) return;
+              const res3 = await authFetch(POSTS_URL + "/" + encodeURIComponent(slug), {
+                method: "DELETE",
+              });
+              if (res3.ok) {
+                alert("Deleted");
+                btn.closest("div").remove();
+              } else {
+                alert("Delete failed");
+              }
+            }
+          });
+        } catch (err) {
+          grid.innerHTML = '<div class="small">Failed to load posts</div>';
+        }
+      });
+      document
+        .getElementById("closePostsBtn")
+        .addEventListener(
+          "click",
+          () => (document.getElementById("postsModal").style.display = "none")
+        );
     </script>
+    <div id="postsModal" class="modal" style="display: none">
+      <div class="modal-card">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+          "
+        >
+          <strong>Posts</strong>
+          <button id="closePostsBtn" class="btn">Close</button>
+        </div>
+        <div id="postsGrid"></div>
+      </div>
+    </div>
   </body>
 </html>
