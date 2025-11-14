@@ -42,16 +42,81 @@
 
     <!-- Blog Section -->
     <main class="max-w-6xl mx-auto py-16 px-6">
-      <div class="mb-10 text-center">
-        <input
-          id="searchInput"
-          type="text"
-          placeholder="Search articles..."
-          class="w-full sm:w-1/2 px-4 py-3 border rounded-xl shadow focus:outline-none focus:ring-2 focus:ring-primary"
-        />
+      <!-- Search Bar -->
+      <div class="mb-8">
+        <div class="relative">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search articles, tags, or topics..."
+            class="w-full px-4 py-3 pr-20 border rounded-xl shadow focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button
+            id="clearSearch"
+            class="hidden absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 px-2"
+          >
+            ✕
+          </button>
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+            🔍
+          </span>
+        </div>
       </div>
 
-      <div id="blogGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+      <!-- Category Filter -->
+      <div class="mb-6">
+        <h3 class="text-sm font-semibold text-gray-600 mb-3">Categories</h3>
+        <div id="categoryFilter" class="flex flex-wrap gap-2">
+          <!-- Categories will be inserted here -->
+        </div>
+      </div>
+
+      <!-- Tag Filter -->
+      <div class="mb-6" id="tagSection">
+        <h3 class="text-sm font-semibold text-gray-600 mb-3">Filter by Tags</h3>
+        <div id="selectedTags" class="flex flex-wrap gap-2 mb-3 min-h-[32px]">
+          <!-- Selected tags will appear here -->
+        </div>
+        <div id="availableTags" class="flex flex-wrap gap-2">
+          <!-- Available tags will be inserted here -->
+        </div>
+      </div>
+
+      <!-- Sort & Results Counter -->
+      <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+        <div class="flex items-center gap-2">
+          <label class="text-sm font-medium text-gray-600">Sort:</label>
+          <select
+            id="sortSelect"
+            class="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="newest">📅 Newest First</option>
+            <option value="oldest">📅 Oldest First</option>
+            <option value="alpha">🔤 A-Z</option>
+            <option value="popular">🔥 Most Popular</option>
+            <option value="readtime">⏱️ Quick Reads</option>
+          </select>
+        </div>
+        <div id="resultsCounter" class="text-sm text-gray-600 font-medium">
+          <!-- Results count will appear here -->
+        </div>
+      </div>
+
+      <!-- Blog Grid -->
+      <div
+        id="blogGrid"
+        class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 transition-opacity duration-300"
+      ></div>
+
+      <!-- Reset Filters Button (appears when filters active) -->
+      <div id="resetSection" class="hidden text-center mt-8">
+        <button
+          id="resetFilters"
+          class="px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl font-medium transition"
+        >
+          🔄 Reset All Filters
+        </button>
+      </div>
     </main>
 
     <!-- FOOTER -->
@@ -62,51 +127,449 @@
       (() => {
         const blogGrid = document.getElementById("blogGrid");
         const searchInput = document.getElementById("searchInput");
+        const clearSearch = document.getElementById("clearSearch");
+        const categoryFilter = document.getElementById("categoryFilter");
+        const availableTags = document.getElementById("availableTags");
+        const selectedTags = document.getElementById("selectedTags");
+        const sortSelect = document.getElementById("sortSelect");
+        const resultsCounter = document.getElementById("resultsCounter");
+        const resetSection = document.getElementById("resetSection");
+        const resetFilters = document.getElementById("resetFilters");
 
+        let allPosts = {};
+        let currentFilters = {
+          search: "",
+          category: "all",
+          tags: [],
+          sort: "newest",
+        };
+
+        // Debounce helper
+        function debounce(func, delay) {
+          let timeout;
+          return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+          };
+        }
+
+        // Load posts from KV
         async function loadPosts() {
           try {
-            const response = await fetch("/posts"); // KV endpoint
+            const response = await fetch("/posts");
             if (!response.ok) throw new Error("KV fetch failed");
             return await response.json();
           } catch (err) {
             console.error("KV fetch failed, using fallback:", err);
-            return {}; // empty fallback, no embedded posts needed
+            return getFallbackPosts();
           }
         }
 
-        function renderPosts(posts, filter = "") {
-          blogGrid.innerHTML = "";
-          const filtered = Object.entries(posts).filter(([key, post]) =>
-            post.title.toLowerCase().includes(filter.toLowerCase())
-          );
+        // Fallback posts with full metadata
+        function getFallbackPosts() {
+          return {
+            "mindful-breathing": {
+              title: "The Art of Mindful Breathing",
+              date: "November 2, 2025",
+              image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800",
+              imageAlt: "Person meditating peacefully",
+              excerpt:
+                "Discover how mindful breathing can reduce stress and improve focus in just 5 minutes a day.",
+              content:
+                "<p>Mindful breathing allows you to focus on your breath and anchor your thoughts in the present moment...</p>",
+              category: "wellness",
+              tags: ["mindfulness", "breathing", "stress-relief"],
+              author: "Calmiqs Team",
+              readTime: "5 min read",
+            },
+            "eco-habits": {
+              title: "5 Small Eco Habits That Reduce Stress",
+              date: "November 4, 2025",
+              image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800",
+              imageAlt: "Sustainable living items",
+              excerpt:
+                "Living sustainably doesn't have to be overwhelming. These simple habits support both the planet and your mental wellbeing.",
+              content: "<p>Living sustainably is easier than you think...</p>",
+              category: "sustainability",
+              tags: ["eco-living", "wellness", "lifestyle"],
+              author: "Calmiqs Team",
+              readTime: "7 min read",
+            },
+            "ai-wellness-future": {
+              title: "AI-Powered Wellness: The Future is Here",
+              date: "October 28, 2025",
+              image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800",
+              imageAlt: "AI technology visualization",
+              excerpt:
+                "How artificial intelligence is revolutionizing mental health support and personalized wellness journeys.",
+              content: "<p>AI is transforming how we approach wellness...</p>",
+              category: "technology",
+              tags: ["ai", "wellness", "innovation"],
+              author: "Tech Team",
+              readTime: "8 min read",
+            },
+            "morning-routines": {
+              title: "Morning Routines That Actually Work",
+              date: "October 15, 2025",
+              image: "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=800",
+              imageAlt: "Sunrise morning routine",
+              excerpt:
+                "Science-backed morning rituals to boost productivity and start your day with intention.",
+              content: "<p>Your morning sets the tone for the entire day...</p>",
+              category: "lifestyle",
+              tags: ["productivity", "habits", "wellness"],
+              author: "Calmiqs Team",
+              readTime: "6 min read",
+            },
+            "digital-detox-guide": {
+              title: "The Complete Digital Detox Guide",
+              date: "October 10, 2025",
+              image: "https://images.unsplash.com/photo-1516192518150-0d8fee5425e3?w=800",
+              imageAlt: "Phone-free relaxation",
+              excerpt:
+                "Reclaim your mental clarity and reduce anxiety with our comprehensive digital detox framework.",
+              content: "<p>Digital overload is real...</p>",
+              category: "wellness",
+              tags: ["mindfulness", "stress-relief", "lifestyle"],
+              author: "Calmiqs Team",
+              readTime: "10 min read",
+            },
+            "sustainable-tech": {
+              title: "Building Technology That Heals, Not Harms",
+              date: "September 30, 2025",
+              image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
+              imageAlt: "Sustainable technology concept",
+              excerpt:
+                "Exploring how conscious tech development can prioritize environmental and mental wellness.",
+              content: "<p>Technology doesn't have to drain resources...</p>",
+              category: "technology",
+              tags: ["sustainability", "innovation", "eco-living"],
+              author: "Tech Team",
+              readTime: "9 min read",
+            },
+            "meditation-beginners": {
+              title: "Meditation for Complete Beginners",
+              date: "September 20, 2025",
+              image: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=800",
+              imageAlt: "Beginner meditation setup",
+              excerpt:
+                "Never meditated before? This gentle introduction will have you practicing with confidence in minutes.",
+              content: "<p>Meditation isn't about perfection...</p>",
+              category: "wellness",
+              tags: ["mindfulness", "breathing", "beginner-friendly"],
+              author: "Calmiqs Team",
+              readTime: "5 min read",
+            },
+            "zero-waste-journey": {
+              title: "My First Year Zero Waste: Lessons Learned",
+              date: "September 5, 2025",
+              image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800",
+              imageAlt: "Zero waste lifestyle",
+              excerpt:
+                "One person's honest journey into zero-waste living, including the mistakes and victories.",
+              content: "<p>Going zero waste was harder than expected...</p>",
+              category: "sustainability",
+              tags: ["eco-living", "lifestyle", "beginner-friendly"],
+              author: "Guest Writer",
+              readTime: "12 min read",
+            },
+          };
+        }
 
-          if (filtered.length === 0) {
-            blogGrid.innerHTML =
-              '<p class="text-gray-500 text-center col-span-full">No posts found.</p>';
-            return;
-          }
-
-          filtered.forEach(([key, post]) => {
-            const card = document.createElement("a");
-            card.href = `post-template.html?post=${key}`;
-            card.className =
-              "bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 block";
-            card.innerHTML = `
-              <img src="${post.image}" alt="${
-              post.imageAlt || post.title
-            }" class="w-full h-48 object-cover" />
-              <div class="p-5">
-                <h3 class="text-xl font-semibold text-primary mb-2">${post.title}</h3>
-                <p class="text-gray-600 mb-3">${post.excerpt}</p>
-                <p class="text-sm text-gray-400">${post.date}</p>
-              </div>`;
-            blogGrid.appendChild(card);
+        // Extract all unique categories
+        function getAllCategories(posts) {
+          const categories = new Set();
+          Object.values(posts).forEach((post) => {
+            if (post.category) categories.add(post.category);
           });
+          return Array.from(categories).sort();
         }
 
+        // Extract all unique tags
+        function getAllTags(posts) {
+          const tags = new Set();
+          Object.values(posts).forEach((post) => {
+            if (post.tags) post.tags.forEach((tag) => tags.add(tag));
+          });
+          return Array.from(tags).sort();
+        }
+
+        // Render category buttons
+        function renderCategories(posts) {
+          const categories = getAllCategories(posts);
+          const categoryIcons = {
+            wellness: "🧘",
+            sustainability: "🌱",
+            technology: "💻",
+            lifestyle: "🎨",
+            yourcategory: "🎯", // Add new
+          };
+
+          const categoryButtons = [
+            { value: "all", label: "📚 All", icon: "" },
+            ...categories.map((cat) => ({
+              value: cat,
+              label: `${categoryIcons[cat] || ""} ${cat.charAt(0).toUpperCase() + cat.slice(1)}`,
+              icon: categoryIcons[cat] || "",
+            })),
+          ];
+
+          categoryFilter.innerHTML = categoryButtons
+            .map(
+              (cat) => `
+            <button 
+              data-category="${cat.value}"
+              class="category-btn px-4 py-2 rounded-full font-medium transition ${
+                currentFilters.category === cat.value
+                  ? "bg-primary text-white shadow-md"
+                  : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+              }"
+            >
+              ${cat.label}
+            </button>
+          `
+            )
+            .join("");
+        }
+
+        // Render tag buttons
+        function renderTags(posts) {
+          const tags = getAllTags(posts);
+
+          availableTags.innerHTML = tags
+            .filter((tag) => !currentFilters.tags.includes(tag))
+            .map(
+              (tag) => `
+            <button 
+              data-tag="${tag}"
+              class="tag-btn px-3 py-1.5 rounded-lg text-sm font-medium bg-white text-gray-700 hover:bg-primary hover:text-white border border-gray-200 transition"
+            >
+              ${tag}
+            </button>
+          `
+            )
+            .join("");
+
+          selectedTags.innerHTML = currentFilters.tags.length
+            ? currentFilters.tags
+                .map(
+                  (tag) => `
+            <span class="selected-tag px-3 py-1.5 rounded-lg text-sm font-medium bg-primary text-white flex items-center gap-2">
+              ${tag}
+              <button data-remove-tag="${tag}" class="hover:text-gray-200">✕</button>
+            </span>
+          `
+                )
+                .join("")
+            : '<span class="text-sm text-gray-400">No tags selected</span>';
+        }
+
+        // Filter posts logic
+        function filterPosts(posts, filters) {
+          let filtered = Object.entries(posts);
+
+          // Category filter
+          if (filters.category !== "all") {
+            filtered = filtered.filter(([_, post]) => post.category === filters.category);
+          }
+
+          // Search filter (title, excerpt, tags, category)
+          if (filters.search) {
+            const search = filters.search.toLowerCase();
+            filtered = filtered.filter(([_, post]) => {
+              const searchableText = `
+                ${post.title} 
+                ${post.excerpt} 
+                ${post.category} 
+                ${(post.tags || []).join(" ")}
+              `.toLowerCase();
+              return searchableText.includes(search);
+            });
+          }
+
+          // Tag filter (must match ALL selected tags)
+          if (filters.tags.length > 0) {
+            filtered = filtered.filter(([_, post]) =>
+              filters.tags.every((tag) => post.tags && post.tags.includes(tag))
+            );
+          }
+
+          // Sort
+          filtered.sort(([keyA, postA], [keyB, postB]) => {
+            if (filters.sort === "alpha") {
+              return postA.title.localeCompare(postB.title);
+            }
+            const dateA = new Date(postA.date);
+            const dateB = new Date(postB.date);
+            return filters.sort === "newest" ? dateB - dateA : dateA - dateB;
+          });
+
+          return filtered;
+        }
+
+        // Render posts
+        function renderPosts() {
+          const filtered = filterPosts(allPosts, currentFilters);
+          const totalPosts = Object.keys(allPosts).length;
+
+          // Update results counter
+          resultsCounter.textContent = `Showing ${filtered.length} of ${totalPosts} posts`;
+
+          // Show/hide reset button
+          const hasActiveFilters =
+            currentFilters.search ||
+            currentFilters.category !== "all" ||
+            currentFilters.tags.length > 0 ||
+            currentFilters.sort !== "newest";
+          resetSection.classList.toggle("hidden", !hasActiveFilters);
+
+          // Fade effect
+          blogGrid.style.opacity = "0";
+
+          setTimeout(() => {
+            if (filtered.length === 0) {
+              blogGrid.innerHTML = `
+                <div class="col-span-full text-center py-16">
+                  <div class="text-6xl mb-4">🔍</div>
+                  <h3 class="text-2xl font-semibold text-gray-700 mb-2">No posts found</h3>
+                  <p class="text-gray-500">Try adjusting your search or filter selections</p>
+                </div>
+              `;
+            } else {
+              blogGrid.innerHTML = filtered
+                .map(
+                  ([key, post]) => `
+                <a href="post-template.html?post=${key}" 
+                   class="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 block">
+                  <img src="${post.image}" alt="${
+                    post.imageAlt || post.title
+                  }" class="w-full h-48 object-cover" />
+                  <div class="p-5">
+                    <div class="flex items-center gap-2 mb-2 text-xs">
+                      <span class="px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">
+                        ${post.category}
+                      </span>
+                      <span class="text-gray-400">${post.readTime || ""}</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary mb-2 group-hover:text-tech transition">
+                      ${post.title}
+                    </h3>
+                    <p class="text-gray-600 mb-3 line-clamp-2">${post.excerpt}</p>
+                    <div class="flex items-center justify-between text-sm text-gray-400">
+                      <span>${post.date}</span>
+                      <span>${post.author || "Calmiqs"}</span>
+                    </div>
+                  </div>
+                </a>
+              `
+                )
+                .join("");
+            }
+            blogGrid.style.opacity = "1";
+          }, 150);
+
+          // Update URL
+          updateURL();
+        }
+
+        // Update URL with current filters
+        function updateURL() {
+          const params = new URLSearchParams();
+          if (currentFilters.search) params.set("search", currentFilters.search);
+          if (currentFilters.category !== "all") params.set("category", currentFilters.category);
+          if (currentFilters.tags.length) params.set("tags", currentFilters.tags.join(","));
+          if (currentFilters.sort !== "newest") params.set("sort", currentFilters.sort);
+
+          const newUrl = params.toString()
+            ? `${window.location.pathname}?${params.toString()}`
+            : window.location.pathname;
+          window.history.replaceState({}, "", newUrl);
+        }
+
+        // Get filters from URL
+        function getFiltersFromURL() {
+          const params = new URLSearchParams(window.location.search);
+          return {
+            search: params.get("search") || "",
+            category: params.get("category") || "all",
+            tags: params.get("tags") ? params.get("tags").split(",") : [],
+            sort: params.get("sort") || "newest",
+          };
+        }
+
+        // Event listeners
+        searchInput.addEventListener(
+          "input",
+          debounce((e) => {
+            currentFilters.search = e.target.value;
+            clearSearch.classList.toggle("hidden", !e.target.value);
+            renderPosts();
+          }, 300)
+        );
+
+        clearSearch.addEventListener("click", () => {
+          searchInput.value = "";
+          currentFilters.search = "";
+          clearSearch.classList.add("hidden");
+          renderPosts();
+        });
+
+        categoryFilter.addEventListener("click", (e) => {
+          const btn = e.target.closest(".category-btn");
+          if (!btn) return;
+          currentFilters.category = btn.dataset.category;
+          renderCategories(allPosts);
+          renderPosts();
+        });
+
+        availableTags.addEventListener("click", (e) => {
+          const btn = e.target.closest(".tag-btn");
+          if (!btn) return;
+          const tag = btn.dataset.tag;
+          if (!currentFilters.tags.includes(tag)) {
+            currentFilters.tags.push(tag);
+            renderTags(allPosts);
+            renderPosts();
+          }
+        });
+
+        selectedTags.addEventListener("click", (e) => {
+          const btn = e.target.closest("[data-remove-tag]");
+          if (!btn) return;
+          const tag = btn.dataset.removeTag;
+          currentFilters.tags = currentFilters.tags.filter((t) => t !== tag);
+          renderTags(allPosts);
+          renderPosts();
+        });
+
+        sortSelect.addEventListener("change", (e) => {
+          currentFilters.sort = e.target.value;
+          renderPosts();
+        });
+
+        resetFilters.addEventListener("click", () => {
+          currentFilters = { search: "", category: "all", tags: [], sort: "newest" };
+          searchInput.value = "";
+          sortSelect.value = "newest";
+          clearSearch.classList.add("hidden");
+          renderCategories(allPosts);
+          renderTags(allPosts);
+          renderPosts();
+        });
+
+        // Initialize
         loadPosts().then((posts) => {
-          renderPosts(posts);
-          searchInput.addEventListener("input", (e) => renderPosts(posts, e.target.value));
+          allPosts = posts;
+          currentFilters = getFiltersFromURL();
+
+          // Set UI to match URL filters
+          searchInput.value = currentFilters.search;
+          sortSelect.value = currentFilters.sort;
+          clearSearch.classList.toggle("hidden", !currentFilters.search);
+
+          renderCategories(posts);
+          renderTags(posts);
+          renderPosts();
         });
       })();
     </script>
