@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Comments API</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-3xl font-bold mb-6">Comments API Test</h1>
+
+      <!-- Test 1: Basic Fetch -->
+      <div class="bg-white rounded-lg shadow p-6 mb-4">
+        <h2 class="text-xl font-semibold mb-3">Test 1: Check Posts Endpoint</h2>
+        <button id="testPosts" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          Test GET /posts
+        </button>
+        <pre
+          id="resultPosts"
+          class="mt-4 p-4 bg-gray-100 rounded text-sm overflow-auto max-h-40"
+        ></pre>
+      </div>
+
+      <!-- Test 2: Get Comments -->
+      <div class="bg-white rounded-lg shadow p-6 mb-4">
+        <h2 class="text-xl font-semibold mb-3">Test 2: Get Comments</h2>
+        <button
+          id="testGetComments"
+          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Test GET /comments/mindful-breathing
+        </button>
+        <pre
+          id="resultGetComments"
+          class="mt-4 p-4 bg-gray-100 rounded text-sm overflow-auto max-h-40"
+        ></pre>
+      </div>
+
+      <!-- Test 3: Post Comment -->
+      <div class="bg-white rounded-lg shadow p-6 mb-4">
+        <h2 class="text-xl font-semibold mb-3">Test 3: Post Comment</h2>
+        <button
+          id="testPostComment"
+          class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        >
+          Test POST /comments
+        </button>
+        <pre
+          id="resultPostComment"
+          class="mt-4 p-4 bg-gray-100 rounded text-sm overflow-auto max-h-40"
+        ></pre>
+      </div>
+
+      <!-- Test 4: Manual Form -->
+      <div class="bg-white rounded-lg shadow p-6 mb-4">
+        <h2 class="text-xl font-semibold mb-3">Test 4: Manual Comment Form</h2>
+        <form id="manualForm" class="space-y-3">
+          <input
+            type="text"
+            id="manualName"
+            placeholder="Name"
+            class="w-full border rounded px-3 py-2"
+            value="Test User"
+          />
+          <input
+            type="email"
+            id="manualEmail"
+            placeholder="Email"
+            class="w-full border rounded px-3 py-2"
+            value="test@example.com"
+          />
+          <textarea
+            id="manualComment"
+            placeholder="Comment"
+            class="w-full border rounded px-3 py-2"
+            rows="3"
+          >
+This is a test comment</textarea
+          >
+          <button
+            type="submit"
+            class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+          >
+            Submit Test Comment
+          </button>
+        </form>
+        <pre
+          id="resultManual"
+          class="mt-4 p-4 bg-gray-100 rounded text-sm overflow-auto max-h-40"
+        ></pre>
+      </div>
+
+      <!-- Test 5: Check Network -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-3">Test 5: Network Info</h2>
+        <div id="networkInfo" class="space-y-2 text-sm"></div>
+      </div>
+    </div>
+
+    <script>
+      // Display network info
+      const networkInfo = document.getElementById("networkInfo");
+      networkInfo.innerHTML = `
+      <p><strong>Current URL:</strong> ${window.location.href}</p>
+      <p><strong>Protocol:</strong> ${window.location.protocol}</p>
+      <p><strong>Host:</strong> ${window.location.host}</p>
+      <p><strong>Pathname:</strong> ${window.location.pathname}</p>
+    `;
+
+      // Helper function to display results
+      function displayResult(elementId, data) {
+        const element = document.getElementById(elementId);
+        element.textContent = JSON.stringify(data, null, 2);
+        console.log(elementId, data);
+      }
+
+      // Helper function to test API
+      async function testAPI(url, options = {}) {
+        const startTime = Date.now();
+        try {
+          console.log("Testing:", url, options);
+
+          const response = await fetch(url, options);
+          const endTime = Date.now();
+
+          console.log("Response received:", {
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers),
+            time: endTime - startTime + "ms",
+          });
+
+          const contentType = response.headers.get("content-type");
+          console.log("Content-Type:", contentType);
+
+          let data;
+          const text = await response.text();
+          console.log("Response text:", text);
+
+          if (text) {
+            try {
+              data = JSON.parse(text);
+            } catch (e) {
+              data = {
+                error: "Not JSON",
+                text: text.substring(0, 200),
+                parseError: e.message,
+              };
+            }
+          } else {
+            data = { error: "Empty response" };
+          }
+
+          return {
+            ok: response.ok,
+            status: response.status,
+            statusText: response.statusText,
+            contentType,
+            time: endTime - startTime + "ms",
+            data,
+          };
+        } catch (error) {
+          console.error("Fetch error:", error);
+          return {
+            error: error.message,
+            stack: error.stack,
+          };
+        }
+      }
+
+      // Test 1: Posts
+      document.getElementById("testPosts").addEventListener("click", async () => {
+        const result = await testAPI("/posts");
+        displayResult("resultPosts", result);
+      });
+
+      // Test 2: Get Comments
+      document.getElementById("testGetComments").addEventListener("click", async () => {
+        const result = await testAPI("/comments/mindful-breathing");
+        displayResult("resultGetComments", result);
+      });
+
+      // Test 3: Post Comment
+      document.getElementById("testPostComment").addEventListener("click", async () => {
+        const payload = {
+          postSlug: "mindful-breathing",
+          name: "Test User",
+          email: "test@example.com",
+          comment: "This is a test comment from the test page",
+        };
+
+        const result = await testAPI("/comments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+        displayResult("resultPostComment", result);
+      });
+
+      // Test 4: Manual Form
+      document.getElementById("manualForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const payload = {
+          postSlug: "mindful-breathing",
+          name: document.getElementById("manualName").value,
+          email: document.getElementById("manualEmail").value,
+          comment: document.getElementById("manualComment").value,
+        };
+
+        console.log("Manual form payload:", payload);
+
+        const result = await testAPI("/comments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+        displayResult("resultManual", result);
+      });
+
+      // Auto-run Test 1 on load
+      window.addEventListener("load", () => {
+        console.log("Page loaded, running initial test...");
+        document.getElementById("testPosts").click();
+      });
+    </script>
+  </body>
+</html>
