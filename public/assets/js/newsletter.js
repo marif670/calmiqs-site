@@ -1,7 +1,11 @@
-/* /assets/js/newsletter.js */
+/* assets/js/newsletter.js */
+
 (() => {
   const form = document.getElementById("calmiqs-newsletter-form");
   if (!form) return;
+
+  // Worker API base (no custom domain yet)
+  const API_BASE = "https://calmiqs-images-worker.techaipet.workers.dev";
 
   const emailInput = document.getElementById("n-email");
   const nameInput = document.getElementById("n-name");
@@ -11,10 +15,10 @@
   const errEl = document.getElementById("n-email-error");
   const successEl = document.getElementById("n-success");
 
-  // RFC-5322-lite / practical email regex (reasonable balance)
+  // Email regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  // set timestamp on load (ISO)
+  // Set timestamp for basic bot-protection
   tsInput.value = new Date().toISOString();
 
   function showError(msg) {
@@ -22,94 +26,70 @@
     errEl.classList.remove("sr-only");
     errEl.focus();
   }
+
   function clearError() {
-    errEl.textContent = "";
     errEl.classList.add("sr-only");
+    errEl.textContent = "";
   }
+
   function showSuccess() {
     successEl.classList.remove("hidden");
     successEl.animate(
       [
-        { opacity: 0, transform: "translateY(6px)" },
+        { opacity: 0, transform: "translateY(8px)" },
         { opacity: 1, transform: "translateY(0)" },
       ],
-      { duration: 360, easing: "ease-out" }
+      { duration: 350, easing: "ease-out" }
     );
-    // optionally hide form
-    form.classList.add("opacity-60", "pointer-events-none");
+    form.classList.add("opacity-50", "pointer-events-none");
   }
 
-  async function submitForm(e) {
+  async function onSubmit(e) {
     e.preventDefault();
     clearError();
 
     const email = emailInput.value.trim();
-    const name = nameInput ? nameInput.value.trim() : "";
-    const honeypot = hp ? hp.value : "";
-    const ts = tsInput.value;
+    const name = nameInput?.value?.trim() || "";
+    const honeypot = hp.value;
 
-    // honeypot check
-    if (honeypot) {
-      // silent fail to block bots
-      return;
+    // Honeypot trigger
+    if (honeypot) return;
+
+    // Timestamp gate — prevent instant bot submissions
+    const submitTime = new Date(tsInput.value);
+    if (Date.now() - submitTime.getTime() < 1200) {
+      return showError("You're too quick — try again.");
     }
 
-    // basic timestamp anti-bot: require >= 2s since form rendering (helps some bots)
-    try {
-      const started = new Date(ts).getTime();
-      if (Date.now() - started < 1500) {
-        showError("Submission too quick. Please wait a moment and try again.");
-        return;
-      }
-    } catch (err) {}
-
-    if (!email) {
-      showError("Please enter your email address.");
+    if (!email || !emailRegex.test(email)) {
       emailInput.focus();
-      return;
-    }
-    if (!emailRegex.test(email)) {
-      showError("Please enter a valid email address.");
-      emailInput.focus();
-      return;
+      return showError("Please enter a valid email address.");
     }
 
     submitBtn.disabled = true;
     submitBtn.setAttribute("aria-busy", "true");
 
     try {
-      const res = await fetch("/api/newsletter/subscribe", {
+      const res = await fetch(`${API_BASE}/api/newsletter/subscribe`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, name }),
       });
+
+      const data = await res.json().catch(() => ({}));
 
       if (res.status === 201 || res.status === 200) {
         showSuccess();
       } else {
-        const j = await res.json().catch(() => ({ message: "Request failed" }));
-        showError(j.message || "Subscription failed — please try later.");
+        showError(data.error || "Subscription failed. Try again.");
       }
     } catch (err) {
-      showError("Network error — please try again later.");
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.removeAttribute("aria-busy");
+      showError("Network error — please try later.");
     }
+
+    submitBtn.disabled = false;
+    submitBtn.removeAttribute("aria-busy");
   }
 
-  form.addEventListener("submit", submitForm);
-
-  // Optional: Floating CTA opens modal of page's newsletter (if implemented)
-  const floatBtn = document.getElementById("calmiqs-floating-cta");
-  if (floatBtn) {
-    floatBtn.classList.remove("hidden");
-    floatBtn.addEventListener("click", () => {
-      // scroll to newsletter section
-      const section = document.querySelector('[aria-labelledby="newsletter-heading"]');
-      if (section) section.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
-  }
+  form.addEventListener("submit", onSubmit);
 })();
