@@ -288,7 +288,21 @@ class CommentsSystem {
         body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
+      // Check if response has content
+      const contentType = response.headers.get("content-type");
+      let result;
+
+      if (contentType && contentType.includes("application/json")) {
+        const text = await response.text();
+        if (text) {
+          result = JSON.parse(text);
+        } else {
+          throw new Error("Empty response from server");
+        }
+      } else {
+        const text = await response.text();
+        throw new Error(`Unexpected response: ${text || "Empty response"}`);
+      }
 
       if (response.ok) {
         message.className = "text-sm mt-2 text-green-600";
@@ -309,6 +323,7 @@ class CommentsSystem {
         throw new Error(result.error || "Failed to submit comment");
       }
     } catch (error) {
+      console.error("Comment submission error:", error);
       message.className = "text-sm mt-2 text-red-600";
       message.textContent = `❌ ${error.message}`;
     } finally {

@@ -30,9 +30,9 @@ export default {
 
       if (path === "/posts" && request.method === "POST") {
         if (!isAdmin())
-          return new Response("Unauthorized", {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), {
             status: 401,
-            headers: corsHeaders,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         return handleSavePost(request, env, corsHeaders);
       }
@@ -44,9 +44,9 @@ export default {
 
       if (path.startsWith("/posts/") && request.method === "DELETE") {
         if (!isAdmin())
-          return new Response("Unauthorized", {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), {
             status: 401,
-            headers: corsHeaders,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         const slug = path.replace("/posts/", "");
         return handleDeletePost(slug, env, corsHeaders);
@@ -71,9 +71,9 @@ export default {
         request.method === "DELETE"
       ) {
         if (!isAdmin())
-          return new Response("Unauthorized", {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), {
             status: 401,
-            headers: corsHeaders,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         const [, , postSlug, commentId] = path.split("/");
         return handleDeleteComment(postSlug, commentId, env, corsHeaders);
@@ -85,9 +85,9 @@ export default {
         request.method === "POST"
       ) {
         if (!isAdmin())
-          return new Response("Unauthorized", {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), {
             status: 401,
-            headers: corsHeaders,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         const [, , postSlug, commentId] = path.split("/");
         return handleModerateComment(
@@ -102,20 +102,26 @@ export default {
       // Get all pending comments (admin only)
       if (path === "/comments/pending" && request.method === "GET") {
         if (!isAdmin())
-          return new Response("Unauthorized", {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), {
             status: 401,
-            headers: corsHeaders,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         return handleGetPendingComments(env, corsHeaders);
       }
 
-      return new Response("Not Found", { status: 404, headers: corsHeaders });
-    } catch (error) {
-      console.error("Worker error:", error);
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
+      return new Response(JSON.stringify({ error: "Not Found" }), {
+        status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    } catch (error) {
+      console.error("Worker error:", error);
+      return new Response(
+        JSON.stringify({ error: error.message, stack: error.stack }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
   },
 };
