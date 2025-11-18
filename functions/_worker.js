@@ -378,7 +378,3 @@ function sanitizeInput(str) {
     .trim()
     .slice(0, 1000); // Limit length
 }
-// Add custom validation
-if (comment.includes("spam")) {
-  return new Response("Blocked", { status: 403 });
-}
