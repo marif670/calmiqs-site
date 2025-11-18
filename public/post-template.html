@@ -223,5 +223,16 @@
     <!-- Global scripts -->
     <script src="/assets/js/auth.js"></script>
     <script src="/assets/js/header-loader.js"></script>
+    <!-- Load the comments script -->
+    <script src="/assets/js/comments.js"></script>
+
+    <!-- Comments container -->
+    <div id="commentsContainer"></div>
+
+    <!-- Initialize comments -->
+    <script>
+      const postSlug = "your-post-slug";
+      window.initComments(postSlug);
+    </script>
   </body>
 </html>

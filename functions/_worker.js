@@ -1,9 +1,15 @@
-// functions/_worker.js - Updated with Comments API
+// functions/_worker.js - Debug version with extensive logging
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname;
+
+    console.log("Request received:", {
+      method: request.method,
+      path: path,
+      headers: Object.fromEntries(request.headers),
+    });
 
     // CORS headers
     const corsHeaders = {
@@ -30,10 +36,7 @@ export default {
 
       if (path === "/posts" && request.method === "POST") {
         if (!isAdmin())
-          return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+          return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
         return handleSavePost(request, env, corsHeaders);
       }
 
@@ -44,10 +47,7 @@ export default {
 
       if (path.startsWith("/posts/") && request.method === "DELETE") {
         if (!isAdmin())
-          return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+          return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
         const slug = path.replace("/posts/", "");
         return handleDeletePost(slug, env, corsHeaders);
       }
@@ -57,11 +57,13 @@ export default {
       // Get comments for a post
       if (path.match(/^\/comments\/[^\/]+$/) && request.method === "GET") {
         const postSlug = path.split("/")[2];
+        console.log("Getting comments for post:", postSlug);
         return handleGetComments(postSlug, env, corsHeaders);
       }
 
       // Add a new comment
       if (path === "/comments" && request.method === "POST") {
+        console.log("Adding new comment");
         return handleAddComment(request, env, corsHeaders);
       }
 
@@ -71,10 +73,7 @@ export default {
         request.method === "DELETE"
       ) {
         if (!isAdmin())
-          return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+          return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
         const [, , postSlug, commentId] = path.split("/");
         return handleDeleteComment(postSlug, commentId, env, corsHeaders);
       }
@@ -85,10 +84,7 @@ export default {
         request.method === "POST"
       ) {
         if (!isAdmin())
-          return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+          return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
         const [, , postSlug, commentId] = path.split("/");
         return handleModerateComment(
           postSlug,
@@ -102,29 +98,34 @@ export default {
       // Get all pending comments (admin only)
       if (path === "/comments/pending" && request.method === "GET") {
         if (!isAdmin())
-          return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+          return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
         return handleGetPendingComments(env, corsHeaders);
       }
 
-      return new Response(JSON.stringify({ error: "Not Found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      console.log("No route matched");
+      return jsonResponse({ error: "Not Found", path }, 404, corsHeaders);
     } catch (error) {
       console.error("Worker error:", error);
-      return new Response(
-        JSON.stringify({ error: error.message, stack: error.stack }),
+      return jsonResponse(
         {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          error: error.message,
+          stack: error.stack,
+          path,
+        },
+        500,
+        corsHeaders
       );
     }
   },
 };
+
+// Helper function for JSON responses
+function jsonResponse(data, status = 200, headers = {}) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...headers, "Content-Type": "application/json" },
+  });
+}
 
 // ========== POSTS HANDLERS ==========
 
@@ -140,31 +141,24 @@ async function handleGetPosts(env, corsHeaders) {
     }
   }
 
-  return new Response(JSON.stringify(posts), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return jsonResponse(posts, 200, corsHeaders);
 }
 
 async function handleGetPost(slug, env, corsHeaders) {
   const post = await env.CALMIQS_POSTS.get(`post:${slug}`);
 
   if (!post) {
-    return new Response("Not found", { status: 404, headers: corsHeaders });
+    return jsonResponse({ error: "Not found" }, 404, corsHeaders);
   }
 
-  return new Response(post, {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return jsonResponse(JSON.parse(post), 200, corsHeaders);
 }
 
 async function handleSavePost(request, env, corsHeaders) {
   const { slug, data } = await request.json();
 
   if (!slug || !data) {
-    return new Response(JSON.stringify({ error: "Missing slug or data" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Missing slug or data" }, 400, corsHeaders);
   }
 
   data.updatedAt = new Date().toISOString();
@@ -172,9 +166,7 @@ async function handleSavePost(request, env, corsHeaders) {
 
   await env.CALMIQS_POSTS.put(`post:${slug}`, JSON.stringify(data));
 
-  return new Response(JSON.stringify({ success: true, slug }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return jsonResponse({ success: true, slug }, 200, corsHeaders);
 }
 
 async function handleDeletePost(slug, env, corsHeaders) {
@@ -188,18 +180,20 @@ async function handleDeletePost(slug, env, corsHeaders) {
     await env.CALMIQS_POSTS.delete(key.name);
   }
 
-  return new Response(JSON.stringify({ success: true }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return jsonResponse({ success: true }, 200, corsHeaders);
 }
 
 // ========== COMMENTS HANDLERS ==========
 
 async function handleGetComments(postSlug, env, corsHeaders) {
+  console.log("handleGetComments called for:", postSlug);
+
   const comments = [];
   const list = await env.CALMIQS_POSTS.list({
     prefix: `comments:${postSlug}:`,
   });
+
+  console.log("Found comment keys:", list.keys.length);
 
   for (const key of list.keys) {
     const value = await env.CALMIQS_POSTS.get(key.name);
@@ -211,78 +205,115 @@ async function handleGetComments(postSlug, env, corsHeaders) {
       }
     }
   }
-
+  // Send email to admin
+  await fetch("https://api.sendgrid.com/v3/mail/send", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.SENDGRID_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: { email: "noreply@calmiqs.com" },
+      to: [{ email: "admin@calmiqs.com" }],
+      subject: "New Comment Pending Review",
+      content: [
+        {
+          type: "text/plain",
+          value: `New comment from ${name} on ${postSlug}`,
+        },
+      ],
+    }),
+  });
   // Sort by date (newest first)
   comments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  return new Response(JSON.stringify({ comments }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  console.log("Returning comments:", comments.length);
+  return jsonResponse({ comments }, 200, corsHeaders);
 }
 
 async function handleAddComment(request, env, corsHeaders) {
-  const body = await request.json();
-  const { postSlug, name, email, comment, parentId } = body;
+  console.log("handleAddComment called");
 
-  // Validation
-  if (!postSlug || !name || !email || !comment) {
-    return new Response(JSON.stringify({ error: "Missing required fields" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+  try {
+    const body = await request.json();
+    console.log("Request body:", body);
 
-  // Basic email validation
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return new Response(JSON.stringify({ error: "Invalid email address" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+    const { postSlug, name, email, comment, parentId } = body;
 
-  // Sanitize inputs
-  const sanitizedName = sanitizeInput(name);
-  const sanitizedComment = sanitizeInput(comment);
-
-  // Generate unique comment ID
-  const commentId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-  const commentData = {
-    id: commentId,
-    postSlug,
-    name: sanitizedName,
-    email, // Store but never expose publicly
-    comment: sanitizedComment,
-    parentId: parentId || null,
-    status: "pending", // pending, approved, rejected
-    createdAt: new Date().toISOString(),
-    ip: request.headers.get("CF-Connecting-IP") || "unknown",
-  };
-
-  // Store comment
-  await env.CALMIQS_POSTS.put(
-    `comments:${postSlug}:${commentId}`,
-    JSON.stringify(commentData)
-  );
-
-  return new Response(
-    JSON.stringify({
-      success: true,
-      commentId,
-      message: "Comment submitted for review",
-    }),
-    {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Validation
+    if (!postSlug || !name || !email || !comment) {
+      console.log("Missing required fields");
+      return jsonResponse(
+        {
+          error: "Missing required fields",
+          received: { postSlug, name, email, comment: comment?.length },
+        },
+        400,
+        corsHeaders
+      );
     }
-  );
+
+    // Basic email validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      console.log("Invalid email");
+      return jsonResponse({ error: "Invalid email address" }, 400, corsHeaders);
+    }
+
+    // Sanitize inputs
+    const sanitizedName = sanitizeInput(name);
+    const sanitizedComment = sanitizeInput(comment);
+
+    // Generate unique comment ID
+    const commentId = `${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+    console.log("Generated comment ID:", commentId);
+
+    const commentData = {
+      id: commentId,
+      postSlug,
+      name: sanitizedName,
+      email, // Store but never expose publicly
+      comment: sanitizedComment,
+      parentId: parentId || null,
+      status: "pending", // pending, approved, rejected
+      createdAt: new Date().toISOString(),
+      ip: request.headers.get("CF-Connecting-IP") || "unknown",
+    };
+
+    // Store comment
+    const kvKey = `comments:${postSlug}:${commentId}`;
+    console.log("Storing to KV key:", kvKey);
+
+    await env.CALMIQS_POSTS.put(kvKey, JSON.stringify(commentData));
+
+    console.log("Comment stored successfully");
+
+    return jsonResponse(
+      {
+        success: true,
+        commentId,
+        message: "Comment submitted for review",
+      },
+      200,
+      corsHeaders
+    );
+  } catch (error) {
+    console.error("Error in handleAddComment:", error);
+    return jsonResponse(
+      {
+        error: error.message,
+        stack: error.stack,
+      },
+      500,
+      corsHeaders
+    );
+  }
 }
 
 async function handleDeleteComment(postSlug, commentId, env, corsHeaders) {
   await env.CALMIQS_POSTS.delete(`comments:${postSlug}:${commentId}`);
-
-  return new Response(JSON.stringify({ success: true }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return jsonResponse({ success: true }, 200, corsHeaders);
 }
 
 async function handleModerateComment(
@@ -292,30 +323,30 @@ async function handleModerateComment(
   env,
   corsHeaders
 ) {
-  const { action } = await request.json(); // action: 'approve' or 'reject'
+  try {
+    const { action } = await request.json();
 
-  const key = `comments:${postSlug}:${commentId}`;
-  const commentData = await env.CALMIQS_POSTS.get(key);
+    const key = `comments:${postSlug}:${commentId}`;
+    const commentData = await env.CALMIQS_POSTS.get(key);
 
-  if (!commentData) {
-    return new Response("Comment not found", {
-      status: 404,
-      headers: corsHeaders,
-    });
-  }
-
-  const comment = JSON.parse(commentData);
-  comment.status = action === "approve" ? "approved" : "rejected";
-  comment.moderatedAt = new Date().toISOString();
-
-  await env.CALMIQS_POSTS.put(key, JSON.stringify(comment));
-
-  return new Response(
-    JSON.stringify({ success: true, status: comment.status }),
-    {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    if (!commentData) {
+      return jsonResponse({ error: "Comment not found" }, 404, corsHeaders);
     }
-  );
+
+    const comment = JSON.parse(commentData);
+    comment.status = action === "approve" ? "approved" : "rejected";
+    comment.moderatedAt = new Date().toISOString();
+
+    await env.CALMIQS_POSTS.put(key, JSON.stringify(comment));
+
+    return jsonResponse(
+      { success: true, status: comment.status },
+      200,
+      corsHeaders
+    );
+  } catch (error) {
+    return jsonResponse({ error: error.message }, 500, corsHeaders);
+  }
 }
 
 async function handleGetPendingComments(env, corsHeaders) {
@@ -335,9 +366,7 @@ async function handleGetPendingComments(env, corsHeaders) {
   // Sort by date (newest first)
   pendingComments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  return new Response(JSON.stringify({ comments: pendingComments }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return jsonResponse({ comments: pendingComments }, 200, corsHeaders);
 }
 
 // Helper: Sanitize user input
@@ -348,4 +377,8 @@ function sanitizeInput(str) {
     .replace(/on\w+=/gi, "") // Remove event handlers
     .trim()
     .slice(0, 1000); // Limit length
+}
+// Add custom validation
+if (comment.includes("spam")) {
+  return new Response("Blocked", { status: 403 });
 }
