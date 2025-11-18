@@ -1,6 +1,7 @@
 // /assets/js/comments.js - Client-side comments functionality
 
-const COMMENTS_API = "/comments";
+// Use relative API path (same domain)
+const COMMENTS_API = "/api/comments";
 
 class CommentsSystem {
   constructor(postSlug, containerId) {

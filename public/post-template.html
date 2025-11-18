@@ -82,83 +82,6 @@
         </a>
       </div>
     </main>
-    <!-- START: Calmiqs Newsletter Card -->
-    <section aria-labelledby="newsletter-heading" class="max-w-3xl mx-auto my-8">
-      <div
-        class="bg-white rounded-xl shadow-lg p-6 md:p-8 flex flex-col md:flex-row items-center gap-6"
-      >
-        <div class="flex-1">
-          <h3 id="newsletter-heading" class="text-xl font-semibold text-primary">
-            Get calm updates — join our newsletter
-          </h3>
-          <p class="mt-1 text-sm text-gray-600">
-            Short, privacy-friendly updates. Unsubscribe anytime.
-          </p>
-        </div>
-
-        <form
-          id="calmiqs-newsletter-form"
-          class="flex-1 w-full md:w-auto flex flex-col sm:flex-row gap-3 items-stretch"
-          novalidate
-        >
-          <!-- visible inputs -->
-          <div class="flex gap-2 w-full">
-            <label for="n-email" class="sr-only">Email</label>
-            <input
-              id="n-email"
-              name="email"
-              type="email"
-              required
-              placeholder="you@domain.com"
-              class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              aria-describedby="n-email-error"
-            />
-
-            <label for="n-name" class="sr-only">Name</label>
-            <input
-              id="n-name"
-              name="name"
-              type="text"
-              placeholder="Name (optional)"
-              class="hidden sm:block w-36 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          <!-- honeypot + timestamp (hidden) -->
-          <input
-            type="text"
-            name="hp_addr"
-            id="hp_addr"
-            class="hidden"
-            autocomplete="off"
-            tabindex="-1"
-          />
-          <input type="hidden" name="ts" id="n-ts" />
-
-          <div class="flex items-center gap-2 mt-2 sm:mt-0">
-            <button
-              id="n-submit"
-              type="submit"
-              class="bg-primary hover:bg-tech text-white px-4 py-2 rounded-lg shadow transition"
-            >
-              Subscribe
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <p id="n-email-error" class="mt-2 text-sm text-red-600 sr-only" role="alert"></p>
-      <div
-        id="n-success"
-        class="mt-4 hidden bg-green-50 border border-green-200 text-green-800 rounded-lg px-4 py-3"
-      >
-        <strong>Thanks — you’re subscribed!</strong>
-        <p class="text-sm mt-1">
-          By subscribing, you agree to receive occasional updates. Unsubscribe anytime.
-        </p>
-      </div>
-    </section>
-    <!-- END: Calmiqs Newsletter Card -->
 
     <footer class="bg-gray-100 py-8 mt-16 text-center text-gray-600">
       <p>© 2025 Calmiqs – Wellness Meets Sustainability</p>
@@ -300,25 +223,5 @@
     <!-- Global scripts -->
     <script src="/assets/js/auth.js"></script>
     <script src="/assets/js/header-loader.js"></script>
-    <!-- Load the comments script -->
-    <script src="/assets/js/comments.js"></script>
-
-    <!-- Comments container -->
-    <div id="commentsContainer"></div>
-
-    <!-- Initialize comments -->
-    <script>
-      const postSlug = "your-post-slug";
-      window.initComments(postSlug);
-    </script>
-    <!-- Floating CTA (optional) -->
-    <button
-      id="calmiqs-floating-cta"
-      aria-label="Subscribe"
-      title="Subscribe"
-      class="fixed right-6 bottom-6 bg-primary text-white p-3 rounded-full shadow-lg hidden md:block"
-    >
-      ✉️
-    </button>
   </body>
 </html>
