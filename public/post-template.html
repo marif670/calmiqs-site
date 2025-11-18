@@ -29,20 +29,82 @@
     <div id="navbar-container"></div>
 
     <main class="max-w-4xl mx-auto py-16 px-6">
+      <!-- Post Content -->
       <div id="postContainer" class="text-center"></div>
+
+      <!-- Post Navigation -->
       <div id="postNav" class="flex justify-between mt-12"></div>
+
+      <!-- Share Buttons -->
+      <div class="mt-12 pt-8 border-t border-gray-200">
+        <h3 class="text-lg font-semibold mb-4 text-center">Share this post</h3>
+        <div class="flex justify-center gap-4">
+          <a
+            id="shareTwitter"
+            target="_blank"
+            class="share-btn bg-blue-400 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition"
+          >
+            🐦 Twitter
+          </a>
+          <a
+            id="shareLinkedIn"
+            target="_blank"
+            class="share-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+          >
+            💼 LinkedIn
+          </a>
+          <a
+            id="shareFacebook"
+            target="_blank"
+            class="share-btn bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg transition"
+          >
+            📘 Facebook
+          </a>
+          <button
+            id="copyLink"
+            class="share-btn bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition"
+          >
+            🔗 Copy Link
+          </button>
+        </div>
+      </div>
+
+      <!-- Comments Section -->
+      <div id="commentsContainer" class="mt-16"></div>
+
+      <!-- Back to Blog -->
+      <div class="mt-12 text-center">
+        <a
+          href="blog.html"
+          class="inline-block bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-accent transition shadow"
+        >
+          ← Back to Blog
+        </a>
+      </div>
     </main>
 
     <footer class="bg-gray-100 py-8 mt-16 text-center text-gray-600">
-      <p>© 2025 Calmiqs — Wellness Meets Sustainability</p>
+      <p>© 2025 Calmiqs – Wellness Meets Sustainability</p>
     </footer>
+
+    <!-- Load Comments Script -->
+    <script src="/assets/js/comments.js"></script>
 
     <script>
       (async () => {
         const postContainer = document.getElementById("postContainer");
         const postNav = document.getElementById("postNav");
 
-        // Fallback embedded posts
+        // Get post slug from URL
+        const params = new URLSearchParams(window.location.search);
+        const postSlug = params.get("post");
+
+        if (!postSlug) {
+          postContainer.innerHTML = `<p class="text-gray-500">Post not found.</p>`;
+          return;
+        }
+
+        // Fallback embedded posts (same as before)
         const embeddedPosts = {
           "mindful-breathing": {
             title: "The Art of Mindful Breathing",
@@ -73,7 +135,7 @@
         // Load posts from KV
         async function loadPosts() {
           try {
-            const res = await fetch("/posts"); // KV endpoint
+            const res = await fetch("/posts");
             if (!res.ok) throw new Error("KV fetch failed");
             return await res.json();
           } catch (err) {
@@ -83,18 +145,15 @@
         }
 
         const posts = await loadPosts();
-
-        // Get post key from URL
-        const params = new URLSearchParams(window.location.search);
         const keys = Object.keys(posts);
-        const key = params.get("post") || keys[0];
-        const post = posts[key];
+        const post = posts[postSlug];
 
         if (!post) {
           postContainer.innerHTML = `<p class="text-gray-500">Post not found.</p>`;
           return;
         }
 
+        // Render post
         postContainer.innerHTML = `
           <h1 class="text-4xl font-bold text-primary mb-4">${post.title}</h1>
           <p class="text-gray-500 mb-6">${post.date}</p>
@@ -102,16 +161,41 @@
           post.imageAlt || post.title
         }" class="rounded-xl mb-8 shadow-lg mx-auto" />
           <div class="text-lg leading-relaxed text-left max-w-3xl mx-auto">${post.content}</div>
-          <div class="mt-10 text-center">
-            <a href="blog.html"
-               class="inline-block bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-accent transition shadow">
-               ← Back to Blog
-            </a>
-          </div>
         `;
 
+        // Setup share buttons
+        const postUrl = window.location.href;
+        const postTitle = encodeURIComponent(post.title);
+
+        document.getElementById(
+          "shareTwitter"
+        ).href = `https://twitter.com/intent/tweet?text=${postTitle}&url=${encodeURIComponent(
+          postUrl
+        )}`;
+
+        document.getElementById(
+          "shareLinkedIn"
+        ).href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+          postUrl
+        )}`;
+
+        document.getElementById(
+          "shareFacebook"
+        ).href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`;
+
+        document.getElementById("copyLink").addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(postUrl);
+            const btn = document.getElementById("copyLink");
+            btn.textContent = "✅ Copied!";
+            setTimeout(() => (btn.textContent = "🔗 Copy Link"), 2000);
+          } catch (err) {
+            alert("Failed to copy link");
+          }
+        });
+
         // Previous / Next navigation
-        const currentIndex = keys.indexOf(key);
+        const currentIndex = keys.indexOf(postSlug);
         const prevKey = keys[currentIndex - 1];
         const nextKey = keys[currentIndex + 1];
 
@@ -131,6 +215,9 @@
             }
           </div>
         `;
+
+        // Initialize comments system
+        window.initComments(postSlug);
       })();
     </script>
     <!-- Global scripts -->
