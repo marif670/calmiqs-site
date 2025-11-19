@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Admin API</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-3xl font-bold mb-6">Test Admin API</h1>
+
+      <div class="bg-white rounded-lg shadow p-6 mb-4">
+        <h2 class="text-xl font-semibold mb-4">Admin Token</h2>
+        <input
+          type="text"
+          id="adminToken"
+          value="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Hadia@2017_Ayesha@2007"
+          class="w-full border rounded px-3 py-2 mb-2"
+        />
+        <p class="text-sm text-gray-600">This should match your admin secret</p>
+      </div>
+
+      <!-- Test 1: Get All Comments -->
+      <div class="bg-white rounded-lg shadow p-6 mb-4">
+        <h2 class="text-xl font-semibold mb-3">Test 1: Get All Comments</h2>
+        <button
+          id="testGetComments"
+          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          GET /api/admin/comments
+        </button>
+        <pre
+          id="resultGetComments"
+          class="mt-4 p-4 bg-gray-100 rounded text-sm overflow-auto max-h-60"
+        ></pre>
+      </div>
+
+      <!-- Test 2: Check KV Directly -->
+      <div class="bg-white rounded-lg shadow p-6 mb-4">
+        <h2 class="text-xl font-semibold mb-3">Test 2: List KV Keys</h2>
+        <p class="text-sm text-gray-600 mb-3">Run this in terminal:</p>
+        <pre class="p-4 bg-gray-800 text-green-400 rounded text-sm">
+wrangler kv:key list --binding=CALMIQS_POSTS --prefix="comments:"</pre
+        >
+        <p class="text-sm text-gray-600 mt-2">This shows all comment keys in KV</p>
+      </div>
+
+      <!-- Test 3: Check Specific Comment -->
+      <div class="bg-white rounded-lg shadow p-6 mb-4">
+        <h2 class="text-xl font-semibold mb-3">Test 3: Get Specific Comment from KV</h2>
+        <input
+          type="text"
+          id="kvKey"
+          placeholder="Enter KV key (e.g., comments:mindful-breathing:1234567890-abc)"
+          class="w-full border rounded px-3 py-2 mb-2"
+        />
+        <p class="text-sm text-gray-600 mb-3">Run this in terminal:</p>
+        <pre class="p-4 bg-gray-800 text-green-400 rounded text-sm">
+wrangler kv:key get --binding=CALMIQS_POSTS "comments:POST_SLUG:COMMENT_ID"</pre
+        >
+      </div>
+
+      <!-- Network Info -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-3">Network Info</h2>
+        <div id="networkInfo" class="text-sm space-y-1"></div>
+      </div>
+    </div>
+
+    <script>
+      const networkInfo = document.getElementById("networkInfo");
+      networkInfo.innerHTML = `
+      <p><strong>Current URL:</strong> ${window.location.href}</p>
+      <p><strong>Host:</strong> ${window.location.host}</p>
+      <p><strong>API Base:</strong> /api</p>
+    `;
+
+      async function authFetch(url, opts = {}) {
+        opts.headers = opts.headers || {};
+        opts.headers["X-Admin-Token"] = document.getElementById("adminToken").value;
+        return fetch(url, opts);
+      }
+
+      function display(elementId, data) {
+        const el = document.getElementById(elementId);
+        el.textContent = JSON.stringify(data, null, 2);
+        console.log(elementId, data);
+      }
+
+      // Test 1: Get All Comments
+      document.getElementById("testGetComments").addEventListener("click", async () => {
+        const result = document.getElementById("resultGetComments");
+        result.textContent = "Loading...";
+
+        try {
+          console.log("Fetching /api/admin/comments...");
+          const response = await authFetch("/api/admin/comments");
+
+          console.log("Response status:", response.status);
+          console.log("Response headers:", Object.fromEntries(response.headers));
+
+          const text = await response.text();
+          console.log("Response text:", text);
+
+          let data;
+          try {
+            data = JSON.parse(text);
+          } catch (e) {
+            data = {
+              error: "Not JSON",
+              text: text.substring(0, 500),
+              parseError: e.message,
+            };
+          }
+
+          const output = {
+            status: response.status,
+            ok: response.ok,
+            data: data,
+          };
+
+          display("resultGetComments", output);
+
+          if (data.comments) {
+            alert(
+              `Found ${data.comments.length} comments!\n` +
+                `Pending: ${data.stats?.pending || 0}\n` +
+                `Approved: ${data.stats?.approved || 0}`
+            );
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          display("resultGetComments", { error: error.message, stack: error.stack });
+        }
+      });
+
+      // Auto-run test on load
+      window.addEventListener("load", () => {
+        console.log("Page loaded, running test...");
+        document.getElementById("testGetComments").click();
+      });
+    </script>
+  </body>
+</html>
