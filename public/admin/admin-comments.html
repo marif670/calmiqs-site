@@ -127,37 +127,33 @@
       // Load all comments (from all posts)
       async function loadAllComments() {
         try {
-          // Get all posts first
-          const postsRes = await authFetch(`${API_BASE}/posts`);
-          const posts = await postsRes.json();
+          console.log("Loading all comments...");
+          const res = await authFetch(`/api/admin/comments`);
 
-          // Load comments for each post
-          allComments = [];
-          for (const [slug, post] of Object.entries(posts)) {
-            const commentsRes = await authFetch(`${API_BASE}/comments/${slug}`);
-            const data = await commentsRes.json();
-
-            // Note: admin endpoint should return ALL comments, not just approved
-            // For now, we'll also check pending endpoint
-            allComments.push(
-              ...data.comments.map((c) => ({ ...c, postSlug: slug, postTitle: post.title }))
-            );
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error("Failed to load comments:", res.status, errorText);
+            throw new Error(`HTTP ${res.status}: ${errorText}`);
           }
 
-          // Also get pending comments specifically
-          const pendingRes = await authFetch(`${API_BASE}/comments/pending`);
-          const pendingData = await pendingRes.json();
+          const data = await res.json();
+          console.log("Received data:", data);
 
-          // Merge, avoiding duplicates
-          const commentIds = new Set(allComments.map((c) => c.id));
-          pendingData.comments.forEach((c) => {
-            if (!commentIds.has(c.id)) {
-              // Try to get post title
-              const post = Object.entries(posts).find(([slug]) => slug === c.postSlug);
-              c.postTitle = post ? post[1].title : c.postSlug;
-              allComments.push(c);
-            }
-          });
+          allComments = data.comments || [];
+
+          // Get post titles for display
+          try {
+            const postsRes = await authFetch(`/api/posts`);
+            const posts = await postsRes.json();
+
+            // Add post titles to comments
+            allComments.forEach((comment) => {
+              const post = posts[comment.postSlug];
+              comment.postTitle = post ? post.title : comment.postSlug;
+            });
+          } catch (e) {
+            console.error("Failed to load post titles:", e);
+          }
 
           updateStats();
           applyFilters();
@@ -167,6 +163,9 @@
           <div class="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
             <p class="text-red-600 font-medium">❌ Failed to load comments</p>
             <p class="text-sm text-red-500 mt-2">${error.message}</p>
+            <button onclick="loadAllComments()" class="mt-4 bg-red-500 text-white px-4 py-2 rounded">
+              Retry
+            </button>
           </div>
         `;
         }
@@ -303,19 +302,24 @@
       // Moderate comment
       async function moderateComment(postSlug, commentId, action) {
         try {
-          const res = await authFetch(`${API_BASE}/comments/${postSlug}/${commentId}/moderate`, {
+          console.log("Moderating:", { postSlug, commentId, action });
+
+          const res = await authFetch(`/api/admin/moderate`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action }),
+            body: JSON.stringify({ postSlug, commentId, action }),
           });
 
           if (res.ok) {
+            const result = await res.json();
+            console.log("Moderation result:", result);
             await loadAllComments();
           } else {
             const error = await res.json();
             alert("Failed to moderate: " + (error.error || "Unknown error"));
           }
         } catch (error) {
+          console.error("Moderation error:", error);
           alert("Error: " + error.message);
         }
       }
@@ -325,17 +329,24 @@
         if (!confirm("Are you sure you want to delete this comment?")) return;
 
         try {
-          const res = await authFetch(`${API_BASE}/comments/${postSlug}/${commentId}`, {
-            method: "DELETE",
+          console.log("Deleting:", { postSlug, commentId });
+
+          const res = await authFetch(`/api/admin/delete`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ postSlug, commentId }),
           });
 
           if (res.ok) {
+            const result = await res.json();
+            console.log("Delete result:", result);
             await loadAllComments();
           } else {
             const error = await res.json();
             alert("Failed to delete: " + (error.error || "Unknown error"));
           }
         } catch (error) {
+          console.error("Delete error:", error);
           alert("Error: " + error.message);
         }
       }
