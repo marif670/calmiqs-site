@@ -155,3 +155,215 @@ function randomHex(len) {
     .join("")
     .slice(0, len);
 }
+// Newsletter endpoints
+if (pathname === "/api/newsletter/subscribe") {
+  return handleNewsletterSubscribe(request, env);
+}
+if (pathname === "/api/newsletter/subscribers") {
+  return handleGetSubscribers(request, env);
+}
+if (pathname === "/api/newsletter/stats") {
+  return handleNewsletterStats(request, env);
+}
+if (pathname === "/api/newsletter/send") {
+  return handleSendNewsletter(request, env);
+}
+// Add these routes to your worker
+if (pathname === "/api/newsletter/subscribe" && request.method === "POST") {
+  return handleNewsletterSubscribe(request, env);
+}
+if (pathname === "/api/newsletter/subscribers" && request.method === "GET") {
+  if (!isAdmin) return new Response("Unauthorized", { status: 401 });
+  return handleGetSubscribers(request, env);
+}
+if (pathname === "/api/newsletter/stats" && request.method === "GET") {
+  if (!isAdmin) return new Response("Unauthorized", { status: 401 });
+  return handleNewsletterStats(request, env);
+}
+if (pathname === "/api/newsletter/send" && request.method === "POST") {
+  if (!isAdmin) return new Response("Unauthorized", { status: 401 });
+  return handleSendNewsletter(request, env);
+}
+if (pathname === "/api/newsletter/unsubscribe" && request.method === "POST") {
+  return handleUnsubscribe(request, env);
+}
+
+// Newsletter Subscribe
+async function handleNewsletterSubscribe(request, env) {
+  try {
+    const payload = await request.json();
+    const { email } = payload;
+
+    if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      return new Response(JSON.stringify({ error: "Invalid email" }), { status: 400 });
+    }
+
+    const subscriptionId = `sub:${email}`;
+    const existingSub = await env.CALMIQS_NEWSLETTER.get(subscriptionId);
+
+    if (existingSub) {
+      const sub = JSON.parse(existingSub);
+      if (sub.status === "active") {
+        return new Response(JSON.stringify({ message: "Already subscribed", subscribed: true }), {
+          status: 200,
+        });
+      }
+    }
+
+    const subscription = {
+      email,
+      status: "pending", // pending until confirmed
+      subscribedAt: new Date().toISOString(),
+      confirmToken: generateToken(),
+      unsubscribeToken: generateToken(),
+    };
+
+    await env.CALMIQS_NEWSLETTER.put(subscriptionId, JSON.stringify(subscription), {
+      expirationTtl: 7 * 24 * 60 * 60, // 7 days for pending
+    });
+
+    // TODO: Send confirmation email with link:
+    // https://calmiqs.pages.dev/api/newsletter/confirm?token={confirmToken}
+
+    return new Response(
+      JSON.stringify({
+        message: "Check your email to confirm subscription",
+        subscribed: false,
+      }),
+      { status: 201, headers: { "Content-Type": "application/json" } }
+    );
+  } catch (err) {
+    console.error(err);
+    return new Response(JSON.stringify({ error: "Subscription failed" }), { status: 500 });
+  }
+}
+
+// Get Subscribers (admin only)
+async function handleGetSubscribers(request, env) {
+  try {
+    const list = await env.CALMIQS_NEWSLETTER.list({ prefix: "sub:" });
+    const subscribers = [];
+
+    for (const key of list.keys) {
+      const data = await env.CALMIQS_NEWSLETTER.get(key.name);
+      if (data) subscribers.push(JSON.parse(data));
+    }
+
+    return new Response(JSON.stringify({ subscribers, total: subscribers.length }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: "Failed to fetch subscribers" }), { status: 500 });
+  }
+}
+
+// Newsletter Stats
+async function handleNewsletterStats(request, env) {
+  try {
+    const list = await env.CALMIQS_NEWSLETTER.list({ prefix: "sub:" });
+    let active = 0,
+      unsubscribed = 0;
+
+    for (const key of list.keys) {
+      const data = await env.CALMIQS_NEWSLETTER.get(key.name);
+      if (data) {
+        const sub = JSON.parse(data);
+        if (sub.status === "active") active++;
+        else if (sub.status === "unsubscribed") unsubscribed++;
+      }
+    }
+
+    return new Response(
+      JSON.stringify({
+        total: list.keys.length,
+        active,
+        unsubscribed,
+        pending: list.keys.length - active - unsubscribed,
+      }),
+      { headers: { "Content-Type": "application/json" } }
+    );
+  } catch (err) {
+    return new Response(JSON.stringify({ error: "Failed to fetch stats" }), { status: 500 });
+  }
+}
+
+// Send Newsletter
+async function handleSendNewsletter(request, env) {
+  try {
+    const { subject, content, fromEmail, fromName } = await request.json();
+
+    // Get all active subscribers
+    const list = await env.CALMIQS_NEWSLETTER.list({ prefix: "sub:" });
+    const activeEmails = [];
+
+    for (const key of list.keys) {
+      const data = await env.CALMIQS_NEWSLETTER.get(key.name);
+      if (data) {
+        const sub = JSON.parse(data);
+        if (sub.status === "active") activeEmails.push(sub.email);
+      }
+    }
+
+    if (activeEmails.length === 0) {
+      return new Response(JSON.stringify({ error: "No active subscribers" }), { status: 400 });
+    }
+
+    // TODO: Integrate with email service (SendGrid, Mailgun, AWS SES)
+    // For now, log the newsletter
+    console.log(`Newsletter queued: ${subject} to ${activeEmails.length} subscribers`);
+
+    // Store newsletter record
+    const nlId = `newsletter:${Date.now()}`;
+    await env.CALMIQS_NEWSLETTER.put(
+      nlId,
+      JSON.stringify({
+        subject,
+        content,
+        sentAt: new Date().toISOString(),
+        recipientCount: activeEmails.length,
+        status: "sent",
+      })
+    );
+
+    return new Response(
+      JSON.stringify({
+        message: "Newsletter sent",
+        recipients: activeEmails.length,
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  } catch (err) {
+    console.error(err);
+    return new Response(JSON.stringify({ error: "Send failed" }), { status: 500 });
+  }
+}
+
+// Unsubscribe
+async function handleUnsubscribe(request, env) {
+  try {
+    const { email } = await request.json();
+    const subscriptionId = `sub:${email}`;
+    const data = await env.CALMIQS_NEWSLETTER.get(subscriptionId);
+
+    if (!data) {
+      return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
+    }
+
+    const sub = JSON.parse(data);
+    sub.status = "unsubscribed";
+    sub.unsubscribedAt = new Date().toISOString();
+
+    await env.CALMIQS_NEWSLETTER.put(subscriptionId, JSON.stringify(sub));
+
+    return new Response(JSON.stringify({ message: "Unsubscribed" }), { status: 200 });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: "Unsubscribe failed" }), { status: 500 });
+  }
+}
+
+// Helpers
+function generateToken() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(32)))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}

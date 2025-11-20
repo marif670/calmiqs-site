@@ -1,65 +1,159 @@
+// ============================================
 // functions/api/posts.js
-// Handles /api/posts endpoint
+// ============================================
 
-function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
+export async function onRequest(context) {
+  const { request, env } = context;
 
-function isAdmin(request, env) {
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
+    "Content-Type": "application/json",
+  };
+
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
   const token = request.headers.get("X-Admin-Token");
-  const ADMIN_SECRET =
-    env.ADMIN_SECRET ||
-    "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Hadia@2017_Ayesha@2007";
-  return token && token === ADMIN_SECRET;
-}
-
-// GET /api/posts
-export async function onRequestGet(context) {
-  const { env } = context;
+  const isAdmin =
+    token === "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Hadia@2017_Ayesha@2007";
 
   try {
-    const posts = {};
-    const list = await env.CALMIQS_POSTS.list({ prefix: "post:" });
+    // GET all posts - PUBLIC ACCESS (no auth required for reading)
+    if (request.method === "GET") {
+      try {
+        const posts = [];
+        const list = await env.CALMIQS_POSTS.list();
 
-    for (const key of list.keys) {
-      const value = await env.CALMIQS_POSTS.get(key.name);
-      if (value) {
-        const slug = key.name.replace("post:", "");
-        posts[slug] = JSON.parse(value);
+        console.log("Total keys in KV:", list.keys.length);
+
+        for (const key of list.keys) {
+          const data = await env.CALMIQS_POSTS.get(key.name);
+          if (data) {
+            try {
+              const post = JSON.parse(data);
+              post.slug = key.name;
+              posts.push(post);
+            } catch (e) {
+              console.error("Failed to parse key:", key.name, e);
+            }
+          }
+        }
+
+        console.log("Posts loaded:", posts.length);
+        posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            posts,
+            total: posts.length,
+          }),
+          {
+            status: 200,
+            headers: corsHeaders,
+          }
+        );
+      } catch (err) {
+        console.error("GET posts error:", err);
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: corsHeaders,
+        });
       }
     }
 
-    return jsonResponse(posts, 200);
-  } catch (error) {
-    return jsonResponse({ error: error.message }, 500);
-  }
-}
+    // POST save post
+    if (request.method === "POST") {
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
 
-// POST /api/posts (create/update post)
-export async function onRequestPost(context) {
-  const { request, env } = context;
+      try {
+        const postData = await request.json();
+        const key = postData.slug;
+        const post = {
+          ...postData,
+          updatedAt: new Date().toISOString(),
+        };
 
-  if (!isAdmin(request, env)) {
-    return jsonResponse({ error: "Unauthorized" }, 401);
-  }
+        await env.CALMIQS_POSTS.put(key, JSON.stringify(post));
 
-  try {
-    const { slug, data } = await request.json();
-
-    if (!slug || !data) {
-      return jsonResponse({ error: "Missing slug or data" }, 400);
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: "Post saved",
+            slug: postData.slug,
+          }),
+          {
+            status: 200,
+            headers: corsHeaders,
+          }
+        );
+      } catch (err) {
+        console.error("POST error:", err);
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: corsHeaders,
+        });
+      }
     }
 
-    data.updatedAt = new Date().toISOString();
-    if (!data.createdAt) data.createdAt = data.updatedAt;
+    // DELETE post
+    if (request.method === "DELETE") {
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
 
-    await env.CALMIQS_POSTS.put(`post:${slug}`, JSON.stringify(data));
+      try {
+        const url = new URL(request.url);
+        const slug = url.searchParams.get("slug");
 
-    return jsonResponse({ success: true, slug }, 200);
-  } catch (error) {
-    return jsonResponse({ error: error.message }, 500);
+        if (!slug) {
+          return new Response(JSON.stringify({ error: "Slug required" }), {
+            status: 400,
+            headers: corsHeaders,
+          });
+        }
+
+        await env.CALMIQS_POSTS.delete(slug);
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: "Post deleted",
+          }),
+          {
+            status: 200,
+            headers: corsHeaders,
+          }
+        );
+      } catch (err) {
+        console.error("DELETE error:", err);
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: corsHeaders,
+        });
+      }
+    }
+
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: corsHeaders,
+    });
+  } catch (err) {
+    console.error("Posts error:", err);
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500,
+      headers: corsHeaders,
+    });
   }
 }

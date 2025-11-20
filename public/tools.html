@@ -38,6 +38,31 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GJ0N1TQ5PP"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-GJ0N1TQ5PP", {
+        page_path: window.location.pathname,
+        page_title: document.title,
+      });
+    </script>
+
+    <script>
+      // Track events
+      function trackEvent(eventName, eventParams) {
+        gtag("event", eventName, eventParams);
+      }
+
+      // Usage examples:
+      // trackEvent('page_view', {'page_title': 'Home'});
+      // trackEvent('scroll', {'scroll_depth': '50%'});
+      // trackEvent('newsletter_signup', {'method': 'inline'});
+    </script>
   </head>
 
   <body class="font-sans bg-[#F9FAFB] text-gray-800">
