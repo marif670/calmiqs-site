@@ -3,224 +3,397 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calmiqs Blog Post</title>
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Calmiqs" />
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/style.css?v=12" />
+
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GJ0N1TQ5PP"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: "#4FA49A",
-              accent: "#FFD580",
-              tech: "#5A67D8",
-            },
-            fontFamily: { sans: ["Poppins", "sans-serif"] },
-          },
-        },
-      };
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-GJ0N1TQ5PP", {
+        page_path: window.location.pathname,
+        page_title: document.title,
+      });
     </script>
 
-    <link rel="stylesheet" href="/assets/css/style.css?v=12" />
+    <script>
+      // Track events
+      function trackEvent(eventName, eventParams) {
+        gtag("event", eventName, eventParams);
+      }
+
+      // Usage examples:
+      // trackEvent('page_view', {'page_title': 'Home'});
+      // trackEvent('scroll', {'scroll_depth': '50%'});
+      // trackEvent('newsletter_signup', {'method': 'inline'});
+    </script>
+
+    <!-- Google AdSense -->
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_PUBLISHER_ID"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json" id="postSchema">
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Article Title",
+        "description": "Article description",
+        "image": "https://example.com/image.jpg",
+        "datePublished": "2025-01-01T00:00:00Z",
+        "dateModified": "2025-01-01T00:00:00Z",
+        "author": {
+          "@type": "Person",
+          "name": "Author Name"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Calmiqs",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://calmiqs.pages.dev/assets/logo.svg"
+          }
+        }
+      }
+    </script>
+
+    <title id="pageTitle">Article - Calmiqs</title>
   </head>
 
   <body class="font-sans bg-[#F9FAFB] text-gray-800">
-    <!-- HEADER -->
     <div id="navbar-container"></div>
 
     <main class="max-w-4xl mx-auto py-16 px-6">
-      <!-- Post Content -->
-      <div id="postContainer" class="text-center"></div>
+      <!-- Article Header -->
+      <article class="bg-white rounded-2xl shadow-lg p-8 md:p-12">
+        <!-- Breadcrumb (for SEO) -->
+        <nav class="mb-6 text-sm text-gray-600" aria-label="Breadcrumb">
+          <a href="/" class="text-primary hover:underline">Home</a>
+          /
+          <a href="/blog.html" class="text-primary hover:underline">Blog</a>
+          /
+          <span id="breadcrumbTitle" class="text-gray-800">Article</span>
+        </nav>
 
-      <!-- Post Navigation -->
-      <div id="postNav" class="flex justify-between mt-12"></div>
-
-      <!-- Share Buttons -->
-      <div class="mt-12 pt-8 border-t border-gray-200">
-        <h3 class="text-lg font-semibold mb-4 text-center">Share this post</h3>
-        <div class="flex justify-center gap-4">
-          <a
-            id="shareTwitter"
-            target="_blank"
-            class="share-btn bg-blue-400 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition"
-          >
-            🐦 Twitter
-          </a>
-          <a
-            id="shareLinkedIn"
-            target="_blank"
-            class="share-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
-          >
-            💼 LinkedIn
-          </a>
-          <a
-            id="shareFacebook"
-            target="_blank"
-            class="share-btn bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg transition"
-          >
-            📘 Facebook
-          </a>
-          <button
-            id="copyLink"
-            class="share-btn bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition"
-          >
-            🔗 Copy Link
-          </button>
+        <!-- Meta Info -->
+        <div class="flex gap-4 text-sm text-gray-500 mb-4 flex-wrap">
+          <span id="postDate">January 1, 2025</span>
+          <span>•</span>
+          <span id="postAuthor">Calmiqs Team</span>
+          <span>•</span>
+          <span id="postReadTime">5 min read</span>
+          <span>•</span>
+          <span id="postCategory" class="px-2 py-1 bg-primary/10 text-primary rounded">
+            Category
+          </span>
         </div>
-      </div>
 
-      <!-- Comments Section -->
-      <div id="commentsContainer" class="mt-16"></div>
+        <!-- Article Title (H1) -->
+        <h1 id="postTitle" class="text-4xl md:text-5xl font-bold text-primary mb-4">
+          Article Title
+        </h1>
 
-      <!-- Back to Blog -->
-      <div class="mt-12 text-center">
-        <a
-          href="blog.html"
-          class="inline-block bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-accent transition shadow"
+        <!-- Excerpt -->
+        <p id="postExcerpt" class="text-lg text-gray-600 mb-8">Article excerpt goes here</p>
+
+        <!-- Featured Image -->
+        <figure class="mb-8">
+          <img
+            id="postImage"
+            src=""
+            alt=""
+            class="w-full h-96 object-cover rounded-2xl shadow-lg"
+          />
+          <figcaption
+            id="postImageAlt"
+            class="text-sm text-gray-600 mt-2 text-center italic"
+          ></figcaption>
+        </figure>
+
+        <!-- Top Ad Banner (Above Fold) -->
+        <div class="mb-8 p-4 bg-gray-100 rounded-lg text-center">
+          <div
+            class="ins"
+            data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
+            data-ad-slot="TOP_BANNER_SLOT"
+            data-ad-format="horizontal"
+            data-full-width-responsive="true"
+          ></div>
+          <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+          </script>
+        </div>
+
+        <!-- Article Content -->
+        <div id="postContent" class="prose prose-lg max-w-none mb-8">
+          <!-- Content dynamically inserted here -->
+        </div>
+
+        <!-- Mid-Article Ad (In-content) -->
+        <div class="my-12 p-4 bg-gray-100 rounded-lg text-center">
+          <div
+            class="ins"
+            data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
+            data-ad-slot="IN_CONTENT_SLOT"
+            data-ad-format="rectangle"
+            data-full-width-responsive="true"
+          ></div>
+          <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+          </script>
+        </div>
+
+        <!-- Tags -->
+        <div class="mb-8 flex flex-wrap gap-2" id="postTags">
+          <!-- Tags dynamically inserted -->
+        </div>
+
+        <!-- Author Bio -->
+        <div class="border-t border-gray-200 pt-6 mt-8">
+          <h3 class="font-semibold mb-2">About the Author</h3>
+          <p class="text-gray-600" id="authorBio">
+            Professional wellness and sustainability advocate at Calmiqs.
+          </p>
+        </div>
+
+        <!-- Related Posts -->
+        <section class="mt-12 border-t pt-8">
+          <h2 class="text-2xl font-bold mb-6">Related Articles</h2>
+          <div id="relatedPosts" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Related posts dynamically inserted -->
+          </div>
+        </section>
+
+        <!-- Newsletter CTA -->
+        <div
+          class="mt-12 bg-gradient-to-r from-primary via-accent to-tech p-8 rounded-2xl text-white text-center"
         >
-          ← Back to Blog
+          <h3 class="text-2xl font-bold mb-3">Stay Updated</h3>
+          <p class="mb-4">Get wellness tips and sustainability insights delivered to your inbox.</p>
+          <form id="newsletterForm" class="flex gap-2 max-w-md mx-auto flex-col sm:flex-row">
+            <input
+              type="email"
+              name="email"
+              placeholder="your@email.com"
+              required
+              class="flex-1 px-4 py-2 rounded-lg text-gray-900 focus:outline-none"
+            />
+            <button
+              type="submit"
+              class="px-6 py-2 bg-white text-primary font-semibold rounded-lg hover:bg-gray-100 transition"
+            >
+              Subscribe
+            </button>
+          </form>
+          <p class="text-sm text-white/80 mt-2">No spam, unsubscribe anytime.</p>
+        </div>
+
+        <!-- Bottom Ad Banner -->
+        <div class="mt-12 p-4 bg-gray-100 rounded-lg text-center">
+          <div
+            class="ins"
+            data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
+            data-ad-slot="BOTTOM_BANNER_SLOT"
+            data-ad-format="horizontal"
+            data-full-width-responsive="true"
+          ></div>
+          <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+          </script>
+        </div>
+      </article>
+
+      <!-- Article Navigation -->
+      <div class="flex justify-between mt-12 gap-4">
+        <a
+          id="prevPost"
+          href="#"
+          class="flex-1 p-4 bg-white rounded-lg shadow hover:shadow-lg transition"
+        >
+          <div class="text-sm text-gray-600">← Previous</div>
+          <div id="prevTitle" class="font-semibold text-primary">Previous Article</div>
+        </a>
+        <a
+          id="nextPost"
+          href="#"
+          class="flex-1 p-4 bg-white rounded-lg shadow hover:shadow-lg transition text-right"
+        >
+          <div class="text-sm text-gray-600">Next →</div>
+          <div id="nextTitle" class="font-semibold text-primary">Next Article</div>
         </a>
       </div>
     </main>
 
-    <footer class="bg-gray-100 py-8 mt-16 text-center text-gray-600">
-      <p>© 2025 Calmiqs – Wellness Meets Sustainability</p>
-    </footer>
+    <div id="footer-container"></div>
 
-    <!-- Load Comments Script -->
-    <script src="/assets/js/comments.js"></script>
+    <!-- Structured Comment Schema -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://calmiqs.pages.dev"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Blog",
+            "item": "https://calmiqs.pages.dev/blog.html"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Article"
+          }
+        ]
+      }
+    </script>
 
     <script>
+      const WORKER_BASE = "https://calmiqs-images-worker.techaipet.workers.dev";
+
       (async () => {
-        const postContainer = document.getElementById("postContainer");
-        const postNav = document.getElementById("postNav");
-
-        // Get post slug from URL
         const params = new URLSearchParams(window.location.search);
-        const postSlug = params.get("post");
+        const postSlug = params.get("post") || "mindful-breathing";
 
-        if (!postSlug) {
-          postContainer.innerHTML = `<p class="text-gray-500">Post not found.</p>`;
-          return;
-        }
+        try {
+          // Load post from KV
+          const res = await fetch(`${WORKER_BASE}/api/posts/${postSlug}`);
+          if (!res.ok) throw new Error("Post not found");
+          const post = await res.json();
 
-        // Fallback embedded posts (same as before)
-        const embeddedPosts = {
-          "mindful-breathing": {
-            title: "The Art of Mindful Breathing",
-            date: "November 2, 2025",
-            image: "https://via.placeholder.com/800x400?text=Mindful+Breathing",
-            content: `
-              <p>Mindful breathing allows you to focus on your breath and anchor your thoughts in the present moment. This practice reduces stress, anxiety, and improves focus.</p>
-              <p class="mt-4">Start by taking deep, slow breaths, observing each inhale and exhale. Feel the air as it enters and leaves your body, grounding you in calm awareness.</p>
-            `,
-          },
-          "eco-habits": {
-            title: "5 Small Eco Habits That Reduce Stress",
-            date: "November 4, 2025",
-            image: "https://via.placeholder.com/800x400?text=Eco+Habits",
-            content: `
-              <p>Living sustainably doesn't have to be overwhelming. By making small eco-friendly changes, you can create a lifestyle that supports both the planet and your mental well-being.</p>
-              <ul class="list-disc ml-6 mt-4 text-left">
-                <li>Practice digital detoxes to save energy and reduce stress.</li>
-                <li>Walk or cycle instead of driving short distances.</li>
-                <li>Start composting to reconnect with nature.</li>
-                <li>Use reusable water bottles and cups.</li>
-                <li>Spend time in green spaces daily.</li>
-              </ul>
-            `,
-          },
-        };
+          // Update page metadata
+          document.title = `${post.title} - Calmiqs`;
+          document.getElementById("pageTitle").textContent = post.title;
+          document.getElementById("breadcrumbTitle").textContent = post.title;
 
-        // Load posts from KV
-        async function loadPosts() {
-          try {
-            const res = await fetch("/posts");
-            if (!res.ok) throw new Error("KV fetch failed");
-            return await res.json();
-          } catch (err) {
-            console.error("KV fetch failed, using fallback:", err);
-            return embeddedPosts;
+          // Update Open Graph
+          document.querySelector('meta[property="og:title"]')?.setAttribute("content", post.title);
+          document
+            .querySelector('meta[property="og:description"]')
+            ?.setAttribute("content", post.metaDescription || post.excerpt);
+          document
+            .querySelector('meta[property="og:image"]')
+            ?.setAttribute("content", post.ogImage || post.image);
+          document
+            .querySelector('meta[property="og:url"]')
+            ?.setAttribute("content", window.location.href);
+
+          // Update meta description
+          document
+            .querySelector('meta[name="description"]')
+            ?.setAttribute("content", post.metaDescription || post.excerpt);
+
+          // Update JSON-LD schema
+          const schema = {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            headline: post.title,
+            description: post.metaDescription || post.excerpt,
+            image: post.ogImage || post.image,
+            datePublished: post.date,
+            author: { "@type": "Person", name: post.author || "Calmiqs Team" },
+            publisher: {
+              "@type": "Organization",
+              name: "Calmiqs",
+              logo: { "@type": "ImageObject", url: "https://calmiqs.pages.dev/assets/logo.svg" },
+            },
+          };
+          document.getElementById("postSchema").textContent = JSON.stringify(schema);
+
+          // Populate page
+          document.getElementById("postTitle").textContent = post.title;
+          document.getElementById("postExcerpt").textContent = post.excerpt;
+          document.getElementById("postDate").textContent = new Date(post.date).toLocaleDateString(
+            "en-US",
+            { year: "numeric", month: "long", day: "numeric" }
+          );
+          document.getElementById("postAuthor").textContent = post.author || "Calmiqs Team";
+          document.getElementById("postReadTime").textContent = post.readTime || "5 min read";
+          document.getElementById("postCategory").textContent = post.category;
+          document.getElementById("postImage").src = post.image;
+          document.getElementById("postImage").alt = post.imageAlt;
+          document.getElementById("postImageAlt").textContent = post.imageAlt;
+          document.getElementById("postContent").innerHTML = post.content;
+
+          // Tags
+          if (post.tags && post.tags.length > 0) {
+            document.getElementById("postTags").innerHTML = post.tags
+              .map(
+                (tag) =>
+                  `<a href="/blog.html?tags=${tag}" class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm hover:bg-primary hover:text-white transition">#${tag}</a>`
+              )
+              .join("");
           }
-        }
 
-        const posts = await loadPosts();
-        const keys = Object.keys(posts);
-        const post = posts[postSlug];
+          // Newsletter form
+          document.getElementById("newsletterForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = e.target.email.value;
+            try {
+              const res = await fetch(`${WORKER_BASE}/api/newsletter/subscribe`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+              });
+              const result = await res.json();
+              alert(result.message || "Thank you for subscribing!");
+              e.target.reset();
 
-        if (!post) {
-          postContainer.innerHTML = `<p class="text-gray-500">Post not found.</p>`;
-          return;
-        }
-
-        // Render post
-        postContainer.innerHTML = `
-          <h1 class="text-4xl font-bold text-primary mb-4">${post.title}</h1>
-          <p class="text-gray-500 mb-6">${post.date}</p>
-          <img src="${post.image}" alt="${
-          post.imageAlt || post.title
-        }" class="rounded-xl mb-8 shadow-lg mx-auto" />
-          <div class="text-lg leading-relaxed text-left max-w-3xl mx-auto">${post.content}</div>
-        `;
-
-        // Setup share buttons
-        const postUrl = window.location.href;
-        const postTitle = encodeURIComponent(post.title);
-
-        document.getElementById(
-          "shareTwitter"
-        ).href = `https://twitter.com/intent/tweet?text=${postTitle}&url=${encodeURIComponent(
-          postUrl
-        )}`;
-
-        document.getElementById(
-          "shareLinkedIn"
-        ).href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-          postUrl
-        )}`;
-
-        document.getElementById(
-          "shareFacebook"
-        ).href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`;
-
-        document.getElementById("copyLink").addEventListener("click", async () => {
-          try {
-            await navigator.clipboard.writeText(postUrl);
-            const btn = document.getElementById("copyLink");
-            btn.textContent = "✅ Copied!";
-            setTimeout(() => (btn.textContent = "🔗 Copy Link"), 2000);
-          } catch (err) {
-            alert("Failed to copy link");
-          }
-        });
-
-        // Previous / Next navigation
-        const currentIndex = keys.indexOf(postSlug);
-        const prevKey = keys[currentIndex - 1];
-        const nextKey = keys[currentIndex + 1];
-
-        postNav.innerHTML = `
-          <div>
-            ${
-              prevKey
-                ? `<a href="post-template.html?post=${prevKey}" class="text-primary hover:underline">← ${posts[prevKey].title}</a>`
-                : ""
+              // Track subscription in GA4
+              gtag("event", "newsletter_signup", {
+                email_domain: email.split("@")[1],
+              });
+            } catch (err) {
+              alert("Error subscribing. Please try again.");
             }
-          </div>
-          <div>
-            ${
-              nextKey
-                ? `<a href="post-template.html?post=${nextKey}" class="text-primary hover:underline">${posts[nextKey].title} →</a>`
-                : ""
-            }
-          </div>
-        `;
+          });
 
-        // Initialize comments system
-        window.initComments(postSlug);
+          // Load footer and header
+          loadFragment("/assets/components/header.html", "#navbar-container");
+          loadFragment("/assets/components/footer.html", "#footer-container");
+
+          // Track page view in GA4
+          gtag("event", "view_item", {
+            items: [
+              {
+                item_id: postSlug,
+                item_name: post.title,
+                item_category: post.category,
+              },
+            ],
+          });
+        } catch (err) {
+          console.error(err);
+          document.getElementById("postContent").innerHTML =
+            "<p class='text-red-600'>Post not found.</p>";
+        }
       })();
+
+      async function loadFragment(url, selector) {
+        try {
+          const res = await fetch(url);
+          document.querySelector(selector).innerHTML = await res.text();
+        } catch (err) {
+          console.error(`Failed to load ${url}:`, err);
+        }
+      }
     </script>
-    <!-- Global scripts -->
+
     <script src="/assets/js/auth.js"></script>
     <script src="/assets/js/header-loader.js"></script>
   </body>
