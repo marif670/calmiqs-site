@@ -1,2 +1,7 @@
 User-agent: *
 Disallow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /*.json$
+
+Sitemap: https://calmiqs-site.pages.dev/sitemap.xml
