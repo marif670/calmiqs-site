@@ -1,142 +1,136 @@
-export async function onRequest(context) {
+// functions/api/comments.js
+// Handles POST /api/comments (submit new comment)
+
+function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+function sanitize(str) {
+  return String(str)
+    .replace(/[<>]/g, "")
+    .replace(/javascript:/gi, "")
+    .replace(/on\w+=/gi, "")
+    .trim()
+    .slice(0, 1000);
+}
+
+export async function onRequestPost(context) {
   const { request, env } = context;
-  const method = request.method;
-  const url = new URL(request.url);
+
+  console.log("POST /api/comments - Adding new comment");
 
   try {
-    if (method === "GET") {
-      return handleGetComments(context);
-    } else if (method === "POST") {
-      return handleAddComment(context);
-    } else if (method === "PUT") {
-      return handleApproveComment(context);
-    } else if (method === "DELETE") {
-      return handleDeleteComment(context);
+    const body = await request.json();
+    console.log("Request body:", body);
+
+    const { postSlug, name, email, comment, parentId } = body;
+
+    // Validation
+    if (!postSlug || !name || !email || !comment) {
+      console.log("Validation failed - missing fields");
+      return jsonResponse(
+        {
+          error: "Missing required fields",
+          received: { postSlug, name, email, hasComment: !!comment },
+        },
+        400
+      );
     }
+
+    // Email validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      console.log("Validation failed - invalid email");
+      return jsonResponse(
+        {
+          error: "Invalid email address",
+        },
+        400
+      );
+    }
+
+    // Generate unique comment ID
+    const commentId = `${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+    console.log("Generated comment ID:", commentId);
+
+    const commentData = {
+      id: commentId,
+      postSlug,
+      name: sanitize(name),
+      email,
+      comment: sanitize(comment),
+      parentId: parentId || null,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+      ip: request.headers.get("CF-Connecting-IP") || "unknown",
+    };
+
+    // Store in KV
+    const kvKey = `comments:${postSlug}:${commentId}`;
+    console.log("Storing to KV:", kvKey);
+
+    await env.CALMIQS_POSTS.put(kvKey, JSON.stringify(commentData));
+
+    console.log("Comment stored successfully");
+
+    return jsonResponse(
+      {
+        success: true,
+        commentId,
+        message: "Comment submitted for review",
+      },
+      200
+    );
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error("Error in POST /api/comments:", error);
+    return jsonResponse(
+      {
+        error: error.message,
+        stack: error.stack,
+      },
+      500
+    );
   }
 }
 
-async function handleGetComments(context) {
-  const { env } = context;
-  const url = new URL(context.request.url);
-  const postSlug = url.searchParams.get("post");
+// Handle GET /api/comments (list all pending - admin only)
+export async function onRequestGet(context) {
+  const { request, env } = context;
 
-  if (!postSlug) {
-    return new Response(JSON.stringify({ error: "Post slug required" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+  // Check admin token
+  const token = request.headers.get("X-Admin-Token");
+  const ADMIN_SECRET =
+    env.ADMIN_SECRET ||
+    "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Hadia@2017_Ayesha@2007";
+
+  if (!token || token !== ADMIN_SECRET) {
+    return jsonResponse({ error: "Unauthorized" }, 401);
   }
 
-  const list = await env.CALMIQS_COMMENTS.list({
-    prefix: `comment:${postSlug}:`,
-  });
-  const comments = [];
+  try {
+    const pendingComments = [];
+    const list = await env.CALMIQS_POSTS.list({ prefix: "comments:" });
 
-  for (const key of list.keys) {
-    const comment = await env.CALMIQS_COMMENTS.get(key.name, "json");
-    if (comment && comment.approved) {
-      comments.push(comment);
+    for (const key of list.keys) {
+      const value = await env.CALMIQS_POSTS.get(key.name);
+      if (value) {
+        const comment = JSON.parse(value);
+        if (comment.status === "pending") {
+          pendingComments.push(comment);
+        }
+      }
     }
+
+    pendingComments.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    return jsonResponse({ comments: pendingComments }, 200);
+  } catch (error) {
+    return jsonResponse({ error: error.message }, 500);
   }
-
-  return new Response(JSON.stringify({ comments }), {
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
-async function handleAddComment(context) {
-  const { env, request } = context;
-  const { postSlug, author, email, content } = await request.json();
-
-  if (!postSlug || !author || !email || !content) {
-    return new Response(JSON.stringify({ error: "Missing fields" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  const commentId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  const comment = {
-    id: commentId,
-    postSlug,
-    author,
-    email,
-    content,
-    approved: false,
-    createdAt: new Date().toISOString(),
-  };
-
-  await env.CALMIQS_COMMENTS.put(
-    `comment:${postSlug}:${commentId}`,
-    JSON.stringify(comment)
-  );
-
-  return new Response(JSON.stringify({ success: true, id: commentId }), {
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
-async function handleApproveComment(context) {
-  const { env, request } = context;
-
-  // Verify admin token
-  const token = request.headers.get("X-Admin-Token");
-  if (!token || token !== env.ADMIN_SECRET) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  const { postSlug, commentId } = await request.json();
-  const comment = await env.CALMIQS_COMMENTS.get(
-    `comment:${postSlug}:${commentId}`,
-    "json"
-  );
-
-  if (!comment) {
-    return new Response(JSON.stringify({ error: "Comment not found" }), {
-      status: 404,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  comment.approved = true;
-  await env.CALMIQS_COMMENTS.put(
-    `comment:${postSlug}:${commentId}`,
-    JSON.stringify(comment)
-  );
-
-  return new Response(JSON.stringify({ success: true }), {
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
-async function handleDeleteComment(context) {
-  const { env, request } = context;
-
-  // Verify admin token
-  const token = request.headers.get("X-Admin-Token");
-  if (!token || token !== env.ADMIN_SECRET) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  const url = new URL(request.url);
-  const postSlug = url.searchParams.get("post");
-  const commentId = url.searchParams.get("id");
-
-  await env.CALMIQS_COMMENTS.delete(`comment:${postSlug}:${commentId}`);
-
-  return new Response(JSON.stringify({ success: true }), {
-    headers: { "Content-Type": "application/json" },
-  });
 }

@@ -36,6 +36,7 @@
         page_title: document.title,
       });
     </script>
+
     <script>
       // Track events
       function trackEvent(eventName, eventParams) {
@@ -257,12 +258,12 @@
         // Load posts from KV
         async function loadPosts() {
           try {
-            const response = await fetch("/api/posts");
+            const response = await fetch("/posts");
             if (!response.ok) throw new Error("KV fetch failed");
             return await response.json();
           } catch (err) {
-            console.error("Post fetch failed:", err);
-            return { posts: [] };
+            console.error("KV fetch failed, using fallback:", err);
+            return getFallbackPosts();
           }
         }
 
@@ -512,10 +513,6 @@
         function renderPosts() {
           const filtered = filterPosts(allPosts, currentFilters);
           const totalPosts = Object.keys(allPosts).length;
-          const posts = data.posts || [];
-          if (Array.isArray(posts)) {
-            filtered = Object.fromEntries(posts.map((post) => [post.slug, post]));
-          }
 
           // Update results counter
           resultsCounter.textContent = `Showing ${filtered.length} of ${totalPosts} posts`;
