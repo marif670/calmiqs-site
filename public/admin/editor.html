@@ -1,909 +1,1209 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Calmiqs — Editor (Final)</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Calmiqs Admin Panel - Content Management & Newsletter Control"
+    />
+    <title>Calmiqs Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4FA49A",
+              accent: "#FFD580",
+              tech: "#5A67D8",
+            },
+            fontFamily: { sans: ["Poppins", "sans-serif"] },
+          },
+        },
+      };
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-      :root {
-        --accent: #2563eb;
-        --muted: #64748b;
-        --border: #e6eef8;
-        --danger: #dc2626;
-      }
+      html,
       body {
-        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-        margin: 16px;
-        background: #f8fafc;
-        color: #0f1724;
-      }
-      header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 14px;
-      }
-      h1 {
         margin: 0;
-        font-size: 20px;
+        padding: 0;
       }
-      .toolbar {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
+      .fade-in {
+        animation: fadeIn 0.3s ease-in;
       }
-      .btn {
-        padding: 6px 10px;
-        border-radius: 6px;
-        border: 1px solid var(--border);
-        background: #fff;
-        cursor: pointer;
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
       }
-      .btn.primary {
-        background: var(--accent);
-        color: #fff;
-        border-color: var(--accent);
+      .tab-content {
+        display: none;
       }
-      .btn.danger {
-        background: transparent;
-        color: var(--danger);
-        border-color: #ffcccc;
-      }
-      .input {
-        padding: 8px;
-        border-radius: 6px;
-        border: 1px solid var(--border);
-        width: 100%;
-      }
-      .layout {
-        display: flex;
-        gap: 12px;
-      }
-      .col {
-        background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 12px;
-      }
-      .left {
-        flex: 1;
-      }
-      .right {
-        width: 360px;
-      }
-      .editor {
-        min-height: 380px;
-        border: 1px dashed #dbe7f0;
-        padding: 10px;
-        border-radius: 6px;
-        overflow: auto;
-        background: #ffffff;
-      }
-      .editor:focus {
-        outline: 2px solid rgba(37, 99, 235, 0.12);
-      }
-      .small {
-        font-size: 13px;
-        color: var(--muted);
-      }
-      .inline-img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 6px;
+      .tab-content.active {
         display: block;
-        margin: 12px auto;
       }
-      .inline-img.left {
-        float: left;
-        margin: 0 12px 12px 0;
+      .editor-toolbar {
+        @apply flex gap-2 flex-wrap mb-4 p-3 bg-gray-100 rounded-lg;
       }
-      .inline-img.right {
-        float: right;
-        margin: 0 0 12px 12px;
+      .editor-toolbar button {
+        @apply px-3 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 font-medium text-sm;
       }
-      .inline-img.center {
-        display: block;
-        margin: 12px auto;
+      .editor-content {
+        @apply w-full min-h-96 p-4 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent;
       }
-      .img-selected {
-        outline: 3px solid rgba(37, 99, 235, 0.25);
+      .field-group {
+        @apply mb-4;
       }
-      .toolbar-2 {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-bottom: 8px;
+      .field-label {
+        @apply block text-sm font-semibold text-gray-700 mb-2;
       }
-      #preview {
-        background: #fff;
-        border: 1px solid var(--border);
-        padding: 12px;
-        border-radius: 8px;
-        min-height: 220px;
-        margin-top: 16px;
+      .field-input {
+        @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent;
       }
-      .modal {
-        position: fixed;
-        inset: 0;
-        background: rgba(2, 6, 23, 0.6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 2000;
+      .btn-primary {
+        @apply px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 font-medium;
+      }
+      .btn-secondary {
+        @apply px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-medium;
+      }
+      .btn-danger {
+        @apply px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium;
+      }
+      .modal-overlay {
+        @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
       }
       .modal-card {
-        background: white;
-        border-radius: 8px;
-        padding: 12px;
-        max-width: 1000px;
-        width: 92%;
-        max-height: 80vh;
-        overflow: auto;
+        @apply bg-white rounded-xl shadow-2xl p-6 max-w-2xl w-full mx-4;
       }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
+      .status-badge {
+        @apply inline-block px-3 py-1 rounded-full text-sm font-medium;
       }
-      .thumb {
-        width: 100%;
-        height: 120px;
-        object-fit: cover;
-        border-radius: 6px;
-        cursor: pointer;
-        border: 1px solid #e6eef8;
+      .status-success {
+        @apply bg-green-100 text-green-800;
       }
-      .inline-toolbar {
-        position: absolute;
-        background: #fff;
-        border: 1px solid var(--border);
-        padding: 8px;
-        border-radius: 6px;
-        z-index: 3000;
-        box-shadow: 0 6px 20px rgba(2, 6, 23, 0.08);
+      .status-warning {
+        @apply bg-yellow-100 text-yellow-800;
       }
-      .html-view {
-        width: 100%;
-        min-height: 160px;
-        font-family: monospace;
-        padding: 8px;
-        border-radius: 6px;
-        border: 1px solid var(--border);
+      .status-error {
+        @apply bg-red-100 text-red-800;
       }
-      footer {
-        margin-top: 12px;
-        font-size: 13px;
-        color: var(--muted);
+      .schema-preview {
+        @apply bg-gray-50 p-3 rounded-lg font-mono text-xs overflow-auto max-h-48 border border-gray-200;
       }
     </style>
   </head>
-  <body>
-    <header>
-      <h1>Calmiqs Editor</h1>
-      <div class="toolbar" style="margin-left: auto">
-        <button id="newPostBtn" class="btn">New</button>
-        <button id="openPostsBtn" class="btn">Posts Library</button>
-        <button id="loadPostBtn" class="btn">Load</button>
-        <button id="savePostBtn" class="btn primary">Save</button>
-        <button id="deletePostBtn" class="btn danger">Delete</button>
+  <body class="bg-gray-50 text-gray-900">
+    <!-- Auth Screen -->
+    <div
+      id="authScreen"
+      class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-accent to-tech p-4"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-primary mb-2">Calmiqs Admin</h1>
+          <p class="text-gray-600">Secure Content Management</p>
+        </div>
+        <form id="authForm" class="space-y-4">
+          <div class="field-group">
+            <label class="field-label">Password</label>
+            <input
+              type="password"
+              id="authPassword"
+              class="field-input"
+              placeholder="Enter admin password"
+              required
+            />
+          </div>
+          <button type="submit" class="w-full btn-primary">Login</button>
+          <p class="text-xs text-gray-500 text-center mt-4">🔒 Password-protected access only</p>
+        </form>
       </div>
-    </header>
+    </div>
 
-    <!-- IMPORTANT: put your admin token here (exact match with Worker ADMIN_SECRET) -->
+    <!-- Main Admin Panel -->
+    <div id="adminPanel" class="hidden min-h-screen bg-gray-50">
+      <!-- Header -->
+      <header class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div class="flex items-center gap-4">
+            <h1 class="text-2xl font-bold text-primary">Calmiqs Admin</h1>
+            <span class="status-badge status-success">🟢 Connected</span>
+          </div>
+          <button id="logoutBtn" class="btn-secondary text-sm">Logout</button>
+        </div>
+      </header>
+
+      <!-- Tabs Navigation -->
+      <nav class="bg-white border-b border-gray-200 sticky top-16 z-30">
+        <div class="max-w-7xl mx-auto px-6 flex gap-4 overflow-x-auto">
+          <button
+            class="tab-btn py-4 px-4 border-b-2 border-primary text-primary font-medium"
+            data-tab="editor"
+          >
+            📝 Editor
+          </button>
+          <button
+            class="tab-btn py-4 px-4 border-b-2 border-transparent text-gray-600 hover:text-gray-900"
+            data-tab="images"
+          >
+            🖼️ Images
+          </button>
+          <button
+            class="tab-btn py-4 px-4 border-b-2 border-transparent text-gray-600 hover:text-gray-900"
+            data-tab="newsletter"
+          >
+            📧 Newsletter
+          </button>
+          <button
+            class="tab-btn py-4 px-4 border-b-2 border-transparent text-gray-600 hover:text-gray-900"
+            data-tab="seo"
+          >
+            🔍 SEO & Schema
+          </button>
+          <button
+            class="tab-btn py-4 px-4 border-b-2 border-transparent text-gray-600 hover:text-gray-900"
+            data-tab="settings"
+          >
+            ⚙️ Settings
+          </button>
+        </div>
+      </nav>
+
+      <!-- Content Area -->
+      <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- EDITOR TAB -->
+        <div id="editor" class="tab-content active fade-in">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left: Editor -->
+            <div class="lg:col-span-2 space-y-6">
+              <!-- Post Management -->
+              <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-bold mb-4">📝 Post Management</h2>
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                  <button id="newPostBtn" class="btn-primary">
+                    <i class="fas fa-plus mr-2"></i>
+                    New Post
+                  </button>
+                  <button id="loadPostBtn" class="btn-secondary">
+                    <i class="fas fa-folder-open mr-2"></i>
+                    Load Post
+                  </button>
+                  <button id="savePostBtn" class="btn-primary">
+                    <i class="fas fa-save mr-2"></i>
+                    Save
+                  </button>
+                  <button id="deletePostBtn" class="btn-danger">
+                    <i class="fas fa-trash mr-2"></i>
+                    Delete
+                  </button>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Post Slug (auto-generated)</label>
+                  <input type="text" id="postSlug" class="field-input" readonly />
+                </div>
+              </div>
+
+              <!-- Hero Image -->
+              <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-lg font-bold mb-4">🖼️ Hero Image</h2>
+                <div class="field-group">
+                  <label class="field-label">Upload Hero Image</label>
+                  <input type="file" id="heroImageFile" class="field-input" accept="image/*" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Image Alt Text</label>
+                  <input
+                    type="text"
+                    id="heroAlt"
+                    class="field-input"
+                    placeholder="Describe the image"
+                  />
+                </div>
+                <button id="uploadHeroBtn" class="btn-primary w-full">
+                  <i class="fas fa-cloud-upload-alt mr-2"></i>
+                  Upload Hero
+                </button>
+                <div id="heroPreview" class="mt-4"></div>
+              </div>
+
+              <!-- Post Content -->
+              <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-lg font-bold mb-4">📄 Content Editor</h2>
+                <div class="editor-toolbar">
+                  <button data-cmd="bold" title="Bold"><i class="fas fa-bold"></i></button>
+                  <button data-cmd="italic" title="Italic"><i class="fas fa-italic"></i></button>
+                  <button data-cmd="underline" title="Underline">
+                    <i class="fas fa-underline"></i>
+                  </button>
+                  <button data-cmd="h2" title="Heading 2">H2</button>
+                  <button data-cmd="h3" title="Heading 3">H3</button>
+                  <button data-cmd="ul" title="Bullet List"><i class="fas fa-list"></i></button>
+                  <button data-cmd="ol" title="Numbered List">
+                    <i class="fas fa-list-ol"></i>
+                  </button>
+                  <button data-cmd="link" title="Insert Link"><i class="fas fa-link"></i></button>
+                </div>
+                <div
+                  id="postContent"
+                  class="editor-content"
+                  contenteditable="true"
+                  placeholder="Write your post content here..."
+                ></div>
+              </div>
+
+              <!-- Inline Images -->
+              <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-lg font-bold mb-4">🖼️ Inline Images</h2>
+                <div class="field-group">
+                  <input type="file" id="inlineImageFile" class="field-input" accept="image/*" />
+                </div>
+                <button id="uploadInlineBtn" class="btn-primary w-full mb-3">
+                  <i class="fas fa-cloud-upload-alt mr-2"></i>
+                  Upload & Insert
+                </button>
+                <button id="openLibraryBtn" class="btn-secondary w-full">
+                  <i class="fas fa-image mr-2"></i>
+                  Select from Library
+                </button>
+              </div>
+            </div>
+
+            <!-- Right: Metadata -->
+            <div class="space-y-6">
+              <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-lg font-bold mb-4">📋 Post Metadata</h2>
+                <div class="field-group">
+                  <label class="field-label">Title</label>
+                  <input type="text" id="postTitle" class="field-input" placeholder="Post title" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Excerpt</label>
+                  <textarea
+                    id="postExcerpt"
+                    class="field-input"
+                    rows="3"
+                    placeholder="Brief summary"
+                  ></textarea>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Date</label>
+                  <input type="date" id="postDate" class="field-input" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Category</label>
+                  <select id="postCategory" class="field-input">
+                    <option value="wellness">Wellness</option>
+                    <option value="sustainability">Sustainability</option>
+                    <option value="technology">Technology</option>
+                    <option value="lifestyle">Lifestyle</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Tags (comma-separated)</label>
+                  <input
+                    type="text"
+                    id="postTags"
+                    class="field-input"
+                    placeholder="tag1, tag2, tag3"
+                  />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Author</label>
+                  <input
+                    type="text"
+                    id="postAuthor"
+                    class="field-input"
+                    placeholder="Author name"
+                  />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Read Time</label>
+                  <input
+                    type="text"
+                    id="postReadTime"
+                    class="field-input"
+                    placeholder="5 min read"
+                  />
+                </div>
+                <label class="flex items-center gap-2 text-sm">
+                  <input type="checkbox" id="autosaveToggle" checked />
+                  <span>Auto-save every 60s</span>
+                </label>
+              </div>
+
+              <!-- Preview -->
+              <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-lg font-bold mb-4">👁️ Preview</h2>
+                <div
+                  id="postPreview"
+                  class="text-sm border border-gray-200 rounded-lg p-4 bg-gray-50 max-h-64 overflow-auto"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- IMAGES TAB -->
+        <div id="images" class="tab-content fade-in">
+          <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-2xl font-bold mb-6">🖼️ Image Library</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="imageLibraryGrid">
+              <div class="col-span-full text-center py-8 text-gray-500">Loading images...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NEWSLETTER TAB -->
+        <div id="newsletter" class="tab-content fade-in">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left: Newsletter Management -->
+            <div class="lg:col-span-2 space-y-6">
+              <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-2xl font-bold mb-6">📧 Newsletter Management</h2>
+
+                <!-- Subscription Stats -->
+                <div class="grid grid-cols-3 gap-4 mb-8">
+                  <div class="bg-blue-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-tech" id="totalSubscribers">0</div>
+                    <div class="text-sm text-gray-600">Total Subscribers</div>
+                  </div>
+                  <div class="bg-green-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600" id="activeSubscribers">0</div>
+                    <div class="text-sm text-gray-600">Active</div>
+                  </div>
+                  <div class="bg-yellow-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-yellow-600" id="unsubscribed">0</div>
+                    <div class="text-sm text-gray-600">Unsubscribed</div>
+                  </div>
+                </div>
+
+                <!-- Send Newsletter -->
+                <div class="border-t pt-6">
+                  <h3 class="text-lg font-semibold mb-4">Send Newsletter</h3>
+                  <div class="field-group">
+                    <label class="field-label">Subject Line</label>
+                    <input
+                      type="text"
+                      id="newsletterSubject"
+                      class="field-input"
+                      placeholder="Email subject"
+                    />
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Email Content</label>
+                    <textarea
+                      id="newsletterContent"
+                      class="field-input"
+                      rows="6"
+                      placeholder="HTML or plain text content"
+                    ></textarea>
+                  </div>
+                  <button id="sendNewsletterBtn" class="btn-primary w-full">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Send to All Subscribers
+                  </button>
+                </div>
+
+                <!-- Subscribers List -->
+                <div class="border-t mt-6 pt-6">
+                  <h3 class="text-lg font-semibold mb-4">Subscribers</h3>
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                      <thead class="bg-gray-100">
+                        <tr>
+                          <th class="px-4 py-2 text-left">Email</th>
+                          <th class="px-4 py-2 text-left">Status</th>
+                          <th class="px-4 py-2 text-left">Subscribed</th>
+                          <th class="px-4 py-2">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="subscribersList" class="divide-y">
+                        <tr>
+                          <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                            Loading subscribers...
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Newsletter Settings -->
+            <div class="space-y-6">
+              <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-lg font-bold mb-4">⚙️ Newsletter Settings</h2>
+                <div class="field-group">
+                  <label class="field-label">From Email</label>
+                  <input
+                    type="email"
+                    id="fromEmail"
+                    class="field-input"
+                    placeholder="noreply@calmiqs.com"
+                  />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">From Name</label>
+                  <input
+                    type="text"
+                    id="fromName"
+                    class="field-input"
+                    placeholder="Calmiqs Newsletter"
+                  />
+                </div>
+                <div class="field-group">
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" id="requireConfirm" checked />
+                    <span>Require double opt-in confirmation</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="bg-blue-50 rounded-xl p-6 border border-blue-200">
+                <h3 class="font-semibold text-blue-900 mb-2">📊 Newsletter Widget Code</h3>
+                <p class="text-sm text-blue-800 mb-3">Add this to your website:</p>
+                <code class="schema-preview text-xs bg-white">
+                  &lt;form action="/api/newsletter/subscribe" method="POST"&gt; &lt;input
+                  type="email" name="email" required /&gt; &lt;button
+                  type="submit"&gt;Subscribe&lt;/button&gt; &lt;/form&gt;
+                </code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEO & SCHEMA TAB -->
+        <div id="seo" class="tab-content fade-in">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left: SEO Settings -->
+            <div class="space-y-6">
+              <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-lg font-bold mb-4">🔍 SEO Meta Tags</h2>
+                <div class="field-group">
+                  <label class="field-label">Meta Description</label>
+                  <textarea
+                    id="metaDescription"
+                    class="field-input"
+                    rows="2"
+                    placeholder="160 characters recommended"
+                    maxlength="160"
+                  ></textarea>
+                  <span class="text-xs text-gray-500 mt-1" id="metaDescCount">0/160</span>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Meta Keywords</label>
+                  <input
+                    type="text"
+                    id="metaKeywords"
+                    class="field-input"
+                    placeholder="keyword1, keyword2, keyword3"
+                  />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">OG Image URL</label>
+                  <input
+                    type="text"
+                    id="ogImage"
+                    class="field-input"
+                    placeholder="Open Graph image URL"
+                  />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Canonical URL</label>
+                  <input
+                    type="text"
+                    id="canonicalUrl"
+                    class="field-input"
+                    placeholder="https://calmiqs.com/blog/post-slug"
+                  />
+                </div>
+              </div>
+
+              <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-lg font-bold mb-4">♿ Accessibility (A11y)</h2>
+                <div class="field-group">
+                  <label class="flex items-center gap-2 text-sm">
+                    <input type="checkbox" id="hasImageAlt" checked />
+                    <span>All images have descriptive alt text</span>
+                  </label>
+                </div>
+                <div class="field-group">
+                  <label class="flex items-center gap-2 text-sm">
+                    <input type="checkbox" id="hasHeadingHierarchy" checked />
+                    <span>Proper heading hierarchy (H1 → H2 → H3)</span>
+                  </label>
+                </div>
+                <div class="field-group">
+                  <label class="flex items-center gap-2 text-sm">
+                    <input type="checkbox" id="hasSkipLink" checked />
+                    <span>Skip to main content link present</span>
+                  </label>
+                </div>
+                <div
+                  id="a11yWarnings"
+                  class="mt-4 text-sm text-amber-700 bg-amber-50 p-3 rounded-lg hidden"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Right: Schema Generator -->
+            <div class="space-y-6">
+              <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-lg font-bold mb-4">📋 JSON Schema Preview</h2>
+                <div class="field-group">
+                  <label class="field-label">Schema Type</label>
+                  <select id="schemaType" class="field-input">
+                    <option value="Article">Article</option>
+                    <option value="BlogPosting">Blog Post</option>
+                    <option value="NewsArticle">News Article</option>
+                  </select>
+                </div>
+                <button id="generateSchemaBtn" class="btn-primary w-full mb-4">
+                  <i class="fas fa-magic mr-2"></i>
+                  Generate Schema
+                </button>
+                <div class="schema-preview" id="schemaPreview">{ Ready to generate schema }</div>
+                <button id="copySchemaBtn" class="btn-secondary w-full mt-3">
+                  <i class="fas fa-copy mr-2"></i>
+                  Copy to Clipboard
+                </button>
+              </div>
+
+              <div class="bg-green-50 rounded-xl p-6 border border-green-200">
+                <h3 class="font-semibold text-green-900 mb-2">✅ SEO Checklist</h3>
+                <ul class="text-sm text-green-800 space-y-2">
+                  <li>
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Meta description under 160 chars
+                  </li>
+                  <li>
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Primary keyword in title
+                  </li>
+                  <li>
+                    <i class="fas fa-check-circle mr-2"></i>
+                    All images have alt text
+                  </li>
+                  <li>
+                    <i class="fas fa-check-circle mr-2"></i>
+                    JSON Schema implemented
+                  </li>
+                  <li>
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Open Graph tags added
+                  </li>
+                  <li>
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Canonical URL set
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div id="settings" class="tab-content fade-in">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white rounded-xl shadow p-6">
+              <h2 class="text-lg font-bold mb-4">🔐 Site Configuration</h2>
+              <div class="field-group">
+                <label class="field-label">Site URL</label>
+                <input
+                  type="text"
+                  id="siteUrl"
+                  class="field-input"
+                  value="https://calmiqs.pages.dev"
+                />
+              </div>
+              <div class="field-group">
+                <label class="field-label">Site Title</label>
+                <input
+                  type="text"
+                  id="siteTitle"
+                  class="field-input"
+                  value="Calmiqs – Wellness & Eco Balance"
+                />
+              </div>
+              <div class="field-group">
+                <label class="field-label">Site Description</label>
+                <textarea id="siteDescription" class="field-input" rows="3">
+Explore AI-powered wellness tools and eco-friendly insights</textarea
+                >
+              </div>
+              <button id="saveSiteSettings" class="btn-primary w-full">
+                <i class="fas fa-save mr-2"></i>
+                Save Settings
+              </button>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-6">
+              <h2 class="text-lg font-bold mb-4">🗑️ Danger Zone</h2>
+              <p class="text-sm text-gray-600 mb-4">These actions cannot be undone.</p>
+              <button id="clearCacheBtn" class="btn-secondary w-full mb-3">
+                <i class="fas fa-broom mr-2"></i>
+                Clear Cache
+              </button>
+              <button id="exportDataBtn" class="btn-secondary w-full mb-3">
+                <i class="fas fa-download mr-2"></i>
+                Export All Data
+              </button>
+              <button id="resetAdminBtn" class="btn-danger w-full">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                Reset Admin Password
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Image Library Modal -->
+    <div id="imageLibraryModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold">📚 Image Library</h3>
+          <button id="closeLibraryModal" class="text-2xl text-gray-400 hover:text-gray-600">
+            &times;
+          </button>
+        </div>
+        <div
+          class="grid grid-cols-2 md:grid-cols-4 gap-4 max-h-96 overflow-y-auto"
+          id="libraryGridModal"
+        >
+          <div class="col-span-full text-center py-8 text-gray-500">Loading library...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Post Library Modal -->
+    <div id="postLibraryModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold">📚 Posts Library</h3>
+          <button id="closePostLibraryModal" class="text-2xl text-gray-400 hover:text-gray-600">
+            &times;
+          </button>
+        </div>
+        <div class="max-h-96 overflow-y-auto" id="postLibraryList">
+          <div class="text-center py-8 text-gray-500">Loading posts...</div>
+        </div>
+      </div>
+    </div>
+
     <script>
-      window.ADMIN_TOKEN_HEADER = "X-Admin-Token";
-      window.ADMIN_TOKEN = "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Hadia@2017_Ayesha@2007"; // same as Worker env
-      window.UPLOAD_URL = "https://calmiqs-images-worker.techaipet.workers.dev/api/images/upload";
-      window.IMAGES_LIST_URL =
-        "https://calmiqs-images-worker.techaipet.workers.dev/api/images/list";
-      window.POSTS_API = "https://calmiqs-images-worker.techaipet.workers.dev/api/posts";
-
-      window.CALMIQS_ADMIN_TOKEN = "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Hadia@2017_Ayesha@2007";
+      // ==== CONFIG ====
+      const ADMIN_PASSWORD = "Hadia@2017";
       const WORKER_BASE = "https://calmiqs-images-worker.techaipet.workers.dev";
-      const UPLOAD_URL = WORKER_BASE + "/upload";
-      const LIST_URL = WORKER_BASE + "/list";
-      const UPDATE_URL = WORKER_BASE + "/update";
-      const POSTS_URL = WORKER_BASE + "/posts";
-      const FILES_BASE = WORKER_BASE + "/files/";
-    </script>
+      const ADMIN_TOKEN = "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Hadia@2017_Ayesha@2007";
 
-    <div class="layout" style="align-items: flex-start">
-      <div class="col left">
-        <div style="margin-bottom: 10px">
-          <input id="postTitle" class="input" placeholder="Post title" />
-          <div class="small" style="margin-top: 6px">Slug auto-generated from title on save</div>
-        </div>
+      // ==== STATE ====
+      let isAuthenticated = false;
+      let currentPost = null;
+      let allPosts = {};
+      let autosaveTimer = null;
 
-        <div class="toolbar-2">
-          <button class="btn" data-cmd="bold"><b>B</b></button>
-          <button class="btn" data-cmd="italic"><i>I</i></button>
-          <button class="btn" data-cmd="h1">H1</button>
-          <button class="btn" data-cmd="h2">H2</button>
-          <button class="btn" data-cmd="h3">H3</button>
-          <button class="btn" data-cmd="p">P</button>
-          <button class="btn" data-cmd="link">Link</button>
-          <button id="insertTableBtn" class="btn">Table</button>
-          <div style="flex: 1"></div>
-          <button id="toggleHtmlBtn" class="btn">Show HTML</button>
-        </div>
-
-        <div id="editor" class="editor" contenteditable="true" aria-label="Article editor">
-          <p>Start writing the post here...</p>
-        </div>
-
-        <div style="display: flex; gap: 8px; align-items: center; margin-top: 10px">
-          <input id="inlineImageFile" type="file" accept="image/*" />
-          <button id="uploadInsertBtn" class="btn">Upload & Insert</button>
-          <button id="openLibraryBtn" class="btn">Select from Library</button>
-        </div>
-
-        <div id="htmlViewWrap" style="display: none; margin-top: 10px">
-          <label class="small">Raw HTML</label>
-          <textarea id="htmlView" class="html-view"></textarea>
-        </div>
-      </div>
-
-      <aside class="col right">
-        <div style="margin-bottom: 10px">
-          <label class="small">Hero Image</label>
-          <input id="heroFile" type="file" accept="image/*" style="margin-top: 6px" />
-          <input
-            id="heroAlt"
-            class="input"
-            placeholder="Hero image alt text"
-            style="margin-top: 8px"
-          />
-          <button id="uploadHeroBtn" class="btn" style="margin-top: 8px">Upload Hero Image</button>
-          <div id="heroPreview" style="margin-top: 8px"></div>
-        </div>
-
-        <div style="margin-top: 12px">
-          <label class="small">Excerpt</label>
-          <textarea
-            id="postExcerpt"
-            class="input"
-            style="min-height: 90px; margin-top: 6px"
-          ></textarea>
-        </div>
-
-        <div style="margin-top: 12px">
-          <label class="small">Options</label>
-          <div style="margin-top: 8px">
-            <label class="small">
-              <input type="checkbox" id="autosaveToggle" checked />
-              Auto-save every 60s
-            </label>
-          </div>
-          <div style="margin-top: 8px">
-            <label class="small">Default inserted image width</label>
-            <input id="defaultImageWidth" class="input" placeholder="80% or 500px" value="80%" />
-          </div>
-        </div>
-      </aside>
-    </div>
-
-    <!-- Image Library modal -->
-    <div id="libraryModal" class="modal" style="display: none">
-      <div class="modal-card">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-          "
-        >
-          <strong>Image Library</strong>
-          <div><button id="closeLibraryBtn" class="btn">Close</button></div>
-        </div>
-        <div id="libraryGrid" class="grid"></div>
-      </div>
-    </div>
-
-    <!-- Posts modal -->
-    <div id="postsModal" class="modal" style="display: none">
-      <div class="modal-card">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-          "
-        >
-          <strong>Posts</strong>
-          <div><button id="closePostsBtn" class="btn">Close</button></div>
-        </div>
-        <div id="postsGrid"></div>
-      </div>
-    </div>
-
-    <!-- Inline image toolbar (floating) -->
-    <div id="imgToolbar" class="inline-toolbar" style="display: none">
-      <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center">
-        <input id="imgUrlField" class="input" placeholder="Image URL" style="width: 260px" />
-        <input id="imgAltField" class="input" placeholder="Alt text" style="width: 180px" />
-        <input
-          id="imgWidthField"
-          class="input"
-          placeholder="Width (px or %)"
-          style="width: 120px"
-        />
-        <div style="display: flex; gap: 6px; align-items: center">
-          <button id="wrapLeftBtn" class="btn">Wrap Left</button>
-          <button id="wrapRightBtn" class="btn">Wrap Right</button>
-          <button id="wrapCenterBtn" class="btn">Center</button>
-          <button id="alignPageLeft" class="btn">Align Page Left</button>
-          <button id="alignPageCenter" class="btn">Align Page Center</button>
-          <button id="alignPageRight" class="btn">Align Page Right</button>
-        </div>
-        <button id="saveImgMetaBtn" class="btn primary">Save</button>
-      </div>
-    </div>
-
-    <!-- Live preview stacked -->
-    <div id="preview" aria-live="polite"></div>
-
-    <footer>
-      <div class="small">
-        Tip: Use Show HTML to view raw tags. Save to persist drafts to Cloudflare KV.
-      </div>
-    </footer>
-
-    <script>
-      (function () {
-        // DOM references
-        const editor = document.getElementById("editor");
-        const preview = document.getElementById("preview");
-        const htmlViewWrap = document.getElementById("htmlViewWrap");
-        const htmlView = document.getElementById("htmlView");
-        const toggleHtmlBtn = document.getElementById("toggleHtmlBtn");
-
-        const inlineFile = document.getElementById("inlineImageFile");
-        const uploadInsertBtn = document.getElementById("uploadInsertBtn");
-        const openLibraryBtn = document.getElementById("openLibraryBtn");
-        const libraryModal = document.getElementById("libraryModal");
-        const libraryGrid = document.getElementById("libraryGrid");
-        const closeLibraryBtn = document.getElementById("closeLibraryBtn");
-
-        const heroFile = document.getElementById("heroFile");
-        const heroAlt = document.getElementById("heroAlt");
-        const uploadHeroBtn = document.getElementById("uploadHeroBtn");
-        const heroPreview = document.getElementById("heroPreview");
-
-        const imgToolbar = document.getElementById("imgToolbar");
-        const imgUrlField = document.getElementById("imgUrlField");
-        const imgAltField = document.getElementById("imgAltField");
-        const imgWidthField = document.getElementById("imgWidthField");
-        const wrapLeftBtn = document.getElementById("wrapLeftBtn");
-        const wrapRightBtn = document.getElementById("wrapRightBtn");
-        const wrapCenterBtn = document.getElementById("wrapCenterBtn");
-        const alignPageLeft = document.getElementById("alignPageLeft");
-        const alignPageCenter = document.getElementById("alignPageCenter");
-        const alignPageRight = document.getElementById("alignPageRight");
-        const saveImgMetaBtn = document.getElementById("saveImgMetaBtn");
-
-        const postTitle = document.getElementById("postTitle");
-        const newPostBtn = document.getElementById("newPostBtn");
-        const openPostsBtn = document.getElementById("openPostsBtn");
-        const loadPostBtn = document.getElementById("loadPostBtn");
-        const savePostBtn = document.getElementById("savePostBtn");
-        const deletePostBtn = document.getElementById("deletePostBtn");
-        const postExcerpt = document.getElementById("postExcerpt");
-        const defaultImageWidth = document.getElementById("defaultImageWidth");
-        const autosaveToggle = document.getElementById("autosaveToggle");
-
-        const postsModal = document.getElementById("postsModal");
-        const postsGrid = document.getElementById("postsGrid");
-        const closePostsBtn = document.getElementById("closePostsBtn");
-
-        let selectedImageEl = null;
-        let autosaveTimer = null;
-        const AUTOSAVE_INTERVAL_MS = 60000;
-
-        // authFetch
-        async function authFetch(url, opts = {}) {
-          opts.headers = opts.headers || {};
-          if (window.CALMIQS_ADMIN_TOKEN)
-            opts.headers["X-Admin-Token"] = window.CALMIQS_ADMIN_TOKEN;
-          return fetch(url, opts);
+      // ==== AUTH ====
+      document.getElementById("authForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const pwd = document.getElementById("authPassword").value;
+        if (pwd === ADMIN_PASSWORD) {
+          isAuthenticated = true;
+          localStorage.setItem("calmiqsAuth", "true");
+          sessionStorage.setItem("calmiqsAuth", "true");
+          document.getElementById("authScreen").classList.add("hidden");
+          document.getElementById("adminPanel").classList.remove("hidden");
+          initializeEditor();
+        } else {
+          alert("❌ Incorrect password");
         }
+      });
 
-        // formatting toolbar
-        document.querySelectorAll("[data-cmd]").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const cmd = btn.dataset.cmd;
-            if (cmd === "link") {
-              const url = prompt("Enter URL (https://...)");
-              if (url) document.execCommand("createLink", false, url);
-            } else if (["h1", "h2", "h3", "p"].includes(cmd)) {
-              document.execCommand("formatBlock", false, cmd);
-            } else {
-              document.execCommand(cmd, false, null);
-            }
-            updatePreview();
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        isAuthenticated = false;
+        localStorage.removeItem("calmiqsAuth");
+        sessionStorage.removeItem("calmiqsAuth");
+        location.reload();
+      });
+
+      // ==== TAB NAVIGATION ====
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const tabName = btn.dataset.tab;
+          document.querySelectorAll(".tab-content").forEach((el) => el.classList.remove("active"));
+          document.querySelectorAll(".tab-btn").forEach((el) => {
+            el.classList.remove("border-primary", "text-primary");
+            el.classList.add("border-transparent", "text-gray-600");
           });
+          document.getElementById(tabName).classList.add("active");
+          btn.classList.remove("border-transparent", "text-gray-600");
+          btn.classList.add("border-primary", "text-primary");
         });
+      });
 
-        // table insertion
-        document.getElementById("insertTableBtn").addEventListener("click", () => {
-          const rows = parseInt(prompt("Rows", "2"), 10) || 2;
-          const cols = parseInt(prompt("Columns", "3"), 10) || 3;
-          const table = document.createElement("table");
-          const tbody = document.createElement("tbody");
-          for (let r = 0; r < rows; r++) {
-            const tr = document.createElement("tr");
-            for (let c = 0; c < cols; c++) {
-              const td = document.createElement("td");
-              td.innerHTML = "&nbsp;";
-              tr.appendChild(td);
-            }
-            tbody.appendChild(tr);
+      // ==== EDITOR TOOLBAR ====
+      document.querySelectorAll(".editor-toolbar button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const cmd = btn.dataset.cmd;
+          if (cmd === "link") {
+            const url = prompt("Enter URL:");
+            if (url) document.execCommand("createLink", false, url);
+          } else if (["h2", "h3", "ul", "ol"].includes(cmd)) {
+            if (cmd === "ul") document.execCommand("insertUnorderedList", false, null);
+            else if (cmd === "ol") document.execCommand("insertOrderedList", false, null);
+            else document.execCommand("formatBlock", false, `<${cmd}>`);
+          } else {
+            document.execCommand(cmd, false, null);
           }
-          table.appendChild(tbody);
-          insertAtCursor(table);
           updatePreview();
         });
+      });
 
-        // toggle HTML
-        toggleHtmlBtn.addEventListener("click", () => {
-          if (htmlViewWrap.style.display === "none" || htmlViewWrap.style.display === "") {
-            htmlView.value = editor.innerHTML;
-            htmlViewWrap.style.display = "block";
-            toggleHtmlBtn.textContent = "Hide HTML";
+      // ==== POST MANAGEMENT ====
+      async function authFetch(url, opts = {}) {
+        opts.headers = opts.headers || {};
+        opts.headers["X-Admin-Token"] = ADMIN_TOKEN;
+        return fetch(url, opts);
+      }
+
+      function generateSlug(title) {
+        return title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "");
+      }
+
+      function updatePreview() {
+        const title = document.getElementById("postTitle").value || "Untitled";
+        const content = document.getElementById("postContent").innerHTML || "<p>No content</p>";
+        const preview = document.getElementById("postPreview");
+        preview.innerHTML = `<h3 class="font-bold text-primary mb-2">${title}</h3><div class="text-xs">${content.substring(
+          0,
+          300
+        )}...</div>`;
+      }
+
+      document.getElementById("postTitle").addEventListener("input", () => {
+        const slug = generateSlug(document.getElementById("postTitle").value);
+        document.getElementById("postSlug").value = slug;
+        updatePreview();
+      });
+
+      document.getElementById("postContent").addEventListener("input", updatePreview);
+
+      document.getElementById("newPostBtn").addEventListener("click", () => {
+        document.getElementById("postTitle").value = "";
+        document.getElementById("postSlug").value = "";
+        document.getElementById("postExcerpt").value = "";
+        document.getElementById("postDate").value = new Date().toISOString().split("T")[0];
+        document.getElementById("postContent").innerHTML = "";
+        document.getElementById("postCategory").value = "wellness";
+        document.getElementById("postTags").value = "";
+        document.getElementById("postAuthor").value = "Calmiqs Team";
+        document.getElementById("postReadTime").value = "";
+        document.getElementById("metaDescription").value = "";
+        document.getElementById("metaKeywords").value = "";
+        document.getElementById("canonicalUrl").value = "";
+        currentPost = null;
+        updatePreview();
+      });
+
+      document.getElementById("savePostBtn").addEventListener("click", async () => {
+        const title = document.getElementById("postTitle").value.trim();
+        if (!title) return alert("Enter post title");
+
+        const postData = {
+          title,
+          slug: generateSlug(title),
+          excerpt: document.getElementById("postExcerpt").value,
+          date: document.getElementById("postDate").value,
+          category: document.getElementById("postCategory").value,
+          tags: document
+            .getElementById("postTags")
+            .value.split(",")
+            .map((t) => t.trim()),
+          author: document.getElementById("postAuthor").value,
+          readTime: document.getElementById("postReadTime").value,
+          content: document.getElementById("postContent").innerHTML,
+          image: document.getElementById("heroImageFile").value || "",
+          imageAlt: document.getElementById("heroAlt").value,
+          // SEO
+          metaDescription: document.getElementById("metaDescription").value,
+          metaKeywords: document.getElementById("metaKeywords").value,
+          ogImage: document.getElementById("ogImage").value,
+          canonicalUrl: document.getElementById("canonicalUrl").value,
+        };
+
+        try {
+          const res = await authFetch(`${WORKER_BASE}/api/posts`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(postData),
+          });
+          const result = await res.json();
+          if (res.ok) {
+            alert("✅ Post saved successfully!");
+            allPosts[postData.slug] = postData;
           } else {
-            editor.innerHTML = htmlView.value;
-            htmlViewWrap.style.display = "none";
-            toggleHtmlBtn.textContent = "Show HTML";
-            updatePreview();
-            attachExistingImages();
+            alert("❌ " + (result.error || "Save failed"));
           }
-        });
-
-        // preview updates
-        const debouncedPreview = debounce(updatePreview, 200);
-        editor.addEventListener("input", () => debouncedPreview());
-        editor.addEventListener("keyup", () => debouncedPreview());
-
-        function updatePreview() {
-          preview.innerHTML = editor.innerHTML;
-          attachExistingImages();
+        } catch (err) {
+          console.error(err);
+          alert("❌ Save failed: " + err.message);
         }
+      });
 
-        // safe ensureParagraphAfter
-        function ensureParagraphAfter(node) {
-          const el =
-            node && node.nodeType === 1 ? node : node && node.parentNode ? node.parentNode : null;
-          if (!el || !el.parentNode || !editor.contains(el)) return;
-          const next = el.nextSibling;
-          if (
-            !next ||
-            next.nodeType === 3 ||
-            (next.nodeName && next.nodeName.toLowerCase() !== "p")
-          ) {
-            const p = document.createElement("p");
-            p.innerHTML = "<br>";
-            el.parentNode.insertBefore(p, el.nextSibling);
-          }
-        }
+      document.getElementById("loadPostBtn").addEventListener("click", () => {
+        document.getElementById("postLibraryModal").classList.remove("hidden");
+        loadPostLibrary();
+      });
 
-        // insertAtCursor (element)
-        function insertAtCursor(el) {
-          const sel = window.getSelection();
-          if (!sel || !sel.rangeCount) {
-            editor.appendChild(el);
-            ensureParagraphAfter(el);
-            updatePreview();
+      async function loadPostLibrary() {
+        try {
+          const res = await authFetch(`${WORKER_BASE}/api/posts`);
+          const data = await res.json();
+          const list = document.getElementById("postLibraryList");
+          list.innerHTML = "";
+
+          if (!data.posts || data.posts.length === 0) {
+            list.innerHTML = "<p class='text-center text-gray-500'>No posts yet</p>";
             return;
           }
-          const range = sel.getRangeAt(0);
-          range.deleteContents();
-          range.insertNode(el);
-          range.setStartAfter(el);
-          range.collapse(true);
-          sel.removeAllRanges();
-          sel.addRange(range);
-          editor.focus();
-          ensureParagraphAfter(el);
-          updatePreview();
-        }
 
-        // attach handlers to images already in editor
-        function attachExistingImages() {
-          editor.querySelectorAll("img").forEach((img) => {
-            if (img.dataset._handled) return;
-            img.dataset._handled = "1";
-            attachImageHandlers(img);
+          data.posts.forEach((post) => {
+            const el = document.createElement("div");
+            el.className = "p-4 border-b hover:bg-gray-50 cursor-pointer transition";
+            el.innerHTML = `
+              <div class="font-semibold text-primary">${post.title}</div>
+              <div class="text-xs text-gray-500">${post.slug} • ${post.date}</div>
+            `;
+            el.addEventListener("click", async () => {
+              const fullPost = await authFetch(`${WORKER_BASE}/api/posts/${post.slug}`).then((r) =>
+                r.json()
+              );
+              loadPostToEditor(fullPost);
+              document.getElementById("postLibraryModal").classList.add("hidden");
+            });
+            list.appendChild(el);
           });
+        } catch (err) {
+          console.error(err);
+          document.getElementById("postLibraryList").innerHTML =
+            "<p class='text-red-600'>Failed to load posts</p>";
         }
+      }
 
-        // attachImageHandlers - click opens toolbar
-        function attachImageHandlers(img) {
-          img.style.maxWidth = img.style.maxWidth || "100%";
-          img.addEventListener("click", (ev) => {
-            ev.stopPropagation();
-            document
-              .querySelectorAll(".inline-img")
-              .forEach((i) => i.classList.remove("img-selected"));
-            img.classList.add("img-selected");
-            selectedImageEl = img;
-            const rect = img.getBoundingClientRect();
-            imgToolbar.style.left = rect.left + window.scrollX + "px";
-            imgToolbar.style.top = rect.bottom + window.scrollY + 8 + "px";
-            imgToolbar.style.display = "block";
-            imgUrlField.value = img.src;
-            imgAltField.value = img.alt || "";
-            imgWidthField.value = img.style.width || "";
-          });
-          ensureParagraphAfter(img);
+      function loadPostToEditor(post) {
+        document.getElementById("postTitle").value = post.title;
+        document.getElementById("postExcerpt").value = post.excerpt;
+        document.getElementById("postDate").value = post.date;
+        document.getElementById("postContent").innerHTML = post.content;
+        document.getElementById("postCategory").value = post.category;
+        document.getElementById("postTags").value = (post.tags || []).join(", ");
+        document.getElementById("postAuthor").value = post.author || "";
+        document.getElementById("postReadTime").value = post.readTime || "";
+        document.getElementById("metaDescription").value = post.metaDescription || "";
+        document.getElementById("metaKeywords").value = post.metaKeywords || "";
+        document.getElementById("canonicalUrl").value = post.canonicalUrl || "";
+        document.getElementById("postSlug").value = post.slug;
+        currentPost = post;
+        updatePreview();
+      }
+
+      document.getElementById("deletePostBtn").addEventListener("click", async () => {
+        const slug = document.getElementById("postSlug").value;
+        if (!slug) return alert("No post selected");
+        if (!confirm("Delete this post?")) return;
+
+        try {
+          const res = await authFetch(`${WORKER_BASE}/api/posts/${slug}`, { method: "DELETE" });
+          if (res.ok) {
+            alert("✅ Post deleted");
+            document.getElementById("newPostBtn").click();
+          } else {
+            alert("❌ Delete failed");
+          }
+        } catch (err) {
+          alert("❌ Error: " + err.message);
         }
+      });
 
-        // image upload & insert
-        uploadInsertBtn.addEventListener("click", async () => {
-          if (!inlineFile.files || !inlineFile.files[0]) return alert("Choose a file first");
-          await uploadFileAndInsert(inlineFile.files[0]);
-        });
+      // ==== IMAGE UPLOAD ====
+      document.getElementById("uploadHeroBtn").addEventListener("click", async () => {
+        const file = document.getElementById("heroImageFile").files[0];
+        if (!file) return alert("Choose an image");
 
-        inlineFile.addEventListener("change", async () => {
-          if (inlineFile.files && inlineFile.files[0])
-            await uploadFileAndInsert(inlineFile.files[0]);
-        });
+        const form = new FormData();
+        form.append("file", file);
+        form.append("alt", document.getElementById("heroAlt").value || file.name);
 
-        async function uploadFileAndInsert(file) {
-          try {
-            const fd = new FormData();
-            fd.append("file", file);
-            const res = await authFetch(UPLOAD_URL, { method: "POST", body: fd });
-            const json = await res.json();
-            if (!res.ok) throw new Error(json.error || JSON.stringify(json));
-            // url fallback
-            const url =
-              json.url ||
-              FILES_BASE +
-                encodeURIComponent(
-                  json.metadata && json.metadata.r2Key
-                    ? json.metadata.r2Key.replace(/^uploads\//, "")
-                    : json.metadata.r2Key
-                );
+        try {
+          const res = await authFetch(`${WORKER_BASE}/upload`, { method: "POST", body: form });
+          const data = await res.json();
+          if (res.ok) {
+            const url = data.url || `${WORKER_BASE}/files/${encodeURIComponent(data.r2Key)}`;
+            document.getElementById(
+              "heroPreview"
+            ).innerHTML = `<img src="${url}" alt="${data.alt}" class="w-full h-48 object-cover rounded-lg" />`;
+            alert("✅ Hero image uploaded");
+          }
+        } catch (err) {
+          alert("❌ Upload failed: " + err.message);
+        }
+      });
+
+      document.getElementById("uploadInlineBtn").addEventListener("click", async () => {
+        const file = document.getElementById("inlineImageFile").files[0];
+        if (!file) return alert("Choose an image");
+
+        const form = new FormData();
+        form.append("file", file);
+
+        try {
+          const res = await authFetch(`${WORKER_BASE}/upload`, { method: "POST", body: form });
+          const data = await res.json();
+          if (res.ok) {
+            const url = data.url || `${WORKER_BASE}/files/${encodeURIComponent(data.r2Key)}`;
             const img = document.createElement("img");
             img.src = url;
-            img.alt = json.metadata && json.metadata.alt ? json.metadata.alt : file.name;
-            img.className = "inline-img";
-            if (json.metadata && json.metadata.r2Key) img.dataset.r2key = json.metadata.r2Key;
-            const defW = defaultImageWidth.value || "80%";
-            img.style.width = defW;
-            attachImageHandlers(img);
-            insertAtCursor(img);
-          } catch (err) {
-            console.error("Upload failed", err);
-            alert("Image upload failed: " + (err.message || err));
+            img.className = "inline-img my-4 rounded-lg shadow-md max-w-full";
+            img.alt = file.name;
+            document.getElementById("postContent").appendChild(img);
+            alert("✅ Image inserted");
           }
+        } catch (err) {
+          alert("❌ Upload failed: " + err.message);
         }
+      });
 
-        // library modal
-        openLibraryBtn.addEventListener("click", openLibrary);
-        closeLibraryBtn.addEventListener("click", () => (libraryModal.style.display = "none"));
+      document.getElementById("openLibraryBtn").addEventListener("click", () => {
+        document.getElementById("imageLibraryModal").classList.remove("hidden");
+        loadImageLibrary();
+      });
 
-        async function openLibrary() {
-          libraryGrid.innerHTML =
-            '<div style="grid-column:1/-1;padding:18px;text-align:center">Loading…</div>';
-          libraryModal.style.display = "flex";
-          try {
-            const res = await authFetch(LIST_URL);
-            const json = await res.json();
-            if (!res.ok) throw new Error(json.error || "Failed");
-            libraryGrid.innerHTML = "";
-            const arr = json.images || [];
-            if (arr.length === 0) {
-              libraryGrid.innerHTML =
-                '<div style="grid-column:1/-1;padding:18px;text-align:center">No images</div>';
-              return;
-            }
-            arr.forEach((item) => {
-              const key = item.r2Key || item.r2Key || item.key || item.filename;
-              const thumb = document.createElement("img");
-              thumb.src = FILES_BASE + encodeURIComponent(key.replace(/^uploads\//, "")); // normalize
-              thumb.className = "thumb";
-              thumb.alt = item.alt || item.title || item.filename || "";
-              thumb.title = item.title || item.filename || "";
-              thumb.addEventListener("click", () => {
-                const img = document.createElement("img");
-                img.src = thumb.src;
-                img.alt = thumb.alt || "";
-                img.className = "inline-img";
-                img.dataset.r2key = key;
-                attachImageHandlers(img);
-                insertAtCursor(img);
-                libraryModal.style.display = "none";
-              });
-              libraryGrid.appendChild(thumb);
-            });
-          } catch (err) {
-            console.error("Library load failed", err);
-            libraryGrid.innerHTML =
-              '<div style="grid-column:1/-1;padding:12px;color:#d04437">Failed to load library</div>';
+      async function loadImageLibrary() {
+        try {
+          const res = await authFetch(`${WORKER_BASE}/list`);
+          const data = await res.json();
+          const grid = document.getElementById("libraryGridModal");
+          grid.innerHTML = "";
+
+          if (!data.images || data.images.length === 0) {
+            grid.innerHTML =
+              "<div class='col-span-full text-center text-gray-500'>No images in library</div>";
+            return;
           }
+
+          data.images.forEach((img) => {
+            const thumb = document.createElement("img");
+            thumb.src = `${WORKER_BASE}/files/${encodeURIComponent(img.r2Key || img.key)}`;
+            thumb.className =
+              "w-full h-32 object-cover rounded cursor-pointer hover:opacity-75 transition";
+            thumb.alt = img.alt || "";
+            thumb.addEventListener("click", () => {
+              const inlineImg = document.createElement("img");
+              inlineImg.src = thumb.src;
+              inlineImg.className = "inline-img my-4 rounded-lg shadow-md max-w-full";
+              inlineImg.alt = img.alt || "";
+              document.getElementById("postContent").appendChild(inlineImg);
+              document.getElementById("imageLibraryModal").classList.add("hidden");
+            });
+            grid.appendChild(thumb);
+          });
+        } catch (err) {
+          console.error(err);
+          document.getElementById("libraryGridModal").innerHTML =
+            "<div class='text-red-600'>Failed to load library</div>";
         }
+      }
 
-        // inline toolbar actions
-        saveImgMetaBtn.addEventListener("click", async () => {
-          if (!selectedImageEl) return;
-          selectedImageEl.src = imgUrlField.value.trim() || selectedImageEl.src;
-          selectedImageEl.alt = imgAltField.value.trim();
-          const w = imgWidthField.value.trim();
-          if (w)
-            selectedImageEl.style.width =
-              w.endsWith("%") || w.endsWith("px") ? w : isNaN(Number(w)) ? w : w + "px";
-          else selectedImageEl.style.removeProperty("width");
-          imgToolbar.style.display = "none";
-          // update KV if r2key present
-          const r2key = selectedImageEl.dataset.r2key;
-          if (r2key) {
-            try {
-              await authFetch(UPDATE_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  r2Key: r2key,
-                  alt: selectedImageEl.alt,
-                  title: selectedImageEl.alt,
-                }),
-              });
-            } catch (e) {
-              console.warn("metadata update failed", e);
-            }
-          }
-          updatePreview();
-        });
+      document.getElementById("closeLibraryModal").addEventListener("click", () => {
+        document.getElementById("imageLibraryModal").classList.add("hidden");
+      });
 
-        wrapLeftBtn.addEventListener("click", () => {
-          if (!selectedImageEl) return;
-          selectedImageEl.className = "inline-img left";
-          imgToolbar.style.display = "none";
-          updatePreview();
-        });
-        wrapRightBtn.addEventListener("click", () => {
-          if (!selectedImageEl) return;
-          selectedImageEl.className = "inline-img right";
-          imgToolbar.style.display = "none";
-          updatePreview();
-        });
-        wrapCenterBtn.addEventListener("click", () => {
-          if (!selectedImageEl) return;
-          selectedImageEl.className = "inline-img center";
-          imgToolbar.style.display = "none";
-          updatePreview();
-        });
+      document.getElementById("closePostLibraryModal").addEventListener("click", () => {
+        document.getElementById("postLibraryModal").classList.add("hidden");
+      });
 
-        alignPageLeft.addEventListener("click", () => {
-          if (!selectedImageEl) return;
-          selectedImageEl.style.display = "block";
-          selectedImageEl.style.margin = "0";
-          imgToolbar.style.display = "none";
-          updatePreview();
-        });
-        alignPageCenter.addEventListener("click", () => {
-          if (!selectedImageEl) return;
-          selectedImageEl.style.display = "block";
-          selectedImageEl.style.margin = "12px auto";
-          imgToolbar.style.display = "none";
-          updatePreview();
-        });
-        alignPageRight.addEventListener("click", () => {
-          if (!selectedImageEl) return;
-          selectedImageEl.style.display = "block";
-          selectedImageEl.style.margin = "0 0 0 auto";
-          imgToolbar.style.display = "none";
-          updatePreview();
-        });
-
-        // hide toolbar on outside click
-        document.addEventListener("click", (e) => {
-          if (!imgToolbar.contains(e.target)) {
-            imgToolbar.style.display = "none";
-            document
-              .querySelectorAll(".inline-img")
-              .forEach((i) => i.classList.remove("img-selected"));
-            selectedImageEl = null;
-          }
-        });
-
-        // HERO IMAGE upload
-        uploadHeroBtn.addEventListener("click", async () => {
-          if (!heroFile.files || !heroFile.files[0]) return alert("Choose hero image first");
-          const f = heroFile.files[0];
-          try {
-            const fd = new FormData();
-            fd.append("file", f);
-            fd.append("alt", heroAlt.value || "");
-            const res = await authFetch(UPLOAD_URL, { method: "POST", body: fd });
-            const json = await res.json();
-            if (!res.ok) throw new Error(json.error || "Upload failed");
-            // set hero preview using json.url or files route
-            const url =
-              json.url ||
-              FILES_BASE +
-                encodeURIComponent(
-                  json.metadata && json.metadata.r2Key
-                    ? json.metadata.r2Key.replace(/^uploads\//, "")
-                    : json.metadata.r2Key
-                );
-            heroPreview.innerHTML = `<img src="${url}" alt="${
-              json.metadata && json.metadata.alt ? json.metadata.alt : ""
-            }" style="width:100%;border-radius:6px;margin-top:8px" />`;
-            alert(
-              "Hero uploaded — preview updated. You can also insert it into the body via Image Library."
-            );
-          } catch (err) {
-            console.error(err);
-            alert("Hero upload failed: " + (err.message || err));
-          }
-        });
-
-        // ---------- POSTS CRUD & Posts Library ----------
-        newPostBtn.addEventListener("click", () => {
-          postTitle.value = "";
-          editor.innerHTML = "<p></p>";
-          postExcerpt.value = "";
-          updatePreview();
-        });
-        loadPostBtn.addEventListener("click", async () => {
-          const slug = prompt("Enter post slug to load");
-          if (!slug) return;
-          try {
-            const res = await authFetch(POSTS_URL + "/" + encodeURIComponent(slug));
-            if (!res.ok) return alert("Not found");
-            const j = await res.json();
-            postTitle.value = j.title || "";
-            editor.innerHTML = j.content || "";
-            postExcerpt.value = j.excerpt || "";
-            updatePreview();
-            attachExistingImages();
-          } catch (e) {
-            console.error(e);
-            alert("Load failed");
-          }
-        });
-
-        savePostBtn.addEventListener("click", savePostNow);
-        deletePostBtn.addEventListener("click", async () => {
-          const slug = prompt("Enter slug to delete");
-          if (!slug) return;
-          if (!confirm("Delete post " + slug + "?")) return;
-          try {
-            const res = await authFetch(POSTS_URL + "/" + encodeURIComponent(slug), {
-              method: "DELETE",
-            });
-            if (res.ok) alert("Deleted");
-            else alert("Delete failed");
-          } catch (e) {
-            console.error(e);
-            alert("Delete failed");
-          }
-        });
-
-        async function savePostNow() {
-          const title = postTitle.value.trim();
-          if (!title) return alert("Enter a title first");
-          const slug = title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "");
-          const payload = {
-            title: title,
-            slug: slug,
-            content: editor.innerHTML,
-            excerpt: postExcerpt.value,
-          };
-          try {
-            const res = await authFetch(POSTS_URL, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload),
-            });
-            if (res.ok) {
-              alert("Saved");
-            } else {
-              const j = await res.json();
-              alert("Save failed: " + (j.error || JSON.stringify(j)));
-            }
-          } catch (e) {
-            console.error(e);
-            alert("Save failed");
-          }
+      // ==== NEWSLETTER ====
+      async function loadNewsletterStats() {
+        try {
+          const res = await authFetch(`${WORKER_BASE}/api/newsletter/stats`);
+          const stats = await res.json();
+          document.getElementById("totalSubscribers").textContent = stats.total || 0;
+          document.getElementById("activeSubscribers").textContent = stats.active || 0;
+          document.getElementById("unsubscribed").textContent = stats.unsubscribed || 0;
+        } catch (err) {
+          console.error("Failed to load newsletter stats:", err);
         }
+      }
 
-        // Posts library UI
-        openPostsBtn.addEventListener("click", async () => {
-          postsGrid.innerHTML = '<div style="padding:18px;text-align:center">Loading…</div>';
-          postsModal.style.display = "flex";
-          try {
-            const res = await authFetch(POSTS_URL);
-            const j = await res.json();
-            if (!res.ok) throw new Error(j.error || "Failed");
-            postsGrid.innerHTML = "";
-            (j.posts || []).forEach((p) => {
-              const row = document.createElement("div");
-              row.style.padding = "8px";
-              row.style.borderBottom = "1px solid #eef";
-              row.innerHTML = `<strong>${p.title}</strong><div class="small">${p.slug} · ${
-                p.updatedAt || p.createdAt || ""
-              }</div>
-            <div style="margin-top:8px">
-              <button class="btn" data-action="edit" data-slug="${p.slug}">Edit</button>
-              <button class="btn danger" data-action="delete" data-slug="${p.slug}">Delete</button>
-            </div>`;
-              postsGrid.appendChild(row);
-            });
-            postsGrid.addEventListener("click", async (e) => {
-              const btn = e.target.closest("button");
-              if (!btn) return;
-              const action = btn.getAttribute("data-action");
-              const slug = btn.getAttribute("data-slug");
-              if (action === "edit") {
-                const res2 = await authFetch(POSTS_URL + "/" + encodeURIComponent(slug));
-                if (!res2.ok) {
-                  alert("Load failed");
-                  return;
-                }
-                const post = await res2.json();
-                postTitle.value = post.title;
-                editor.innerHTML = post.content || "";
-                postExcerpt.value = post.excerpt || "";
-                attachExistingImages();
-                updatePreview();
-                postsModal.style.display = "none";
-              } else if (action === "delete") {
-                if (!confirm("Delete " + slug + "?")) return;
-                const res3 = await authFetch(POSTS_URL + "/" + encodeURIComponent(slug), {
-                  method: "DELETE",
-                });
-                if (res3.ok) {
-                  alert("Deleted");
-                  btn.closest("div").remove();
-                } else {
-                  alert("Delete failed");
-                }
-              }
-            });
-          } catch (err) {
-            console.error(err);
-            postsGrid.innerHTML = '<div class="small">Failed to load posts</div>';
+      async function loadSubscribers() {
+        try {
+          const res = await authFetch(`${WORKER_BASE}/api/newsletter/subscribers`);
+          const data = await res.json();
+          const tbody = document.getElementById("subscribersList");
+          tbody.innerHTML = "";
+
+          if (!data.subscribers || data.subscribers.length === 0) {
+            tbody.innerHTML =
+              "<tr><td colspan='4' class='px-4 py-8 text-center text-gray-500'>No subscribers yet</td></tr>";
+            return;
           }
-        });
-        closePostsBtn.addEventListener("click", () => (postsModal.style.display = "none"));
 
-        // ---------- Autosave ----------
-        function startAutosave() {
-          if (autosaveTimer) clearInterval(autosaveTimer);
-          if (!autosaveToggle.checked) return;
-          autosaveTimer = setInterval(() => {
-            try {
-              savePostNow();
-            } catch (e) {
-              console.warn(e);
-            }
-          }, AUTOSAVE_INTERVAL_MS);
+          data.subscribers.forEach((sub) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td class="px-4 py-2">${sub.email}</td>
+              <td class="px-4 py-2"><span class="status-badge ${
+                sub.status === "active" ? "status-success" : "status-warning"
+              }">${sub.status}</span></td>
+              <td class="px-4 py-2 text-xs">${new Date(sub.subscribedAt).toLocaleDateString()}</td>
+              <td class="px-4 py-2 text-center">
+                <button class="text-red-600 hover:text-red-800 text-sm" onclick="unsubscribeEmail('${
+                  sub.email
+                }')">Remove</button>
+              </td>
+            `;
+            tbody.appendChild(row);
+          });
+        } catch (err) {
+          console.error("Failed to load subscribers:", err);
         }
-        autosaveToggle.addEventListener("change", startAutosave);
-        startAutosave();
+      }
 
-        // initial attachments
-        attachExistingImages();
-        updatePreview();
-
-        // small utilities
-        function debounce(fn, t) {
-          let timer;
-          return (...a) => {
-            clearTimeout(timer);
-            timer = setTimeout(() => fn.apply(this, a), t);
-          };
+      window.unsubscribeEmail = async (email) => {
+        if (!confirm(`Unsubscribe ${email}?`)) return;
+        try {
+          await authFetch(`${WORKER_BASE}/api/newsletter/unsubscribe`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+          alert("✅ Unsubscribed");
+          loadSubscribers();
+          loadNewsletterStats();
+        } catch (err) {
+          alert("❌ Error: " + err.message);
         }
+      };
 
-        // Expose debug helpers
-        window.calmiqsEditor = { editor, preview, savePostNow };
-      })();
+      document.getElementById("sendNewsletterBtn").addEventListener("click", async () => {
+        const subject = document.getElementById("newsletterSubject").value.trim();
+        const content = document.getElementById("newsletterContent").value.trim();
+
+        if (!subject || !content) return alert("Fill in subject and content");
+
+        try {
+          const res = await authFetch(`${WORKER_BASE}/api/newsletter/send`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              subject,
+              content,
+              fromEmail: document.getElementById("fromEmail").value,
+              fromName: document.getElementById("fromName").value,
+            }),
+          });
+          if (res.ok) {
+            alert("✅ Newsletter sent!");
+            document.getElementById("newsletterSubject").value = "";
+            document.getElementById("newsletterContent").value = "";
+          } else {
+            alert("❌ Send failed");
+          }
+        } catch (err) {
+          alert("❌ Error: " + err.message);
+        }
+      });
+
+      // ==== SEO & SCHEMA ====
+      document.getElementById("metaDescription").addEventListener("input", (e) => {
+        document.getElementById("metaDescCount").textContent = `${e.target.value.length}/160`;
+      });
+
+      document.getElementById("generateSchemaBtn").addEventListener("click", () => {
+        const schemaType = document.getElementById("schemaType").value;
+        const title = document.getElementById("postTitle").value || "Untitled";
+        const excerpt = document.getElementById("postExcerpt").value || "";
+        const author = document.getElementById("postAuthor").value || "Calmiqs";
+        const date = document.getElementById("postDate").value || new Date().toISOString();
+
+        const schema = {
+          "@context": "https://schema.org",
+          "@type": schemaType,
+          headline: title,
+          description: excerpt,
+          author: { "@type": "Person", name: author },
+          datePublished: date,
+          image:
+            document.getElementById("ogImage").value || "https://calmiqs.pages.dev/assets/logo.svg",
+          publisher: {
+            "@type": "Organization",
+            name: "Calmiqs",
+            logo: "https://calmiqs.pages.dev/assets/logo.svg",
+          },
+        };
+
+        document.getElementById("schemaPreview").textContent = JSON.stringify(schema, null, 2);
+      });
+
+      document.getElementById("copySchemaBtn").addEventListener("click", () => {
+        const schema = document.getElementById("schemaPreview").textContent;
+        navigator.clipboard.writeText(schema);
+        alert("✅ Schema copied to clipboard");
+      });
+
+      document.getElementById("saveSiteSettings").addEventListener("click", () => {
+        const settings = {
+          siteUrl: document.getElementById("siteUrl").value,
+          siteTitle: document.getElementById("siteTitle").value,
+          siteDescription: document.getElementById("siteDescription").value,
+        };
+        localStorage.setItem("calmiqsSiteSettings", JSON.stringify(settings));
+        alert("✅ Settings saved");
+      });
+
+      // ==== AUTO-SAVE ====
+      document.getElementById("autosaveToggle").addEventListener("change", (e) => {
+        if (e.target.checked) startAutosave();
+        else if (autosaveTimer) clearInterval(autosaveTimer);
+      });
+
+      function startAutosave() {
+        autosaveTimer = setInterval(() => {
+          document.getElementById("savePostBtn").click();
+        }, 60000);
+      }
+
+      // ==== INITIALIZE ====
+      function initializeEditor() {
+        document.getElementById("postDate").valueAsDate = new Date();
+        loadNewsletterStats();
+        loadSubscribers();
+        const settings = JSON.parse(localStorage.getItem("calmiqsSiteSettings") || "{}");
+        if (settings.siteUrl) document.getElementById("siteUrl").value = settings.siteUrl;
+        if (settings.siteTitle) document.getElementById("siteTitle").value = settings.siteTitle;
+        if (settings.siteDescription)
+          document.getElementById("siteDescription").value = settings.siteDescription;
+      }
+
+      // Check auth on load
+      if (localStorage.getItem("calmiqsAuth") === "true") {
+        isAuthenticated = true;
+        document.getElementById("authScreen").classList.add("hidden");
+        document.getElementById("adminPanel").classList.remove("hidden");
+        initializeEditor();
+      }
     </script>
   </body>
 </html>
