@@ -2,18 +2,35 @@ name = "calmiqs-site"
 compatibility_date = "2024-11-04"
 pages_build_output_dir = "public"
 
+[env.production]
+name = "calmiqs-prod"
+
 [[kv_namespaces]]
 binding = "CALMIQS_POSTS"
 id = "7bceea0c0fe9419b81c41b54231acc11"
+preview_id = "7bceea0c0fe9419b81c41b54231acc11"
 
 [[kv_namespaces]]
 binding = "CALMIQS_IMAGES"
 id = "cdab54f42fde47db8ea06123a7b686eb"
+preview_id = "cdab54f42fde47db8ea06123a7b686eb"
 
 [[kv_namespaces]]
-binding = "CALMIQS_NEWSLETTER"
-id = "af9f270722ec4af899f2ef340f5dfa44" # Create new KV namespace if needed
+binding = "CALMIQS_COMMENTS"
+id = "c721558929a546729bf733b917db96e4"
+preview_id = "c721558929a546729bf733b917db96e4"
 
 [[r2_buckets]]
 binding = "R2_BUCKET"
 bucket_name = "calmiqs-images"
+preview_bucket_name = "calmiqs-images"
+
+[[kv_namespaces]]
+binding = "CALMIQS_NEWSLETTER"
+id = "af9f270722ec4af899f2ef340f5dfa44" # Create new KV namespace if needed
+preview_id = "af9f270722ec4af899f2ef340f5dfa44"
+
+[env.production.vars]
+ADMIN_SECRET = "Hadia@2017"
+
+
