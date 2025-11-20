@@ -64,22 +64,36 @@
         try {
           console.log("Loading post:", postSlug);
 
-          // Try to fetch from /api/posts endpoint
+          // Fetch all posts - NO authentication required
           const res = await fetch("/api/posts");
-          if (!res.ok) throw new Error("Failed to fetch posts");
+
+          if (!res.ok) {
+            throw new Error(`Server responded with status ${res.status}`);
+          }
 
           const data = await res.json();
+
+          if (!data.success) {
+            throw new Error(data.error || "Failed to load posts");
+          }
+
           const posts = data.posts || [];
           console.log("Posts available:", posts.length);
 
           const post = posts.find((p) => p.slug === postSlug);
 
           if (!post) {
+            console.error(
+              "Post not found. Available slugs:",
+              posts.map((p) => p.slug)
+            );
             document.getElementById(
               "postContainer"
             ).innerHTML = `<p class='text-red-600'>Post not found: ${postSlug}</p>`;
             return;
           }
+
+          console.log("Post loaded successfully:", post.title);
 
           // Update page title
           document.title = `${post.title} - Calmiqs`;

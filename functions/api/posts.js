@@ -21,15 +21,8 @@ export async function onRequest(context) {
     token === "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Hadia@2017_Ayesha@2007";
 
   try {
-    // GET all posts
+    // GET all posts - PUBLIC ACCESS (no auth required for reading)
     if (request.method === "GET") {
-      if (!isAdmin) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401,
-          headers: corsHeaders,
-        });
-      }
-
       try {
         const posts = [];
         const list = await env.CALMIQS_POSTS.list();
