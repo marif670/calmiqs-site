@@ -1,65 +1,135 @@
+// ============================================
 // functions/api/posts.js
-// Handles /api/posts endpoint
+// ============================================
 
-function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
-function isAdmin(request, env) {
-  const token = request.headers.get("X-Admin-Token");
-  const ADMIN_SECRET =
-    env.ADMIN_SECRET ||
-    "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Hadia@2017_Ayesha@2007";
-  return token && token === ADMIN_SECRET;
-}
-
-// GET /api/posts
-export async function onRequestGet(context) {
-  const { env } = context;
-
-  try {
-    const posts = {};
-    const list = await env.CALMIQS_POSTS.list({ prefix: "post:" });
-
-    for (const key of list.keys) {
-      const value = await env.CALMIQS_POSTS.get(key.name);
-      if (value) {
-        const slug = key.name.replace("post:", "");
-        posts[slug] = JSON.parse(value);
-      }
-    }
-
-    return jsonResponse(posts, 200);
-  } catch (error) {
-    return jsonResponse({ error: error.message }, 500);
-  }
-}
-
-// POST /api/posts (create/update post)
-export async function onRequestPost(context) {
+export async function onRequest(context) {
   const { request, env } = context;
 
-  if (!isAdmin(request, env)) {
-    return jsonResponse({ error: "Unauthorized" }, 401);
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
+    "Content-Type": "application/json",
+  };
+
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
 
-  try {
-    const { slug, data } = await request.json();
+  const token = request.headers.get("X-Admin-Token");
+  const isAdmin =
+    token === "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Hadia@2017_Ayesha@2007";
 
-    if (!slug || !data) {
-      return jsonResponse({ error: "Missing slug or data" }, 400);
+  try {
+    // GET all posts
+    if (request.method === "GET") {
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
+
+      const posts = [];
+      const list = await env.CALMIQS_POSTS.list({ prefix: "post:" });
+
+      console.log("Posts in KV:", list.keys.length);
+
+      for (const key of list.keys) {
+        const data = await env.CALMIQS_POSTS.get(key.name);
+        if (data) {
+          posts.push(JSON.parse(data));
+        }
+      }
+
+      posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          posts,
+          total: posts.length,
+        }),
+        {
+          status: 200,
+          headers: corsHeaders,
+        }
+      );
     }
 
-    data.updatedAt = new Date().toISOString();
-    if (!data.createdAt) data.createdAt = data.updatedAt;
+    // POST save post
+    if (request.method === "POST") {
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
 
-    await env.CALMIQS_POSTS.put(`post:${slug}`, JSON.stringify(data));
+      const postData = await request.json();
+      const key = `post:${postData.slug}`;
+      const post = {
+        ...postData,
+        updatedAt: new Date().toISOString(),
+      };
 
-    return jsonResponse({ success: true, slug }, 200);
-  } catch (error) {
-    return jsonResponse({ error: error.message }, 500);
+      await env.CALMIQS_POSTS.put(key, JSON.stringify(post));
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Post saved",
+          slug: postData.slug,
+        }),
+        {
+          status: 200,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    // DELETE post
+    if (request.method === "DELETE") {
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
+
+      const url = new URL(request.url);
+      const slug = url.searchParams.get("slug");
+
+      if (!slug) {
+        return new Response(JSON.stringify({ error: "Slug required" }), {
+          status: 400,
+          headers: corsHeaders,
+        });
+      }
+
+      await env.CALMIQS_POSTS.delete(`post:${slug}`);
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Post deleted",
+        }),
+        {
+          status: 200,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: corsHeaders,
+    });
+  } catch (err) {
+    console.error("Posts error:", err);
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500,
+      headers: corsHeaders,
+    });
   }
 }
