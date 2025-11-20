@@ -30,31 +30,46 @@ export async function onRequest(context) {
         });
       }
 
-      const posts = [];
-      const list = await env.CALMIQS_POSTS.list({ prefix: "post:" });
+      try {
+        const posts = [];
+        const list = await env.CALMIQS_POSTS.list();
 
-      console.log("Posts in KV:", list.keys.length);
+        console.log("Total keys in KV:", list.keys.length);
 
-      for (const key of list.keys) {
-        const data = await env.CALMIQS_POSTS.get(key.name);
-        if (data) {
-          posts.push(JSON.parse(data));
+        for (const key of list.keys) {
+          const data = await env.CALMIQS_POSTS.get(key.name);
+          if (data) {
+            try {
+              const post = JSON.parse(data);
+              post.slug = key.name;
+              posts.push(post);
+            } catch (e) {
+              console.error("Failed to parse key:", key.name, e);
+            }
+          }
         }
-      }
 
-      posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+        console.log("Posts loaded:", posts.length);
+        posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      return new Response(
-        JSON.stringify({
-          success: true,
-          posts,
-          total: posts.length,
-        }),
-        {
-          status: 200,
+        return new Response(
+          JSON.stringify({
+            success: true,
+            posts,
+            total: posts.length,
+          }),
+          {
+            status: 200,
+            headers: corsHeaders,
+          }
+        );
+      } catch (err) {
+        console.error("GET posts error:", err);
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
           headers: corsHeaders,
-        }
-      );
+        });
+      }
     }
 
     // POST save post
@@ -66,26 +81,34 @@ export async function onRequest(context) {
         });
       }
 
-      const postData = await request.json();
-      const key = `post:${postData.slug}`;
-      const post = {
-        ...postData,
-        updatedAt: new Date().toISOString(),
-      };
+      try {
+        const postData = await request.json();
+        const key = postData.slug;
+        const post = {
+          ...postData,
+          updatedAt: new Date().toISOString(),
+        };
 
-      await env.CALMIQS_POSTS.put(key, JSON.stringify(post));
+        await env.CALMIQS_POSTS.put(key, JSON.stringify(post));
 
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: "Post saved",
-          slug: postData.slug,
-        }),
-        {
-          status: 200,
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: "Post saved",
+            slug: postData.slug,
+          }),
+          {
+            status: 200,
+            headers: corsHeaders,
+          }
+        );
+      } catch (err) {
+        console.error("POST error:", err);
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
           headers: corsHeaders,
-        }
-      );
+        });
+      }
     }
 
     // DELETE post
@@ -97,28 +120,36 @@ export async function onRequest(context) {
         });
       }
 
-      const url = new URL(request.url);
-      const slug = url.searchParams.get("slug");
+      try {
+        const url = new URL(request.url);
+        const slug = url.searchParams.get("slug");
 
-      if (!slug) {
-        return new Response(JSON.stringify({ error: "Slug required" }), {
-          status: 400,
+        if (!slug) {
+          return new Response(JSON.stringify({ error: "Slug required" }), {
+            status: 400,
+            headers: corsHeaders,
+          });
+        }
+
+        await env.CALMIQS_POSTS.delete(slug);
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: "Post deleted",
+          }),
+          {
+            status: 200,
+            headers: corsHeaders,
+          }
+        );
+      } catch (err) {
+        console.error("DELETE error:", err);
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
           headers: corsHeaders,
         });
       }
-
-      await env.CALMIQS_POSTS.delete(`post:${slug}`);
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: "Post deleted",
-        }),
-        {
-          status: 200,
-          headers: corsHeaders,
-        }
-      );
     }
 
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
