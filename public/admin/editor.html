@@ -1130,48 +1130,67 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
         updatePreview();
       });
 
+      // Save post handler
       document.getElementById("savePostBtn").addEventListener("click", async () => {
         const title = document.getElementById("postTitle").value.trim();
-        if (!title) return alert("Enter post title");
+        if (!title) {
+          alert("Please enter a post title");
+          return;
+        }
+
+        // Generate slug from title
+        const slug = title
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .replace(/-+/g, "-")
+          .trim();
 
         const postData = {
+          slug,
           title,
-          slug: generateSlug(title),
-          excerpt: document.getElementById("postExcerpt").value,
-          date: document.getElementById("postDate").value,
+          content: document.getElementById("postContent").innerHTML,
+          excerpt: document.getElementById("postExcerpt").value.trim(),
+          image: document.getElementById("postImage").value.trim(),
+          imageAlt: document.getElementById("heroAlt").value.trim(),
           category: document.getElementById("postCategory").value,
           tags: document
             .getElementById("postTags")
             .value.split(",")
             .map((t) => t.trim())
             .filter((t) => t),
-          author: document.getElementById("postAuthor").value,
-          readTime: document.getElementById("postReadTime").value,
-          content: document.getElementById("postContent").innerHTML,
-          image: selectedHeroImage || "",
-          imageAlt: document.getElementById("heroAlt").value,
-          metaDescription: document.getElementById("metaDescription").value,
-          metaKeywords: document.getElementById("metaKeywords").value,
-          ogImage: document.getElementById("ogImage").value,
-          canonicalUrl: document.getElementById("canonicalUrl").value,
+          author: document.getElementById("postAuthor").value || "Calmiqs Team",
+          date: document.getElementById("postDate").value || new Date().toISOString().split("T")[0],
         };
 
+        const saveBtn = document.getElementById("savePostBtn");
+        saveBtn.disabled = true;
+        saveBtn.textContent = "💾 Saving...";
+
         try {
-          const res = await authFetch(`${WORKER_BASE}/api/posts`, {
+          const response = await fetch("/api/admin/posts", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "X-Admin-Token": "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Hadia@2017_Ayesha@2007",
+            },
             body: JSON.stringify(postData),
           });
-          const result = await res.json();
-          if (res.ok) {
-            alert("✅ Post saved successfully!");
-            allPosts[postData.slug] = postData;
+
+          const result = await response.json();
+
+          if (response.ok) {
+            alert("✅ Post saved successfully!\nSlug: " + result.slug);
+            document.getElementById("postSlug").value = result.slug;
           } else {
-            alert("❌ " + (result.error || "Save failed"));
+            alert("❌ Save failed: " + (result.error || "Unknown error"));
           }
-        } catch (err) {
-          console.error(err);
-          alert("❌ Save failed: " + err.message);
+        } catch (error) {
+          console.error("Save error:", error);
+          alert("❌ Save failed: " + error.message);
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.textContent = "💾 Save Post";
         }
       });
 
