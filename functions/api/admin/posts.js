@@ -1,5 +1,4 @@
 // functions/api/admin/posts.js
-// Admin endpoint to manage posts
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,13 +6,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
   "Content-Type": "application/json",
 };
-
-function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: corsHeaders,
-  });
-}
 
 function isAdmin(request, env) {
   const token = request.headers.get("X-Admin-Token");
@@ -33,12 +25,15 @@ export async function onRequest(context) {
   }
 
   if (!isAdmin(request, env)) {
-    return jsonResponse({ error: "Unauthorized" }, 401);
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: corsHeaders,
+    });
   }
 
-  try {
-    // GET /api/admin/posts - List all posts
-    if (path === "/api/admin/posts" && request.method === "GET") {
+  // GET /api/admin/posts - List all posts
+  if (path === "/api/admin/posts" && request.method === "GET") {
+    try {
       const posts = [];
       const list = await env.CALMIQS_POSTS.list({ prefix: "post:" });
 
@@ -51,18 +46,25 @@ export async function onRequest(context) {
 
       posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-      return jsonResponse(
-        {
+      return new Response(
+        JSON.stringify({
           success: true,
           posts,
           total: posts.length,
-        },
-        200
+        }),
+        { headers: corsHeaders }
       );
+    } catch (error) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: corsHeaders,
+      });
     }
+  }
 
-    // POST /api/admin/posts - Create/Update post
-    if (path === "/api/admin/posts" && request.method === "POST") {
+  // POST /api/admin/posts - Create/Update post
+  if (path === "/api/admin/posts" && request.method === "POST") {
+    try {
       const body = await request.json();
       const {
         slug,
@@ -78,7 +80,13 @@ export async function onRequest(context) {
       } = body;
 
       if (!slug || !title) {
-        return jsonResponse({ error: "Missing slug or title" }, 400);
+        return new Response(
+          JSON.stringify({ error: "Missing slug or title" }),
+          {
+            status: 400,
+            headers: corsHeaders,
+          }
+        );
       }
 
       const post = {
@@ -96,40 +104,60 @@ export async function onRequest(context) {
         updatedAt: new Date().toISOString(),
       };
 
+      // Save to KV with key format: post:{slug}
       await env.CALMIQS_POSTS.put(`post:${slug}`, JSON.stringify(post));
 
-      return jsonResponse(
-        {
+      return new Response(
+        JSON.stringify({
           success: true,
           slug,
           message: "Post saved successfully",
-        },
-        200
+        }),
+        {
+          status: 200,
+          headers: corsHeaders,
+        }
       );
+    } catch (error) {
+      console.error("Post save error:", error);
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: corsHeaders,
+      });
     }
+  }
 
-    // GET /api/admin/posts/:slug - Get specific post
-    if (
-      path.match(/^\/api\/admin\/posts\/[^\/]+$/) &&
-      request.method === "GET"
-    ) {
-      const slug = path.split("/").pop();
+  // GET /api/admin/posts/:slug - Get specific post
+  if (path.match(/^\/api\/admin\/posts\/[^\/]+$/) && request.method === "GET") {
+    const slug = path.split("/").pop();
+
+    try {
       const post = await env.CALMIQS_POSTS.get(`post:${slug}`);
 
       if (!post) {
-        return jsonResponse({ error: "Post not found" }, 404);
+        return new Response(JSON.stringify({ error: "Post not found" }), {
+          status: 404,
+          headers: corsHeaders,
+        });
       }
 
-      return jsonResponse(JSON.parse(post), 200);
+      return new Response(post, { headers: corsHeaders });
+    } catch (error) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: corsHeaders,
+      });
     }
+  }
 
-    // DELETE /api/admin/posts/:slug - Delete post
-    if (
-      path.match(/^\/api\/admin\/posts\/[^\/]+$/) &&
-      request.method === "DELETE"
-    ) {
-      const slug = path.split("/").pop();
+  // DELETE /api/admin/posts/:slug - Delete post
+  if (
+    path.match(/^\/api\/admin\/posts\/[^\/]+$/) &&
+    request.method === "DELETE"
+  ) {
+    const slug = path.split("/").pop();
 
+    try {
       await env.CALMIQS_POSTS.delete(`post:${slug}`);
 
       // Also delete associated comments
@@ -140,18 +168,23 @@ export async function onRequest(context) {
         await env.CALMIQS_POSTS.delete(key.name);
       }
 
-      return jsonResponse(
-        {
+      return new Response(
+        JSON.stringify({
           success: true,
           message: "Post and associated comments deleted",
-        },
-        200
+        }),
+        { headers: corsHeaders }
       );
+    } catch (error) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: corsHeaders,
+      });
     }
-
-    return jsonResponse({ error: "Not found" }, 404);
-  } catch (error) {
-    console.error("Posts API error:", error);
-    return jsonResponse({ error: error.message }, 500);
   }
+
+  return new Response(JSON.stringify({ error: "Not found" }), {
+    status: 404,
+    headers: corsHeaders,
+  });
 }
