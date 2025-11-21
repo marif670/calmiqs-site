@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recommended Wellness Products - Calmiqs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#4FA49A",
+            accent: "#FFD580",
+            tech: "#5A67D8",
+          },
+          fontFamily: { sans: ["Poppins", "sans-serif"] },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="/assets/css/style.css?v=12" />
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GJ0N1TQ5PP"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag("js", new Date());
+    gtag("config", "G-GJ0N1TQ5PP");
+  </script>
+</head>
+<body class="font-sans bg-[#F9FAFB] text-gray-800">
+  <div id="navbar-container"></div>
+
+  <!-- Hero -->
+  <section class="relative text-center py-20 px-6 text-white overflow-hidden bg-gradient-to-br from-primary via-accent to-tech animate-gradient bg-[length:400%_400%]">
+    <div class="relative z-10">
+      <h1 class="text-4xl sm:text-5xl font-bold mb-4 drop-shadow-lg">🌿 Wellness Products We Recommend</h1>
+      <p class="max-w-2xl mx-auto text-lg">Carefully selected books, tools, and resources to support your wellness journey</p>
+    </div>
+  </section>
+
+  <!-- Products Grid -->
+  <main class="max-w-6xl mx-auto py-16 px-6">
+    <div id="productsGrid" class="grid md:grid-cols-3 gap-8">
+      <!-- Products will load here -->
+      <div class="col-span-3 text-center py-8">
+        <p class="text-gray-500">Loading products...</p>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-container"></div>
+
+  <script>
+    // Sample affiliate products - you can make this dynamic from a CMS
+    const affiliateProducts = [
+      {
+        id: 1,
+        title: "The Art of Mindfulness",
+        category: "Book",
+        description: "A comprehensive guide to mindfulness practices and techniques",
+        image: "https://via.placeholder.com/300x400?text=Mindfulness+Book",
+        affiliateUrl: "https://amazon.com/s?k=mindfulness+book",
+        price: "$19.99",
+        rating: 4.8
+      },
+      {
+        id: 2,
+        title: "Eco-Friendly Water Bottle",
+        category: "Sustainability",
+        description: "Sustainable bamboo water bottle with filtering system",
+        image: "https://via.placeholder.com/300x400?text=Water+Bottle",
+        affiliateUrl: "https://amazon.com/s?k=eco+water+bottle",
+        price: "$34.99",
+        rating: 4.6
+      },
+      {
+        id: 3,
+        title: "Meditation Cushion",
+        category: "Wellness",
+        description: "Premium buckwheat meditation cushion for comfort and support",
+        image: "https://via.placeholder.com/300x400?text=Meditation+Cushion",
+        affiliateUrl: "https://amazon.com/s?k=meditation+cushion",
+        price: "$49.99",
+        rating: 4.9
+      },
+      {
+        id: 4,
+        title: "Sustainable Living Guide",
+        category: "Book",
+        description: "Practical guide to reducing your carbon footprint",
+        image: "https://via.placeholder.com/300x400?text=Eco+Guide",
+        affiliateUrl: "https://amazon.com/s?k=sustainable+living",
+        price: "$24.99",
+        rating: 4.7
+      },
+      {
+        id: 5,
+        title: "Smart Yoga Mat",
+        category: "Wellness",
+        description: "Connected yoga mat with guided poses and posture correction",
+        image: "https://via.placeholder.com/300x400?text=Yoga+Mat",
+        affiliateUrl: "https://amazon.com/s?k=smart+yoga+mat",
+        price: "$129.99",
+        rating: 4.5
+      },
+      {
+        id: 6,
+        title: "Organic Tea Collection",
+        category: "Wellness",
+        description: "Premium organic herbal teas for relaxation and wellness",
+        image: "https://via.placeholder.com/300x400?text=Tea+Collection",
+        affiliateUrl: "https://amazon.com/s?k=organic+tea",
+        price: "$39.99",
+        rating: 4.8
+      }
+    ];
+
+    // Render products
+    function renderProducts() {
+      const grid = document.getElementById("productsGrid");
+      grid.innerHTML = affiliateProducts.map(product => `
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1">
+          <div class="relative h-48 bg-gray-200 overflow-hidden">
+            <img src="${product.image}" alt="${product.title}" class="w-full h-full object-cover" />
+            <div class="absolute top-3 right-3 bg-primary text-white px-3 py-1 rounded-full text-xs font-medium">
+              ${product.category}
+            </div>
+          </div>
+
+          <div class="p-6">
+            <h3 class="font-semibold text-lg text-gray-800 mb-2 line-clamp-2">${product.title}</h3>
+            <p class="text-sm text-gray-600 mb-3">${product.description}</p>
+
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-lg font-bold text-primary">${product.price}</span>
+              <div class="flex items-center gap-1">
+                <span class="text-yellow-500">⭐</span>
+                <span class="text-sm text-gray-600">${product.rating}</span>
+              </div>
+            </div>
+
+            <a href="/api/affiliate/redirect?id=calmiqs_${product.id}&url=${encodeURIComponent(product.affiliateUrl)}" 
+               target="_blank" rel="noopener noreferrer"
+               class="block w-full bg-primary text-white text-center py-2.5 rounded-lg font-medium hover:bg-accent transition"
+               onclick="gtag('event', 'affiliate_click', { product_id: '${product.id}', product_name: '${product.title}' })">
+              View on Amazon →
+            </a>
+
+            <p class="text-xs text-gray-500 mt-3 text-center">
+              💡 Affiliate link - We may earn a commission
+            </p>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    document.addEventListener("DOMContentLoaded", renderProducts);
+
+    // Load header and footer
+    async function loadFragment(url, selector) {
+      try {
+        const response = await fetch(url);
+        document.querySelector(selector).innerHTML = await response.text()
