@@ -402,13 +402,15 @@
                 </div>
               </div>
 
-              <!-- Hero Image -->
+              <!-- Hero Image Upload Section -->
               <div class="bg-white rounded-xl shadow p-6">
                 <h2 class="text-lg font-bold text-primary mb-4">🖼️ Hero Image</h2>
+
                 <div class="field-group">
                   <label class="field-label">Upload Hero Image</label>
                   <input type="file" id="heroImageFile" class="field-input" accept="image/*" />
                 </div>
+
                 <div class="field-group">
                   <label class="field-label">Image Alt Text</label>
                   <input
@@ -418,24 +420,76 @@
                     placeholder="Describe the image for accessibility"
                   />
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                  <button
-                    id="uploadHeroBtn"
-                    class="btn-primary flex items-center justify-center gap-2"
-                  >
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    Upload
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                  <button id="uploadHeroBtn" type="button" class="btn btn-primary">
+                    📤 Upload to R2
                   </button>
-                  <button
-                    id="selectHeroBtn"
-                    class="btn-secondary flex items-center justify-center gap-2"
-                  >
-                    <i class="fas fa-image"></i>
-                    From Library
+                  <button id="selectHeroBtn" type="button" class="btn btn-secondary">
+                    🖼️ From Library
                   </button>
                 </div>
-                <div id="heroPreview" class="mt-4"></div>
+
+                <div
+                  id="heroPreview"
+                  class="rounded-lg overflow-hidden bg-gray-100 h-48 flex items-center justify-center"
+                >
+                  <span class="text-gray-400">No image selected</span>
+                </div>
               </div>
+
+              <script>
+                // Hero image upload handler
+                document.getElementById("uploadHeroBtn").addEventListener("click", async () => {
+                  const fileInput = document.getElementById("heroImageFile");
+                  const altInput = document.getElementById("heroAlt");
+
+                  if (!fileInput.files[0]) {
+                    alert("Please select an image file");
+                    return;
+                  }
+
+                  const file = fileInput.files[0];
+                  const formData = new FormData();
+                  formData.append("file", file);
+                  formData.append("alt", altInput.value || file.name);
+
+                  const uploadBtn = document.getElementById("uploadHeroBtn");
+                  uploadBtn.disabled = true;
+                  uploadBtn.textContent = "📤 Uploading...";
+
+                  try {
+                    const response = await fetch("/api/images/upload", {
+                      method: "POST",
+                      headers: {
+                        "X-Admin-Token":
+                          "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Hadia@2017_Ayesha@2007",
+                      },
+                      body: formData,
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                      // Store the URL for later use
+                      document.getElementById("postImage").value = data.url;
+                      document.getElementById("heroPreview").innerHTML = `
+        <img src="${data.url}" alt="${data.metadata.alt}" class="w-full h-full object-cover" />
+      `;
+                      alert("✅ Hero image uploaded successfully!");
+                      fileInput.value = "";
+                    } else {
+                      alert("❌ Upload failed: " + (data.error || "Unknown error"));
+                    }
+                  } catch (error) {
+                    console.error("Upload error:", error);
+                    alert("❌ Upload failed: " + error.message);
+                  } finally {
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = "📤 Upload to R2";
+                  }
+                });
+              </script>
 
               <!-- Post Content -->
               <div class="bg-white rounded-xl shadow p-6">
@@ -943,7 +997,7 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
     <script>
       // ==== CONFIG ====
       const ADMIN_PASSWORD = "Hadia@2017";
-      const WORKER_BASE = "https://calmiqs-images-worker.techaipet.workers.dev";
+      const WORKER_BASE = "/api";
       const ADMIN_TOKEN = "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Hadia@2017_Ayesha@2007";
 
       // ==== STATE ====
