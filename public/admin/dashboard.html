@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calmiqs Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4FA49A",
+              accent: "#FFD580",
+              tech: "#5A67D8",
+            },
+            fontFamily: { sans: ["Poppins", "sans-serif"] },
+          },
+        },
+      };
+    </script>
+    <style>
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-900 font-sans">
+    <!-- Auth Screen -->
+    <div
+      id="authScreen"
+      class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-accent to-tech p-4"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-primary mb-2">Calmiqs Admin</h1>
+          <p class="text-gray-600">Unified Dashboard</p>
+        </div>
+        <form id="authForm" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <input
+              type="password"
+              id="authPassword"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+              placeholder="Enter admin password"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full bg-primary text-white py-2.5 rounded-lg font-medium hover:bg-accent transition"
+          >
+            Login
+          </button>
+          <p class="text-xs text-gray-500 text-center mt-4">🔐 Password-protected access only</p>
+        </form>
+      </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminPanel" class="hidden min-h-screen bg-gray-50">
+      <!-- Header -->
+      <header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div>
+            <h1 class="text-2xl font-bold text-primary">📊 Calmiqs Admin</h1>
+            <p class="text-sm text-gray-600">Posts • Comments • Newsletter</p>
+          </div>
+          <button
+            id="logoutBtn"
+            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg transition"
+          >
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <!-- Tabs Navigation -->
+      <nav class="bg-white border-b border-gray-200 sticky top-16 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 flex gap-4">
+          <button
+            class="tab-btn py-4 px-4 border-b-2 border-primary text-primary font-medium hover:text-primary transition"
+            data-tab="posts"
+          >
+            📝 Posts
+          </button>
+          <button
+            class="tab-btn py-4 px-4 border-b-2 border-transparent text-gray-600 hover:text-gray-900 transition"
+            data-tab="comments"
+          >
+            💬 Comments
+          </button>
+          <button
+            class="tab-btn py-4 px-4 border-b-2 border-transparent text-gray-600 hover:text-gray-900 transition"
+            data-tab="newsletter"
+          >
+            📧 Newsletter
+          </button>
+        </div>
+      </nav>
+
+      <!-- Content Area -->
+      <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- POSTS TAB -->
+        <div id="posts" class="tab-content active">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left: Editor -->
+            <div class="lg:col-span-2 space-y-6">
+              <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-bold text-primary mb-4">📝 New/Edit Post</h2>
+
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-2">Title</label>
+                    <input
+                      type="text"
+                      id="postTitle"
+                      class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                      placeholder="Post title"
+                    />
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium mb-2">Slug (auto-generated)</label>
+                    <input
+                      type="text"
+                      id="postSlug"
+                      class="w-full px-4 py-2 border rounded-lg bg-gray-100"
+                      readonly
+                    />
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium mb-2">Excerpt</label>
+                    <textarea
+                      id="postExcerpt"
+                      rows="2"
+                      class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                      placeholder="Brief summary"
+                    ></textarea>
+                  </div>
+
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium mb-2">Category</label>
+                      <select id="postCategory" class="w-full px-4 py-2 border rounded-lg">
+                        <option value="wellness">Wellness</option>
+                        <option value="sustainability">Sustainability</option>
+                        <option value="technology">Technology</option>
+                        <option value="lifestyle">Lifestyle</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium mb-2">Date</label>
+                      <input type="date" id="postDate" class="w-full px-4 py-2 border rounded-lg" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium mb-2">Tags (comma-separated)</label>
+                    <input
+                      type="text"
+                      id="postTags"
+                      class="w-full px-4 py-2 border rounded-lg"
+                      placeholder="tag1, tag2, tag3"
+                    />
+                  </div>
+
+                  <div id="heroImageSection" class="border-t pt-4">
+                    <h3 class="font-semibold mb-3">🖼️ Hero Image</h3>
+                    <input type="file" id="heroImageFile" accept="image/*" class="mb-2" />
+                    <input
+                      type="text"
+                      id="heroAlt"
+                      class="w-full px-4 py-2 border rounded-lg mb-2"
+                      placeholder="Image alt text"
+                    />
+                    <button
+                      id="uploadHeroBtn"
+                      type="button"
+                      class="w-full bg-primary text-white py-2 rounded-lg hover:bg-accent transition"
+                    >
+                      📤 Upload Hero Image
+                    </button>
+                    <div
+                      id="heroPreview"
+                      class="mt-4 rounded-lg bg-gray-100 h-40 flex items-center justify-center"
+                    >
+                      <span class="text-gray-400">No image selected</span>
+                    </div>
+                    <input type="hidden" id="postImage" />
+                  </div>
+
+                  <div id="contentEditor" class="border-t pt-4">
+                    <h3 class="font-semibold mb-3">📄 Content</h3>
+                    <div class="mb-3 flex gap-2 flex-wrap">
+                      <button
+                        type="button"
+                        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                        onclick="document.execCommand('bold')"
+                      >
+                        <b>B</b>
+                      </button>
+                      <button
+                        type="button"
+                        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                        onclick="document.execCommand('italic')"
+                      >
+                        <i>I</i>
+                      </button>
+                      <button
+                        type="button"
+                        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                        onclick="document.execCommand('underline')"
+                      >
+                        <u>U</u>
+                      </button>
+                      <button
+                        type="button"
+                        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                        onclick="document.execCommand('insertUnorderedList')"
+                      >
+                        • List
+                      </button>
+                      <button
+                        type="button"
+                        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                        onclick="insertLink()"
+                      >
+                        🔗 Link
+                      </button>
+                      <button
+                        type="button"
+                        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                        onclick="uploadInlineImage()"
+                      >
+                        🖼️ Image
+                      </button>
+                    </div>
+                    <textarea
+                      id="postContent"
+                      rows="8"
+                      class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary font-mono text-sm"
+                      placeholder="Enter post content (HTML supported)"
+                    ></textarea>
+                  </div>
+
+                  <div class="flex gap-3">
+                    <button
+                      id="savePostBtn"
+                      class="flex-1 bg-primary text-white py-2.5 rounded-lg font-medium hover:bg-accent transition"
+                    >
+                      💾 Save Post
+                    </button>
+                    <button
+                      id="newPostBtn"
+                      class="flex-1 bg-gray-200 text-gray-800 py-2.5 rounded-lg font-medium hover:bg-gray-300 transition"
+                    >
+                      ➕ New Post
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Posts List -->
+            <div class="space-y-6">
+              <div class="bg-white rounded-xl shadow p-6">
+                <h3 class="font-semibold mb-4">📚 Your Posts</h3>
+                <div id="postsList" class="space-y-2 max-h-96 overflow-y-auto">
+                  <p class="text-gray-500 text-sm">Loading posts...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COMMENTS TAB -->
+        <div id="comments" class="tab-content">
+          <div class="bg-white rounded-xl shadow p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl font-bold text-primary">💬 Comments Moderation</h2>
+              <button
+                id="refreshCommentsBtn"
+                class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent transition"
+              >
+                🔄 Refresh
+              </button>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid md:grid-cols-3 gap-4 mb-8">
+              <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                <div class="text-2xl font-bold text-yellow-600" id="pendingCount">0</div>
+                <div class="text-sm text-gray-600">Pending</div>
+              </div>
+              <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                <div class="text-2xl font-bold text-green-600" id="approvedCount">0</div>
+                <div class="text-sm text-gray-600">Approved</div>
+              </div>
+              <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                <div class="text-2xl font-bold text-red-600" id="rejectedCount">0</div>
+                <div class="text-sm text-gray-600">Rejected</div>
+              </div>
+            </div>
+
+            <!-- Comments List -->
+            <div id="commentsList" class="space-y-4">
+              <p class="text-gray-500 text-center py-8">Loading comments...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- NEWSLETTER TAB -->
+        <div id="newsletter" class="tab-content">
+          <div class="grid lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-6">
+              <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-bold text-primary mb-6">📧 Newsletter Stats</h2>
+
+                <div class="grid md:grid-cols-3 gap-4 mb-8">
+                  <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <div class="text-2xl font-bold text-tech" id="totalSubscribers">0</div>
+                    <div class="text-sm text-gray-600">Total</div>
+                  </div>
+                  <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <div class="text-2xl font-bold text-green-600" id="activeSubscribers">0</div>
+                    <div class="text-sm text-gray-600">Active</div>
+                  </div>
+                  <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div class="text-2xl font-bold text-gray-600" id="unsubscribed">0</div>
+                    <div class="text-sm text-gray-600">Unsubscribed</div>
+                  </div>
+                </div>
+
+                <div class="border-t pt-6">
+                  <h3 class="font-semibold mb-4">Send Newsletter</h3>
+                  <div class="space-y-4">
+                    <div>
+                      <label class="block text-sm font-medium mb-2">Subject</label>
+                      <input
+                        type="text"
+                        id="newsletterSubject"
+                        class="w-full px-4 py-2 border rounded-lg"
+                        placeholder="Email subject"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium mb-2">Content</label>
+                      <textarea
+                        id="newsletterContent"
+                        rows="5"
+                        class="w-full px-4 py-2 border rounded-lg"
+                        placeholder="Email content (HTML)"
+                      ></textarea>
+                    </div>
+                    <button
+                      id="sendNewsletterBtn"
+                      class="w-full bg-primary text-white py-2.5 rounded-lg font-medium hover:bg-accent transition"
+                    >
+                      📤 Send Newsletter
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-6">
+              <h3 class="font-semibold mb-4">Subscribers List</h3>
+              <div id="subscribersList" class="space-y-2 max-h-96 overflow-y-auto text-sm">
+                <p class="text-gray-500">Loading...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // ========== AUTH LOGIC ==========
+      const ADMIN_PASSWORD = "Hadia@2017";
+      const ADMIN_TOKEN = "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Hadia@2017_Ayesha@2007";
+
+      document.getElementById("authForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (document.getElementById("authPassword").value === ADMIN_PASSWORD) {
+          document.getElementById("authScreen").classList.add("hidden");
+          document.getElementById("adminPanel").classList.remove("hidden");
+          localStorage.setItem("calmiqsAdmin", "true");
+          initDashboard();
+        } else {
+          alert("❌ Incorrect password");
+        }
+      });
+
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("calmiqsAdmin");
+        location.reload();
+      });
+
+      // Check auth on load
+      if (localStorage.getItem("calmiqsAdmin") === "true") {
+        document.getElementById("authScreen").classList.add("hidden");
+        document.getElementById("adminPanel").classList.remove("hidden");
+        initDashboard();
+      }
+
+      // ========== TAB LOGIC ==========
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const tab = btn.dataset.tab;
+          document.querySelectorAll(".tab-content").forEach((el) => el.classList.remove("active"));
+          document.querySelectorAll(".tab-btn").forEach((el) => {
+            el.classList.remove("border-primary", "text-primary");
+            el.classList.add("border-transparent", "text-gray-600");
+          });
+          document.getElementById(tab).classList.add("active");
+          btn.classList.remove("border-transparent", "text-gray-600");
+          btn.classList.add("border-primary", "text-primary");
+
+          if (tab === "comments") loadComments();
+          if (tab === "newsletter") loadNewsletter();
+        });
+      });
+
+      // ========== AUTH FETCH HELPER ==========
+      async function authFetch(url, opts = {}) {
+        opts.headers = opts.headers || {};
+        opts.headers["X-Admin-Token"] = ADMIN_TOKEN;
+        return fetch(url, opts);
+      }
+
+      // ========== INITIALIZE DASHBOARD ==========
+      async function initDashboard() {
+        loadPostsList();
+        loadComments();
+        loadNewsletter();
+
+        // Set today's date
+        document.getElementById("postDate").valueAsDate = new Date();
+      }
+
+      // ========== POSTS LOGIC ==========
+      async function loadPostsList() {
+        try {
+          const response = await authFetch("/api/admin/posts");
+          const data = await response.json();
+
+          const list = document.getElementById("postsList");
+          if (!data.posts || data.posts.length === 0) {
+            list.innerHTML = "<p class='text-gray-500 text-sm'>No posts yet</p>";
+            return;
+          }
+
+          list.innerHTML = data.posts
+            .map(
+              (post) => `
+          <div class="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition" onclick="loadPostToEditor('${
+            post.slug
+          }')">
+            <div class="font-semibold text-sm text-gray-800">${post.title}</div>
+            <div class="text-xs text-gray-500">${post.slug}</div>
+            <div class="text-xs text-gray-400">${new Date(post.date).toLocaleDateString()}</div>
+          </div>
+        `
+            )
+            .join("");
+        } catch (error) {
+          console.error("Posts load error:", error);
+        }
+      }
+
+      async function loadPostToEditor(slug) {
+        try {
+          const response = await authFetch(`/api/admin/posts/${slug}`);
+          const post = await response.json();
+
+          document.getElementById("postTitle").value = post.title;
+          document.getElementById("postSlug").value = post.slug;
+          document.getElementById("postExcerpt").value = post.excerpt;
+          document.getElementById("postCategory").value = post.category;
+          document.getElementById("postTags").value = (post.tags || []).join(", ");
+          document.getElementById("postDate").value = post.date;
+          document.getElementById("postContent").value = post.content;
+          document.getElementById("postImage").value = post.image;
+          document.getElementById("heroAlt").value = post.imageAlt;
+
+          if (post.image) {
+            document.getElementById("heroPreview").innerHTML = `
+            <img src="${post.image}" alt="${post.imageAlt}" class="w-full h-full object-cover" />
+          `;
+          }
+        } catch (error) {
+          alert("❌ Failed to load post: " + error.message);
+        }
+      }
+
+      document.getElementById("newPostBtn").addEventListener("click", () => {
+        document.getElementById("postTitle").value = "";
+        document.getElementById("postSlug").value = "";
+        document.getElementById("postExcerpt").value = "";
+        document.getElementById("postCategory").value = "wellness";
+        document.getElementById("postTags").value = "";
+        document.getElementById("postDate").valueAsDate = new Date();
+        document.getElementById("postContent").value = "";
+        document.getElementById("postImage").value = "";
+        document.getElementById("heroAlt").value = "";
+        document.getElementById("heroImageFile").value = "";
+        document.getElementById("heroPreview").innerHTML =
+          '<span class="text-gray-400">No image selected</span>';
+      });
+
+      document.getElementById("postTitle").addEventListener("input", () => {
+        const slug = document
+          .getElementById("postTitle")
+          .value.toLowerCase()
+          .replace(/[^\w\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .replace(/-+/g, "-")
+          .trim();
+        document.getElementById("postSlug").value = slug;
+      });
+
+      document.getElementById("uploadHeroBtn").addEventListener("click", async () => {
+        const file = document.getElementById("heroImageFile").files[0];
+        if (!file) {
+          alert("Select an image first");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("alt", document.getElementById("heroAlt").value || file.name);
+
+        const btn = document.getElementById("uploadHeroBtn");
+        btn.disabled = true;
+        btn.textContent = "📤 Uploading...";
+
+        try {
+          const response = await authFetch("/api/images/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            document.getElementById("postImage").value = data.url;
+            document.getElementById("heroPreview").innerHTML = `
+            <img src="${data.url}" alt="${data.metadata.alt}" class="w-full h-full object-cover" />
+          `;
+            alert("✅ Image uploaded!");
+          } else {
+            alert("❌ " + (data.error || "Upload failed"));
+          }
+        } catch (error) {
+          alert("❌ " + error.message);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "📤 Upload Hero Image";
+        }
+      });
+
+      document.getElementById("savePostBtn").addEventListener("click", async () => {
+        const title = document.getElementById("postTitle").value.trim();
+        if (!title) {
+          alert("Enter post title");
+          return;
+        }
+
+        const postData = {
+          slug: document.getElementById("postSlug").value,
+          title,
+          content: document.getElementById("postContent").value,
+          excerpt: document.getElementById("postExcerpt").value,
+          image: document.getElementById("postImage").value,
+          imageAlt: document.getElementById("heroAlt").value,
+          category: document.getElementById("postCategory").value,
+          tags: document
+            .getElementById("postTags")
+            .value.split(",")
+            .map((t) => t.trim())
+            .filter((t) => t),
+          date: document.getElementById("postDate").value,
+        };
+
+        const btn = document.getElementById("savePostBtn");
+        btn.disabled = true;
+        btn.textContent = "💾 Saving...";
+
+        try {
+          const response = await authFetch("/api/admin/posts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(postData),
+          });
+
+          const result = await response.json();
+          if (response.ok) {
+            alert("✅ Post saved!");
+            loadPostsList();
+          } else {
+            alert("❌ " + (result.error || "Save failed"));
+          }
+        } catch (error) {
+          alert("❌ " + error.message);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "💾 Save Post";
+        }
+      });
+
+      // ========== COMMENTS LOGIC ==========
+      async function loadComments() {
+        try {
+          const response = await authFetch("/api/admin/comments");
+          const data = await response.json();
+
+          document.getElementById("pendingCount").textContent = data.stats.pending;
+          document.getElementById("approvedCount").textContent = data.stats.approved;
+          document.getElementById("rejectedCount").textContent = data.stats.rejected;
+
+          const list = document.getElementById("commentsList");
+          if (!data.comments || data.comments.length === 0) {
+            list.innerHTML = "<p class='text-gray-500 text-center py-8'>No comments</p>";
+            return;
+          }
+
+          list.innerHTML = data.comments
+            .map(
+              (comment) => `
+          <div class="bg-white rounded-lg p-4 border-l-4 ${
+            comment.status === "pending"
+              ? "border-yellow-400"
+              : comment.status === "approved"
+              ? "border-green-400"
+              : "border-red-400"
+          }">
+            <div class="flex items-start justify-between mb-2">
+              <div>
+                <div class="font-semibold">${comment.name}</div>
+                <div class="text-sm text-gray-500">${comment.email}</div>
+                <div class="text-xs text-gray-400">Post: ${comment.postSlug}</div>
+              </div>
+              <span class="px-2 py-1 text-xs font-medium rounded ${
+                comment.status === "pending"
+                  ? "bg-yellow-100 text-yellow-800"
+                  : comment.status === "approved"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }">
+                ${comment.status}
+              </span>
+            </div>
+            <p class="text-gray-700 mb-3">${comment.comment}</p>
+            <div class="text-xs text-gray-500 mb-3">${new Date(
+              comment.createdAt
+            ).toLocaleString()}</div>
+            <div class="flex gap-2">
+              ${
+                comment.status === "pending"
+                  ? `
+                <button onclick="moderateComment('${comment.postSlug}', '${comment.id}', 'approve')" class="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600">✅ Approve</button>
+                <button onclick="moderateComment('${comment.postSlug}', '${comment.id}', 'reject')" class="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600">❌ Reject</button>
+              `
+                  : `
+                <button onclick="deleteComment('${comment.postSlug}', '${comment.id}')" class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600">🗑️ Delete</button>
+              `
+              }
+            </div>
+          </div>
+        `
+            )
+            .join("");
+        } catch (error) {
+          console.error("Comments load error:", error);
+        }
+      }
+
+      window.moderateComment = async function (postSlug, commentId, action) {
+        try {
+          const response = await authFetch(
+            `/api/admin/comments/${postSlug}/${commentId}/${action}`,
+            {
+              method: "POST",
+            }
+          );
+
+          if (response.ok) {
+            loadComments();
+          } else {
+            alert("❌ Failed");
+          }
+        } catch (error) {
+          alert("❌ " + error.message);
+        }
+      };
+
+      window.deleteComment = async function (postSlug, commentId) {
+        if (!confirm("Delete this comment?")) return;
+
+        try {
+          const response = await authFetch(`/api/admin/comments/${postSlug}/${commentId}`, {
+            method: "DELETE",
+          });
+
+          if (response.ok) {
+            loadComments();
+          } else {
+            alert("❌ Failed");
+          }
+        } catch (error) {
+          alert("❌ " + error.message);
+        }
+      };
+
+      document.getElementById("refreshCommentsBtn").addEventListener("click", loadComments);
+
+      // ========== NEWSLETTER LOGIC ==========
+      async function loadNewsletter() {
+        try {
+          const response = await authFetch("/api/admin/dashboard");
+          const data = await response.json();
+
+          const stats = data.subscribers;
+          document.getElementById("totalSubscribers").textContent = stats.total;
+          document.getElementById("activeSubscribers").textContent = stats.active;
+          document.getElementById("unsubscribed").textContent = stats.unsubscribed;
+        } catch (error) {
+          console.error("Newsletter load error:", error);
+        }
+      }
+
+      // ========== HELPERS ==========
+      function insertLink() {
+        const url = prompt("Enter URL:");
+        if (url) {
+          const textarea = document.getElementById("postContent");
+          const before = textarea.value.substring(0, textarea.selectionStart);
+          const selected = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
+          const after = textarea.value.substring(textarea.selectionEnd);
+          textarea.value = before + `<a href="${url}">${selected || "Link"}</a>` + after;
+        }
+      }
+
+      function uploadInlineImage() {
+        alert(
+          "Use hero image section above to upload images. They will be available for the post."
+        );
+      }
+    </script>
+  </body>
+</html>
