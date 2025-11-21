@@ -1,10 +1,17 @@
 // functions/api/admin/comments.js
-// Admin endpoint to get ALL comments (including pending)
+// Admin endpoint to manage all comments
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
+  "Content-Type": "application/json",
+};
 
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: corsHeaders,
   });
 }
 
@@ -16,75 +23,137 @@ function isAdmin(request, env) {
   return token && token === ADMIN_SECRET;
 }
 
-// GET /api/admin/comments - Get ALL comments with status
-export async function onRequestGet(context) {
+export async function onRequest(context) {
   const { request, env } = context;
+  const url = new URL(request.url);
+  const path = url.pathname;
 
-  console.log("Admin: Getting all comments");
+  if (request.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
 
   if (!isAdmin(request, env)) {
-    console.log("Admin: Unauthorized access attempt");
     return jsonResponse({ error: "Unauthorized" }, 401);
   }
 
   try {
-    const allComments = [];
-    const list = await env.CALMIQS_POSTS.list({ prefix: "comments:" });
+    // GET /api/admin/comments - Get ALL comments (for dashboard)
+    if (path === "/api/admin/comments" && request.method === "GET") {
+      const allComments = [];
+      const list = await env.CALMIQS_POSTS.list({ prefix: "comments:" });
 
-    console.log("Admin: Found total keys:", list.keys.length);
-
-    for (const key of list.keys) {
-      const value = await env.CALMIQS_POSTS.get(key.name);
-      if (value) {
-        try {
+      for (const key of list.keys) {
+        const value = await env.CALMIQS_POSTS.get(key.name);
+        if (value) {
           const comment = JSON.parse(value);
-
-          // Extract post slug from key: comments:postSlug:commentId
-          const keyParts = key.name.split(":");
-          if (keyParts.length >= 2) {
-            comment.postSlug = keyParts[1];
-          }
-
           allComments.push(comment);
-        } catch (e) {
-          console.error("Failed to parse comment:", key.name, e);
         }
       }
+
+      allComments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      return jsonResponse(
+        {
+          comments: allComments,
+          stats: {
+            total: allComments.length,
+            pending: allComments.filter((c) => c.status === "pending").length,
+            approved: allComments.filter((c) => c.status === "approved").length,
+            rejected: allComments.filter((c) => c.status === "rejected").length,
+          },
+        },
+        200
+      );
     }
 
-    // Sort by date (newest first)
-    allComments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    // POST /api/admin/comments/:postSlug/:commentId/approve
+    if (
+      path.match(/^\/api\/admin\/comments\/[^\/]+\/[^\/]+\/approve$/) &&
+      request.method === "POST"
+    ) {
+      const parts = path.split("/");
+      const postSlug = parts[4];
+      const commentId = parts[5];
 
-    console.log("Admin: Returning comments:", allComments.length);
-    console.log(
-      "Admin: Pending:",
-      allComments.filter((c) => c.status === "pending").length
-    );
-    console.log(
-      "Admin: Approved:",
-      allComments.filter((c) => c.status === "approved").length
-    );
+      const kvKey = `comments:${postSlug}:${commentId}`;
+      const commentData = await env.CALMIQS_POSTS.get(kvKey);
 
-    return jsonResponse(
-      {
-        comments: allComments,
-        stats: {
-          total: allComments.length,
-          pending: allComments.filter((c) => c.status === "pending").length,
-          approved: allComments.filter((c) => c.status === "approved").length,
-          rejected: allComments.filter((c) => c.status === "rejected").length,
+      if (!commentData) {
+        return jsonResponse({ error: "Comment not found" }, 404);
+      }
+
+      const comment = JSON.parse(commentData);
+      comment.status = "approved";
+      comment.moderatedAt = new Date().toISOString();
+
+      await env.CALMIQS_POSTS.put(kvKey, JSON.stringify(comment));
+
+      return jsonResponse(
+        {
+          success: true,
+          status: "approved",
+          message: "Comment approved",
         },
-      },
-      200
-    );
+        200
+      );
+    }
+
+    // POST /api/admin/comments/:postSlug/:commentId/reject
+    if (
+      path.match(/^\/api\/admin\/comments\/[^\/]+\/[^\/]+\/reject$/) &&
+      request.method === "POST"
+    ) {
+      const parts = path.split("/");
+      const postSlug = parts[4];
+      const commentId = parts[5];
+
+      const kvKey = `comments:${postSlug}:${commentId}`;
+      const commentData = await env.CALMIQS_POSTS.get(kvKey);
+
+      if (!commentData) {
+        return jsonResponse({ error: "Comment not found" }, 404);
+      }
+
+      const comment = JSON.parse(commentData);
+      comment.status = "rejected";
+      comment.moderatedAt = new Date().toISOString();
+
+      await env.CALMIQS_POSTS.put(kvKey, JSON.stringify(comment));
+
+      return jsonResponse(
+        {
+          success: true,
+          status: "rejected",
+          message: "Comment rejected",
+        },
+        200
+      );
+    }
+
+    // DELETE /api/admin/comments/:postSlug/:commentId
+    if (
+      path.match(/^\/api\/admin\/comments\/[^\/]+\/[^\/]+$/) &&
+      request.method === "DELETE"
+    ) {
+      const parts = path.split("/");
+      const postSlug = parts[4];
+      const commentId = parts[5];
+
+      const kvKey = `comments:${postSlug}:${commentId}`;
+      await env.CALMIQS_POSTS.delete(kvKey);
+
+      return jsonResponse(
+        {
+          success: true,
+          message: "Comment deleted",
+        },
+        200
+      );
+    }
+
+    return jsonResponse({ error: "Not found" }, 404);
   } catch (error) {
-    console.error("Admin: Error getting comments:", error);
-    return jsonResponse(
-      {
-        error: error.message,
-        stack: error.stack,
-      },
-      500
-    );
+    console.error("Admin comments error:", error);
+    return jsonResponse({ error: error.message }, 500);
   }
 }
