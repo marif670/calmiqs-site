@@ -1,26 +1,10 @@
 // functions/api/comments/[postSlug].js
-// GET - Fetch approved comments for a post
-// POST - Submit new comment
 
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
+    headers: { "Content-Type": "application/json" },
   });
-}
-
-function sanitizeInput(str) {
-  return String(str)
-    .replace(/[<>]/g, "")
-    .replace(/javascript:/gi, "")
-    .replace(/on\w+=/gi, "")
-    .trim()
-    .slice(0, 1000);
 }
 
 export async function onRequestGet(context) {
@@ -28,16 +12,10 @@ export async function onRequestGet(context) {
   const postSlug = params.postSlug;
 
   try {
-    console.log(`[GET] Fetching approved comments for post: ${postSlug}`);
-
     const comments = [];
     const list = await env.CALMIQS_POSTS.list({
       prefix: `comments:${postSlug}:`,
     });
-
-    console.log(
-      `[GET] Found ${list.keys.length} total comment keys for ${postSlug}`
-    );
 
     for (const key of list.keys) {
       const value = await env.CALMIQS_POSTS.get(key.name);
@@ -50,7 +28,7 @@ export async function onRequestGet(context) {
             name: comment.name,
             comment: comment.comment,
             createdAt: comment.createdAt,
-            // Don't expose email or IP
+            // Don't return email or IP
           });
         }
       }
@@ -59,7 +37,6 @@ export async function onRequestGet(context) {
     // Sort newest first
     comments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    console.log(`[GET] Returning ${comments.length} approved comments`);
     return jsonResponse({ comments }, 200);
   } catch (error) {
     console.error("Error fetching comments:", error);
@@ -68,20 +45,17 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPost(context) {
-  const { request, env, params } = context;
-  const postSlug = params.postSlug;
+  const { request, env } = context;
 
   try {
     const body = await request.json();
-    const { name, email, comment, parentId } = body;
-
-    console.log(`[POST] Received comment for post: ${postSlug}`);
+    const { postSlug, name, email, comment } = body;
 
     // Validation
-    if (!name || !email || !comment) {
+    if (!postSlug || !name || !email || !comment) {
       return jsonResponse(
         {
-          error: "Missing required fields: name, email, comment",
+          error: "Missing required fields: postSlug, name, email, comment",
         },
         400
       );
@@ -92,6 +66,16 @@ export async function onRequestPost(context) {
       return jsonResponse({ error: "Invalid email address" }, 400);
     }
 
+    // Sanitize
+    const sanitize = (str) => {
+      return String(str)
+        .replace(/[<>]/g, "")
+        .replace(/javascript:/gi, "")
+        .replace(/on\w+=/gi, "")
+        .trim()
+        .slice(0, 1000);
+    };
+
     // Generate unique comment ID
     const commentId = `${Date.now()}-${Math.random()
       .toString(36)
@@ -100,10 +84,9 @@ export async function onRequestPost(context) {
     const commentData = {
       id: commentId,
       postSlug,
-      name: sanitizeInput(name),
-      email, // stored but not displayed publicly
-      comment: sanitizeInput(comment),
-      parentId: parentId || null,
+      name: sanitize(name),
+      email, // stored but not displayed
+      comment: sanitize(comment),
       status: "pending", // pending, approved, rejected
       createdAt: new Date().toISOString(),
       ip: request.headers.get("CF-Connecting-IP") || "unknown",
@@ -112,8 +95,6 @@ export async function onRequestPost(context) {
     // Store in KV
     const kvKey = `comments:${postSlug}:${commentId}`;
     await env.CALMIQS_POSTS.put(kvKey, JSON.stringify(commentData));
-
-    console.log(`[POST] Comment stored: ${kvKey}`);
 
     return jsonResponse(
       {
@@ -127,15 +108,4 @@ export async function onRequestPost(context) {
     console.error("Error submitting comment:", error);
     return jsonResponse({ error: error.message }, 500);
   }
-}
-
-export async function onRequestOptions(context) {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
 }
