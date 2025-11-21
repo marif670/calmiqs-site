@@ -1,4 +1,4 @@
-// /assets/js/newsletter.js - Newsletter subscription
+// /assets/js/newsletter.js - Newsletter subscription handler
 
 (() => {
   const form = document.getElementById("calmiqs-newsletter-form");
@@ -54,15 +54,10 @@
       if (response.ok || response.status === 201) {
         showSuccess();
         form.reset();
-        // Track GA4 event
-        if (typeof gtag !== "undefined") {
-          gtag("event", "newsletter_signup", { email: email });
-        }
       } else {
         showError(data.error || "Subscription failed. Try again.");
       }
     } catch (err) {
-      console.error("Subscribe error:", err);
       showError("Network error — please try later.");
     } finally {
       submitBtn.disabled = false;
