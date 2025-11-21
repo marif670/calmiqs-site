@@ -81,6 +81,170 @@
           ← Back to Blog
         </a>
       </div>
+      <!-- Comments Section -->
+      <div id="commentsSection" class="mt-16">
+        <!-- Will be loaded by script -->
+      </div>
+
+      <script>
+        async function loadAndDisplayComments() {
+          const postSlug = new URLSearchParams(window.location.search).get("post");
+          if (!postSlug) return;
+
+          try {
+            console.log(`[COMMENTS] Loading for post: ${postSlug}`);
+
+            const response = await fetch(`/api/comments/${postSlug}`);
+            const data = await response.json();
+
+            if (!data.comments || data.comments.length === 0) {
+              document.getElementById("commentsSection").innerHTML = `
+          <div class="bg-gray-50 rounded-lg p-8 text-center">
+            <p class="text-gray-600">No comments yet. Be the first to share your thoughts!</p>
+          </div>
+        `;
+              console.log("[COMMENTS] No approved comments found");
+              return;
+            }
+
+            console.log(`[COMMENTS] Loaded ${data.comments.length} approved comments`);
+
+            // Display comments
+            const commentsHTML = data.comments
+              .map(
+                (comment) => `
+        <div class="bg-white rounded-lg shadow p-6 mb-4 border-l-4 border-primary">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-lg">
+              ${comment.name.charAt(0).toUpperCase()}
+            </div>
+            <div class="flex-1">
+              <h4 class="font-semibold text-gray-800">${comment.name}</h4>
+              <p class="text-sm text-gray-500">${new Date(comment.createdAt).toLocaleDateString(
+                "en-US",
+                {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              )}</p>
+              <p class="text-gray-700 mt-2 whitespace-pre-wrap">${comment.comment}</p>
+            </div>
+          </div>
+        </div>
+      `
+              )
+              .join("");
+
+            document.getElementById("commentsSection").innerHTML = `
+       <div class="mt-16">
+      <h3 class="text-2xl font-bold text-primary mb-8">💬 Comments (${data.comments.length})</h3>
+      ${commentsHTML}
+    </div>
+    
+    <!-- Comment Form -->
+    <div class="mt-12">
+      <h4 class="text-xl font-semibold mb-6 text-gray-800">Leave a Comment</h4>
+      <form id="commentForm" class="space-y-4">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-2">Name *</label>
+            <input type="text" id="commentName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Your name" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">Email *</label>
+            <input type="email" id="commentEmail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="your@email.com" />
+            <p class="text-xs text-gray-500 mt-1">Your email will not be published</p>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-2">Comment *</label>
+          <textarea id="commentText" required rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none" placeholder="Share your thoughts..."></textarea>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <button type="submit" class="bg-primary hover:bg-accent text-white px-6 py-2.5 rounded-lg font-medium transition shadow-md hover:shadow-lg">
+            📤 Submit Comment
+          </button>
+          <div id="commentMessage" class="text-sm"></div>
+        </div>
+      </form>
+    </div>
+  `;
+
+            // Attach form handler
+            document.getElementById("commentForm").addEventListener("submit", submitComment);
+          } catch (error) {
+            console.error("Failed to load comments:", error);
+            document.getElementById("commentsSection").innerHTML = `
+    <div class="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
+      <p class="text-red-600">Failed to load comments</p>
+    </div>
+  `;
+          }
+        }
+        async function submitComment(e) {
+          e.preventDefault();
+          const postSlug = new URLSearchParams(window.location.search).get("post");
+          const messageEl = document.getElementById("commentMessage");
+          const formData = {
+            postSlug,
+            name: document.getElementById("commentName").value.trim(),
+            email: document.getElementById("commentEmail").value.trim(),
+            comment: document.getElementById("commentText").value.trim(),
+          };
+
+          console.log("[COMMENTS] Submitting comment:", formData);
+
+          const submitBtn = e.target.querySelector('button[type="submit"]');
+          submitBtn.disabled = true;
+          submitBtn.textContent = "⏳ Submitting...";
+
+          try {
+            const response = await fetch("/api/comments/" + postSlug, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok || response.status === 201) {
+              messageEl.className = "text-sm text-green-600";
+              messageEl.textContent = "✅ Comment submitted! It will appear after moderation.";
+              e.target.reset();
+
+              // Track GA4 event
+              if (typeof gtag !== "undefined") {
+                gtag("event", "comment_posted", { post_slug: postSlug });
+              }
+
+              // Reload comments after delay
+              setTimeout(() => {
+                loadAndDisplayComments();
+              }, 2000);
+            } else {
+              throw new Error(result.error || "Failed to submit");
+            }
+          } catch (error) {
+            console.error("Comment submission error:", error);
+            messageEl.className = "text-sm text-red-600";
+            messageEl.textContent = "❌ " + error.message;
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "📤 Submit Comment";
+          }
+        }
+        // Load comments when page loads
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", loadAndDisplayComments);
+        } else {
+          loadAndDisplayComments();
+        }
+      </script>
     </main>
 
     <footer class="bg-gray-100 py-8 mt-16 text-center text-gray-600">
