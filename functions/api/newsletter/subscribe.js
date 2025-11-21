@@ -1,5 +1,4 @@
 // functions/api/newsletter/subscribe.js
-// Newsletter subscription
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,10 +18,7 @@ export async function onRequest(context) {
   const { request, env } = context;
 
   if (request.method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
-      headers: corsHeaders,
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   if (request.method !== "POST") {
@@ -35,8 +31,6 @@ export async function onRequest(context) {
   try {
     const body = await request.json();
     const { email, name } = body;
-
-    console.log(`[NEWSLETTER] Subscribe request for: ${email}`);
 
     // Validation
     if (!email || !validateEmail(email)) {
@@ -54,7 +48,6 @@ export async function onRequest(context) {
     if (existing) {
       const sub = JSON.parse(existing);
       if (sub.status === "active") {
-        console.log(`[NEWSLETTER] Already subscribed: ${email}`);
         return new Response(
           JSON.stringify({
             success: true,
@@ -68,23 +61,21 @@ export async function onRequest(context) {
       }
     }
 
-    // Create subscription
+    // Create subscription record
     const subscription = {
       email,
       name: sanitizedName,
-      status: "active",
+      status: "active", // Auto-approve for now (can implement double opt-in later)
       subscribedAt: new Date().toISOString(),
       ip: request.headers.get("CF-Connecting-IP") || "unknown",
     };
 
-    // Store in KV
+    // Store in KV (keep for 1 year)
     await env.CALMIQS_NEWSLETTER.put(
       subscriptionId,
       JSON.stringify(subscription),
-      { expirationTtl: 365 * 24 * 60 * 60 } // 1 year
+      { expirationTtl: 365 * 24 * 60 * 60 }
     );
-
-    console.log(`[NEWSLETTER] Subscribed: ${email}`);
 
     return new Response(
       JSON.stringify({
