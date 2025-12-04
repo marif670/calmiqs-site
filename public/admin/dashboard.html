@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calmiqs Admin Dashboard</title>
+    <title>Calmiqs Editor - Content Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -19,6 +19,10 @@
         },
       };
     </script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
       .tab-content {
         display: none;
@@ -26,661 +30,1011 @@
       .tab-content.active {
         display: block;
       }
+      .editor-toolbar button {
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        background: white;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .editor-toolbar button:hover {
+        background: #f3f4f6;
+        border-color: #4fa49a;
+      }
+      #content {
+        min-height: 400px;
+        padding: 1rem;
+        border: 2px solid #d1d5db;
+        border-radius: 0.5rem;
+        outline: none;
+      }
+      #content:focus {
+        border-color: #4fa49a;
+        box-shadow: 0 0 0 3px rgba(79, 164, 154, 0.1);
+      }
+      .modal-hidden {
+        display: none;
+      }
     </style>
   </head>
-  <body class="bg-gray-50 text-gray-900 font-sans">
-    <!-- Auth Screen -->
-    <div
-      id="authScreen"
-      class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-accent to-tech p-4"
-    >
-      <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-primary mb-2">Calmiqs Admin</h1>
-          <p class="text-gray-600">Dashboard</p>
-        </div>
-        <form id="authForm" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-            <input
-              type="password"
-              id="authPassword"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-              placeholder="Enter admin password"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            class="w-full bg-primary text-white py-2.5 rounded-lg font-medium hover:bg-accent transition"
-          >
-            Login
-          </button>
-          <p class="text-xs text-gray-500 text-center mt-4">🔐 Password-protected access only</p>
-        </form>
-      </div>
-    </div>
 
-    <!-- Admin Dashboard -->
-    <div id="adminPanel" class="hidden min-h-screen bg-gray-50">
-      <!-- Header -->
-      <header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div>
-            <h1 class="text-2xl font-bold text-primary">📊 Calmiqs Admin</h1>
-            <p class="text-sm text-gray-600">Posts • Comments • Newsletter</p>
-          </div>
+  <body class="bg-gray-50 font-sans">
+    <script>
+      window.CALMIQS_ADMIN_TOKEN = "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Hadia@2017_Ayesha@2007";
+    </script>
+
+    <!-- Header -->
+    <header class="bg-white border-b sticky top-0 z-50 shadow-sm">
+      <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+          <a href="/" class="flex items-center gap-2">
+            <img src="/assets/logo.svg" alt="Calmiqs Logo" class="h-8 w-8" />
+            <span class="text-2xl font-bold text-primary">Calmiqs Editor</span>
+          </a>
+        </div>
+        <div class="flex items-center gap-3">
+          <a
+            href="/admin-comments.html"
+            class="px-4 py-2 text-gray-700 hover:text-primary transition"
+          >
+            💬 Comments
+          </a>
           <button
             id="logoutBtn"
-            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg transition"
+            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition"
           >
             Logout
           </button>
         </div>
-      </header>
+      </div>
+    </header>
 
-      <!-- Tabs Navigation -->
-      <nav class="bg-white border-b border-gray-200 sticky top-16 z-30 shadow-sm">
-        <div class="max-w-7xl mx-auto px-6 flex gap-4">
-          <button
-            class="tab-btn py-4 px-4 border-b-2 border-primary text-primary font-medium hover:text-primary transition"
-            data-tab="posts"
-          >
-            📝 Posts
-          </button>
-          <button
-            class="tab-btn py-4 px-4 border-b-2 border-transparent text-gray-600 hover:text-gray-900 transition"
-            data-tab="comments"
-          >
-            💬 Comments
-          </button>
-          <button
-            class="tab-btn py-4 px-4 border-b-2 border-transparent text-gray-600 hover:text-gray-900 transition"
-            data-tab="newsletter"
-          >
-            📧 Newsletter
-          </button>
-        </div>
-      </nav>
+    <!-- Tabs Navigation -->
+    <nav class="bg-white border-b sticky top-16 z-40 shadow-sm">
+      <div class="max-w-7xl mx-auto px-6 flex gap-4 overflow-x-auto">
+        <button
+          class="tab-btn py-4 px-4 border-b-2 border-primary text-primary font-medium"
+          data-tab="editor"
+        >
+          📝 Editor
+        </button>
+        <button
+          class="tab-btn py-4 px-4 border-b-2 border-transparent text-gray-600 hover:text-gray-900"
+          data-tab="seo"
+        >
+          🔍 SEO & Meta
+        </button>
+        <button
+          class="tab-btn py-4 px-4 border-b-2 border-transparent text-gray-600 hover:text-gray-900"
+          data-tab="images"
+        >
+          🖼️ Images
+        </button>
+        <button
+          class="tab-btn py-4 px-4 border-b-2 border-transparent text-gray-600 hover:text-gray-900"
+          data-tab="settings"
+        >
+          ⚙️ Settings
+        </button>
+      </div>
+    </nav>
 
-      <!-- Content Area -->
-      <main class="max-w-7xl mx-auto px-6 py-8">
-        <!-- POSTS TAB -->
-        <div id="posts" class="tab-content active">
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left: Editor -->
-            <div class="lg:col-span-2 space-y-6">
-              <div class="bg-white rounded-xl shadow p-6">
-                <h2 class="text-xl font-bold text-primary mb-4">📝 New/Edit Post</h2>
-
-                <div class="space-y-4">
-                  <div>
-                    <label class="block text-sm font-medium mb-2">Title *</label>
-                    <input
-                      type="text"
-                      id="postTitle"
-                      class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                      placeholder="Post title"
-                    />
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium mb-2">Slug (auto-generated)</label>
-                    <input
-                      type="text"
-                      id="postSlug"
-                      class="w-full px-4 py-2 border rounded-lg bg-gray-100"
-                      readonly
-                    />
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium mb-2">Excerpt</label>
-                    <textarea
-                      id="postExcerpt"
-                      rows="2"
-                      class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                      placeholder="Brief summary"
-                    ></textarea>
-                  </div>
-
-                  <div class="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-sm font-medium mb-2">Category</label>
-                      <select id="postCategory" class="w-full px-4 py-2 border rounded-lg">
-                        <option value="wellness">Wellness</option>
-                        <option value="sustainability">Sustainability</option>
-                        <option value="technology">Technology</option>
-                        <option value="lifestyle">Lifestyle</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium mb-2">Date</label>
-                      <input type="date" id="postDate" class="w-full px-4 py-2 border rounded-lg" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium mb-2">Tags (comma-separated)</label>
-                    <input
-                      type="text"
-                      id="postTags"
-                      class="w-full px-4 py-2 border rounded-lg"
-                      placeholder="tag1, tag2, tag3"
-                    />
-                  </div>
-
-                  <div class="border-t pt-4">
-                    <h3 class="font-semibold mb-3">🖼️ Hero Image</h3>
-                    <input type="file" id="heroImageFile" accept="image/*" class="mb-2" />
-                    <input
-                      type="text"
-                      id="heroAlt"
-                      class="w-full px-4 py-2 border rounded-lg mb-2"
-                      placeholder="Image alt text"
-                    />
-                    <button
-                      id="uploadHeroBtn"
-                      type="button"
-                      class="w-full bg-primary text-white py-2 rounded-lg hover:bg-accent transition"
-                    >
-                      📤 Upload Hero Image
-                    </button>
-                    <div
-                      id="heroPreview"
-                      class="mt-4 rounded-lg bg-gray-100 h-40 flex items-center justify-center"
-                    >
-                      <span class="text-gray-400">No image selected</span>
-                    </div>
-                    <input type="hidden" id="postImage" />
-                  </div>
-
-                  <div class="border-t pt-4">
-                    <h3 class="font-semibold mb-3">📄 Content (HTML supported)</h3>
-                    <textarea
-                      id="postContent"
-                      rows="8"
-                      class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary font-mono text-sm"
-                      placeholder="Enter post content"
-                    ></textarea>
-                  </div>
-
-                  <div class="flex gap-3">
-                    <button
-                      id="savePostBtn"
-                      class="flex-1 bg-primary text-white py-2.5 rounded-lg font-medium hover:bg-accent transition"
-                    >
-                      💾 Save Post
-                    </button>
-                    <button
-                      id="newPostBtn"
-                      class="flex-1 bg-gray-200 text-gray-800 py-2.5 rounded-lg font-medium hover:bg-gray-300 transition"
-                    >
-                      ➕ New Post
-                    </button>
-                    <button
-                      id="deletePostBtn"
-                      class="flex-1 bg-red-500 text-white py-2.5 rounded-lg font-medium hover:bg-red-600 transition"
-                    >
-                      🗑️ Delete
-                    </button>
-                  </div>
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-8">
+      <!-- EDITOR TAB -->
+      <div id="editor" class="tab-content active">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Left: Editor -->
+          <div class="lg:col-span-2 space-y-6">
+            <!-- Post Management -->
+            <div class="bg-white rounded-xl shadow p-6">
+              <h2 class="text-xl font-bold text-primary mb-4">📋 Post Management</h2>
+              <div class="grid grid-cols-2 gap-3 mb-6">
+                <button
+                  id="newPostBtn"
+                  class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent transition"
+                >
+                  <i class="fas fa-plus"></i>
+                  New Post
+                </button>
+                <button
+                  id="loadPostBtn"
+                  class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+                >
+                  <i class="fas fa-folder-open"></i>
+                  Load Post
+                </button>
+                <button
+                  id="savePostBtn"
+                  class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                >
+                  <i class="fas fa-save"></i>
+                  Save Post
+                </button>
+                <button
+                  id="deletePostBtn"
+                  class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                >
+                  <i class="fas fa-trash"></i>
+                  Delete Post
+                </button>
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-sm font-medium mb-2">Post Slug</label>
+                  <input
+                    type="text"
+                    id="postSlug"
+                    readonly
+                    class="w-full px-4 py-2 border rounded-lg bg-gray-50"
+                  />
                 </div>
               </div>
             </div>
 
-            <!-- Right: Posts List -->
-            <div>
-              <div class="bg-white rounded-xl shadow p-6">
-                <h3 class="font-semibold mb-4">📚 Your Posts</h3>
-                <div id="postsList" class="space-y-2 max-h-96 overflow-y-auto">
-                  <p class="text-gray-500 text-sm">Loading posts...</p>
+            <!-- Title -->
+            <div class="bg-white rounded-xl shadow p-6">
+              <label class="block text-sm font-medium mb-2">Post Title *</label>
+              <input
+                type="text"
+                id="postTitle"
+                class="w-full px-4 py-2 border rounded-lg text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Enter your post title..."
+              />
+            </div>
+
+            <!-- Hero Image -->
+            <div class="bg-white rounded-xl shadow p-6">
+              <h2 class="text-lg font-bold text-primary mb-4">🖼️ Hero Image</h2>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-sm font-medium mb-2">Upload Hero Image</label>
+                  <input
+                    type="file"
+                    id="heroImageFile"
+                    class="w-full px-4 py-2 border rounded-lg"
+                    accept="image/*"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Image Alt Text</label>
+                  <input
+                    type="text"
+                    id="heroAlt"
+                    class="w-full px-4 py-2 border rounded-lg"
+                    placeholder="Describe the image for accessibility"
+                  />
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <button
+                    id="uploadHeroBtn"
+                    class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent transition"
+                  >
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Upload
+                  </button>
+                  <button
+                    id="selectHeroBtn"
+                    class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+                  >
+                    <i class="fas fa-image"></i>
+                    From Library
+                  </button>
+                </div>
+                <div id="heroPreview" class="mt-4"></div>
+              </div>
+            </div>
+
+            <!-- Content Editor -->
+            <div class="bg-white rounded-xl shadow p-6">
+              <h2 class="text-lg font-bold text-primary mb-4">📄 Content Editor</h2>
+              <div class="editor-toolbar flex flex-wrap gap-2 mb-4 p-3 bg-gray-50 rounded-lg">
+                <button type="button" data-cmd="bold" title="Bold">
+                  <i class="fas fa-bold"></i>
+                </button>
+                <button type="button" data-cmd="italic" title="Italic">
+                  <i class="fas fa-italic"></i>
+                </button>
+                <button type="button" data-cmd="underline" title="Underline">
+                  <i class="fas fa-underline"></i>
+                </button>
+                <div class="w-px bg-gray-300"></div>
+                <button type="button" data-cmd="h2" title="Heading 2">H2</button>
+                <button type="button" data-cmd="h3" title="Heading 3">H3</button>
+                <div class="w-px bg-gray-300"></div>
+                <button type="button" data-cmd="ul" title="Bullet List">
+                  <i class="fas fa-list"></i>
+                </button>
+                <button type="button" data-cmd="ol" title="Numbered List">
+                  <i class="fas fa-list-ol"></i>
+                </button>
+                <button type="button" data-cmd="link" title="Insert Link">
+                  <i class="fas fa-link"></i>
+                </button>
+                <button type="button" id="insertImageBtn" title="Insert Image">
+                  <i class="fas fa-image"></i>
+                </button>
+              </div>
+              <div
+                id="content"
+                contenteditable="true"
+                class="prose max-w-none"
+                placeholder="Start writing your content..."
+              ></div>
+            </div>
+          </div>
+
+          <!-- Right: Metadata -->
+          <div class="space-y-6">
+            <div class="bg-white rounded-xl shadow p-6">
+              <h2 class="text-lg font-bold text-primary mb-4">📋 Post Metadata</h2>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium mb-2">Excerpt</label>
+                  <textarea
+                    id="postExcerpt"
+                    rows="3"
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Brief summary"
+                  ></textarea>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Date</label>
+                  <input type="date" id="postDate" class="w-full px-4 py-2 border rounded-lg" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Category</label>
+                  <select id="postCategory" class="w-full px-4 py-2 border rounded-lg">
+                    <option value="wellness">Wellness</option>
+                    <option value="sustainability">Sustainability</option>
+                    <option value="technology">Technology</option>
+                    <option value="lifestyle">Lifestyle</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Tags (comma-separated)</label>
+                  <input
+                    type="text"
+                    id="postTags"
+                    class="w-full px-4 py-2 border rounded-lg"
+                    placeholder="tag1, tag2, tag3"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Author</label>
+                  <input
+                    type="text"
+                    id="postAuthor"
+                    class="w-full px-4 py-2 border rounded-lg"
+                    placeholder="Author name"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Read Time</label>
+                  <input
+                    type="text"
+                    id="postReadTime"
+                    class="w-full px-4 py-2 border rounded-lg"
+                    placeholder="5 min read"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="bg-white rounded-xl shadow p-6">
+              <h2 class="text-lg font-bold text-primary mb-4">👁️ Preview</h2>
+              <div
+                id="postPreview"
+                class="text-sm border rounded-lg p-4 bg-gray-50 max-h-64 overflow-auto"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEO & META TAB -->
+      <div id="seo" class="tab-content">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="space-y-6">
+            <div class="bg-white rounded-xl shadow p-6">
+              <h2 class="text-lg font-bold text-primary mb-4">🔍 SEO Meta Tags</h2>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium mb-2">Meta Description</label>
+                  <textarea
+                    id="metaDescription"
+                    rows="3"
+                    maxlength="160"
+                    class="w-full px-4 py-2 border rounded-lg"
+                    placeholder="160 characters recommended"
+                  ></textarea>
+                  <span class="text-xs text-gray-500" id="metaDescCount">0/160</span>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Meta Keywords</label>
+                  <input
+                    type="text"
+                    id="metaKeywords"
+                    class="w-full px-4 py-2 border rounded-lg"
+                    placeholder="keyword1, keyword2, keyword3"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">OG Image URL</label>
+                  <input
+                    type="text"
+                    id="ogImage"
+                    class="w-full px-4 py-2 border rounded-lg"
+                    placeholder="Open Graph image URL"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Canonical URL</label>
+                  <input
+                    type="text"
+                    id="canonicalUrl"
+                    class="w-full px-4 py-2 border rounded-lg"
+                    placeholder="https://calmiqs.com/blog/post-slug"
+                  />
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- COMMENTS TAB -->
-        <div id="comments" class="tab-content">
+          <div class="space-y-6">
+            <div class="bg-white rounded-xl shadow p-6">
+              <h2 class="text-lg font-bold text-primary mb-4">📋 JSON Schema</h2>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium mb-2">Schema Type</label>
+                  <select id="schemaType" class="w-full px-4 py-2 border rounded-lg">
+                    <option value="Article">Article</option>
+                    <option value="BlogPosting">Blog Post</option>
+                    <option value="NewsArticle">News Article</option>
+                  </select>
+                </div>
+                <button
+                  id="generateSchemaBtn"
+                  class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent transition"
+                >
+                  <i class="fas fa-magic"></i>
+                  Generate Schema
+                </button>
+                <div
+                  id="schemaPreview"
+                  class="bg-gray-50 p-4 rounded-lg text-xs font-mono overflow-auto max-h-64"
+                >
+                  { Ready to generate }
+                </div>
+                <button
+                  id="copySchemaBtn"
+                  class="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+                >
+                  <i class="fas fa-copy"></i>
+                  Copy Schema
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- IMAGES TAB -->
+      <div id="images" class="tab-content">
+        <div class="bg-white rounded-xl shadow p-6">
+          <h2 class="text-2xl font-bold text-primary mb-6">🖼️ Image Library</h2>
+          <div id="imageLibraryGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="col-span-full text-center py-8 text-gray-500">Loading images...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS TAB -->
+      <div id="settings" class="tab-content">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div class="bg-white rounded-xl shadow p-6">
-            <div class="flex items-center justify-between mb-6">
-              <h2 class="text-xl font-bold text-primary">💬 Comments Moderation</h2>
+            <h2 class="text-lg font-bold text-primary mb-4">🔧 Site Configuration</h2>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium mb-2">Site URL</label>
+                <input
+                  type="text"
+                  id="siteUrl"
+                  class="w-full px-4 py-2 border rounded-lg"
+                  value="https://calmiqs.pages.dev"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-2">Site Title</label>
+                <input
+                  type="text"
+                  id="siteTitle"
+                  class="w-full px-4 py-2 border rounded-lg"
+                  value="Calmiqs – Wellness & Eco Balance"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-2">Site Description</label>
+                <textarea id="siteDescription" class="w-full px-4 py-2 border rounded-lg" rows="3">
+Explore AI-powered wellness tools and eco-friendly insights</textarea
+                >
+              </div>
               <button
-                id="refreshCommentsBtn"
-                class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent transition"
+                id="saveSiteSettings"
+                class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent transition"
               >
-                🔄 Refresh
+                <i class="fas fa-save"></i>
+                Save Settings
               </button>
             </div>
-
-            <!-- Stats -->
-            <div class="grid md:grid-cols-3 gap-4 mb-8">
-              <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                <div class="text-2xl font-bold text-yellow-600" id="pendingCount">0</div>
-                <div class="text-sm text-gray-600">Pending</div>
-              </div>
-              <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                <div class="text-2xl font-bold text-green-600" id="approvedCount">0</div>
-                <div class="text-sm text-gray-600">Approved</div>
-              </div>
-              <div class="bg-red-50 p-4 rounded-lg border border-red-200">
-                <div class="text-2xl font-bold text-red-600" id="rejectedCount">0</div>
-                <div class="text-sm text-gray-600">Rejected</div>
-              </div>
-            </div>
-
-            <!-- Comments List -->
-            <div id="commentsList" class="space-y-4">
-              <p class="text-gray-500 text-center py-8">Loading comments...</p>
-            </div>
           </div>
         </div>
+      </div>
+    </main>
 
-        <!-- NEWSLETTER TAB -->
-        <div id="newsletter" class="tab-content">
-          <div class="grid lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-6">
-              <div class="bg-white rounded-xl shadow p-6">
-                <h2 class="text-xl font-bold text-primary mb-6">📧 Newsletter Stats</h2>
-
-                <div class="grid md:grid-cols-3 gap-4">
-                  <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <div class="text-2xl font-bold text-tech" id="totalSubscribers">0</div>
-                    <div class="text-sm text-gray-600">Total</div>
-                  </div>
-                  <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                    <div class="text-2xl font-bold text-green-600" id="activeSubscribers">0</div>
-                    <div class="text-sm text-gray-600">Active</div>
-                  </div>
-                  <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <div class="text-2xl font-bold text-gray-600" id="unsubscribed">0</div>
-                    <div class="text-sm text-gray-600">Unsubscribed</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <!-- Image Library Modal -->
+    <div
+      id="imageLibraryModal"
+      class="modal-hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    >
+      <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
+        <div class="flex justify-between items-center p-6 border-b">
+          <h3 class="text-xl font-bold text-primary">📚 Image Library</h3>
+          <button id="closeLibraryModal" class="text-2xl text-gray-400 hover:text-gray-600">
+            ×
+          </button>
+        </div>
+        <div class="p-6">
+          <div id="libraryGridModal" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="col-span-full text-center py-8 text-gray-500">Loading library...</div>
           </div>
         </div>
-      </main>
+      </div>
+    </div>
+
+    <!-- Post Library Modal -->
+    <div
+      id="postLibraryModal"
+      class="modal-hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    >
+      <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-auto">
+        <div class="flex justify-between items-center p-6 border-b">
+          <h3 class="text-xl font-bold text-primary">📚 Posts Library</h3>
+          <button id="closePostLibraryModal" class="text-2xl text-gray-400 hover:text-gray-600">
+            ×
+          </button>
+        </div>
+        <div class="p-6">
+          <div id="postLibraryList">
+            <div class="text-center py-8 text-gray-500">Loading posts...</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-      // ========== CONFIG ==========
-      const ADMIN_PASSWORD = "Hadia@2017";
-      const ADMIN_TOKEN = "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Hadia@2017_Ayesha@2007";
+      const WORKER_BASE = "https://calmiqs-images-worker.techaipet.workers.dev";
+      const ADMIN_TOKEN = window.CALMIQS_ADMIN_TOKEN;
 
-      // ========== AUTH ==========
-      document.getElementById("authForm").addEventListener("submit", (e) => {
-        e.preventDefault();
-        if (document.getElementById("authPassword").value === ADMIN_PASSWORD) {
-          document.getElementById("authScreen").classList.add("hidden");
-          document.getElementById("adminPanel").classList.remove("hidden");
-          localStorage.setItem("calmiqsAdmin", "true");
-          initDashboard();
-        } else {
-          alert("❌ Incorrect password");
-        }
-      });
+      let currentPost = null;
+      let selectedHeroImage = null;
 
-      document.getElementById("logoutBtn").addEventListener("click", () => {
-        localStorage.removeItem("calmiqsAdmin");
-        location.reload();
-      });
-
-      if (localStorage.getItem("calmiqsAdmin") === "true") {
-        document.getElementById("authScreen").classList.add("hidden");
-        document.getElementById("adminPanel").classList.remove("hidden");
-        initDashboard();
-      }
-
-      // ========== TAB LOGIC ==========
-      document.querySelectorAll(".tab-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const tab = btn.dataset.tab;
-          document.querySelectorAll(".tab-content").forEach((el) => el.classList.remove("active"));
-          document.querySelectorAll(".tab-btn").forEach((el) => {
-            el.classList.remove("border-primary", "text-primary");
-            el.classList.add("border-transparent", "text-gray-600");
-          });
-          document.getElementById(tab).classList.add("active");
-          btn.classList.remove("border-transparent", "text-gray-600");
-          btn.classList.add("border-primary", "text-primary");
-
-          if (tab === "comments") loadComments();
-          if (tab === "newsletter") loadNewsletter();
-        });
-      });
-
-      // ========== HELPERS ==========
+      // Auth fetch helper
       async function authFetch(url, opts = {}) {
         opts.headers = opts.headers || {};
         opts.headers["X-Admin-Token"] = ADMIN_TOKEN;
         return fetch(url, opts);
       }
 
-      async function initDashboard() {
-        document.getElementById("postDate").valueAsDate = new Date();
-        loadPostsList();
-        loadComments();
-        loadNewsletter();
+      // Generate slug from title
+      function generateSlug(title) {
+        return title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "");
       }
 
-      // ========== POSTS ==========
-      async function loadPostsList() {
-        try {
-          const response = await authFetch("/api/admin/posts");
-          const data = await response.json();
+      // Update preview
+      function updatePreview() {
+        const title = document.getElementById("postTitle").value || "Untitled";
+        const content = document.getElementById("content").innerHTML || "<p>No content</p>";
+        const preview = document.getElementById("postPreview");
+        preview.innerHTML = `<h3 class="font-bold text-primary mb-2">${title}</h3><div class="text-xs">${content.substring(
+          0,
+          300
+        )}...</div>`;
+      }
 
-          const list = document.getElementById("postsList");
-          if (!data.posts || data.posts.length === 0) {
-            list.innerHTML = "<p class='text-gray-500 text-sm'>No posts yet</p>";
-            return;
+      // Tab navigation
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const tabName = btn.dataset.tab;
+          document.querySelectorAll(".tab-content").forEach((el) => el.classList.remove("active"));
+          document.querySelectorAll(".tab-btn").forEach((el) => {
+            el.classList.remove("border-primary", "text-primary");
+            el.classList.add("border-transparent", "text-gray-600");
+          });
+          document.getElementById(tabName).classList.add("active");
+          btn.classList.remove("border-transparent", "text-gray-600");
+          btn.classList.add("border-primary", "text-primary");
+
+          if (tabName === "images") loadImageLibraryTab();
+        });
+      });
+
+      // Editor toolbar
+      document.querySelectorAll(".editor-toolbar button").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          const cmd = btn.dataset.cmd;
+          if (cmd === "link") {
+            const url = prompt("Enter URL:");
+            if (url) document.execCommand("createLink", false, url);
+          } else if (["h2", "h3", "ul", "ol"].includes(cmd)) {
+            if (cmd === "ul") document.execCommand("insertUnorderedList", false, null);
+            else if (cmd === "ol") document.execCommand("insertOrderedList", false, null);
+            else document.execCommand("formatBlock", false, `<${cmd}>`);
+          } else {
+            document.execCommand(cmd, false, null);
           }
+          updatePreview();
+          document.getElementById("content").focus();
+        });
+      });
 
-          list.innerHTML = data.posts
-            .map(
-              (post) => `
-          <div class="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition" onclick="loadPostToEditor('${
-            post.slug
-          }')">
-            <div class="font-semibold text-sm text-gray-800">${post.title}</div>
-            <div class="text-xs text-gray-500">${post.slug}</div>
-            <div class="text-xs text-gray-400">${new Date(post.date).toLocaleDateString()}</div>
-          </div>
-        `
-            )
-            .join("");
-        } catch (error) {
-          console.error("Posts load error:", error);
-        }
-      }
+      // Title input
+      document.getElementById("postTitle").addEventListener("input", () => {
+        const slug = generateSlug(document.getElementById("postTitle").value);
+        document.getElementById("postSlug").value = slug;
+        updatePreview();
+      });
 
-      async function loadPostToEditor(slug) {
-        try {
-          const response = await authFetch(`/api/admin/posts/${slug}`);
-          const post = await response.json();
+      // Content input
+      document.getElementById("content").addEventListener("input", updatePreview);
 
-          document.getElementById("postTitle").value = post.title;
-          document.getElementById("postSlug").value = post.slug;
-          document.getElementById("postExcerpt").value = post.excerpt;
-          document.getElementById("postCategory").value = post.category;
-          document.getElementById("postTags").value = (post.tags || []).join(", ");
-          document.getElementById("postDate").value = post.date;
-          document.getElementById("postContent").value = post.content;
-          document.getElementById("postImage").value = post.image;
-          document.getElementById("heroAlt").value = post.imageAlt;
+      // Meta description counter
+      document.getElementById("metaDescription").addEventListener("input", (e) => {
+        document.getElementById("metaDescCount").textContent = `${e.target.value.length}/160`;
+      });
 
-          if (post.image) {
-            document.getElementById("heroPreview").innerHTML = `
-            <img src="${post.image}" alt="${post.imageAlt}" class="w-full h-full object-cover rounded-lg" />
-          `;
-          }
-        } catch (error) {
-          alert("❌ Failed to load post");
-        }
-      }
-
+      // New Post
       document.getElementById("newPostBtn").addEventListener("click", () => {
         document.getElementById("postTitle").value = "";
         document.getElementById("postSlug").value = "";
         document.getElementById("postExcerpt").value = "";
+        document.getElementById("postDate").value = new Date().toISOString().split("T")[0];
+        document.getElementById("content").innerHTML = "";
         document.getElementById("postCategory").value = "wellness";
         document.getElementById("postTags").value = "";
-        document.getElementById("postDate").valueAsDate = new Date();
-        document.getElementById("postContent").value = "";
-        document.getElementById("postImage").value = "";
-        document.getElementById("heroAlt").value = "";
+        document.getElementById("postAuthor").value = "Calmiqs Team";
+        document.getElementById("postReadTime").value = "";
+        document.getElementById("metaDescription").value = "";
+        document.getElementById("metaKeywords").value = "";
+        document.getElementById("canonicalUrl").value = "";
         document.getElementById("heroImageFile").value = "";
-        document.getElementById("heroPreview").innerHTML =
-          '<span class="text-gray-400">No image selected</span>';
+        document.getElementById("heroAlt").value = "";
+        document.getElementById("heroPreview").innerHTML = "";
+        selectedHeroImage = null;
+        currentPost = null;
+        updatePreview();
       });
 
-      document.getElementById("postTitle").addEventListener("input", () => {
-        const slug = document
-          .getElementById("postTitle")
-          .value.toLowerCase()
-          .replace(/[^\w\s-]/g, "")
-          .replace(/\s+/g, "-")
-          .replace(/-+/g, "-")
-          .trim();
-        document.getElementById("postSlug").value = slug;
-      });
-
-      document.getElementById("uploadHeroBtn").addEventListener("click", async () => {
-        const file = document.getElementById("heroImageFile").files[0];
-        if (!file) {
-          alert("Select an image first");
-          return;
-        }
-
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("alt", document.getElementById("heroAlt").value || file.name);
-
-        const btn = document.getElementById("uploadHeroBtn");
-        btn.disabled = true;
-        btn.textContent = "📤 Uploading...";
-
-        try {
-          const response = await authFetch("/api/images/upload", {
-            method: "POST",
-            body: formData,
-          });
-
-          const data = await response.json();
-          if (response.ok) {
-            document.getElementById("postImage").value = data.url;
-            document.getElementById("heroPreview").innerHTML = `
-            <img src="${data.url}" alt="${data.metadata.alt}" class="w-full h-full object-cover rounded-lg" />
-          `;
-            alert("✅ Image uploaded!");
-          } else {
-            alert("❌ " + (data.error || "Upload failed"));
-          }
-        } catch (error) {
-          alert("❌ " + error.message);
-        } finally {
-          btn.disabled = false;
-          btn.textContent = "📤 Upload Hero Image";
-        }
-      });
-
+      // Save Post
       document.getElementById("savePostBtn").addEventListener("click", async () => {
         const title = document.getElementById("postTitle").value.trim();
-        if (!title) {
-          alert("Enter post title");
-          return;
-        }
+        if (!title) return alert("Enter post title");
 
         const postData = {
-          slug: document.getElementById("postSlug").value,
           title,
-          content: document.getElementById("postContent").value,
+          slug: generateSlug(title),
           excerpt: document.getElementById("postExcerpt").value,
-          image: document.getElementById("postImage").value,
-          imageAlt: document.getElementById("heroAlt").value,
+          date: document.getElementById("postDate").value,
           category: document.getElementById("postCategory").value,
           tags: document
             .getElementById("postTags")
             .value.split(",")
             .map((t) => t.trim())
             .filter((t) => t),
-          date: document.getElementById("postDate").value,
+          author: document.getElementById("postAuthor").value,
+          readTime: document.getElementById("postReadTime").value,
+          content: document.getElementById("content").innerHTML,
+          image: selectedHeroImage || "",
+          imageAlt: document.getElementById("heroAlt").value,
+          metaDescription: document.getElementById("metaDescription").value,
+          metaKeywords: document.getElementById("metaKeywords").value,
+          ogImage: document.getElementById("ogImage").value,
+          canonicalUrl: document.getElementById("canonicalUrl").value,
         };
 
-        const btn = document.getElementById("savePostBtn");
-        btn.disabled = true;
-        btn.textContent = "💾 Saving...";
-
         try {
-          const response = await authFetch("/api/admin/posts", {
+          const res = await authFetch(`${WORKER_BASE}/api/posts`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(postData),
           });
-
-          const result = await response.json();
-          if (response.ok) {
-            alert("✅ Post saved!");
-            loadPostsList();
+          const result = await res.json();
+          if (res.ok) {
+            alert("✅ Post saved successfully!");
           } else {
             alert("❌ " + (result.error || "Save failed"));
           }
-        } catch (error) {
-          alert("❌ " + error.message);
-        } finally {
-          btn.disabled = false;
-          btn.textContent = "💾 Save Post";
+        } catch (err) {
+          console.error(err);
+          alert("❌ Save failed: " + err.message);
         }
       });
 
-      document.getElementById("deletePostBtn").addEventListener("click", async () => {
-        const slug = document.getElementById("postSlug").value;
-        if (!slug) {
-          alert("Select a post first");
-          return;
-        }
+      // Load Post
+      document.getElementById("loadPostBtn").addEventListener("click", () => {
+        document.getElementById("postLibraryModal").classList.remove("modal-hidden");
+        loadPostLibrary();
+      });
 
-        if (!confirm("Are you sure? This will delete the post and all comments.")) return;
-
+      async function loadPostLibrary() {
         try {
-          const response = await authFetch(`/api/admin/posts/${slug}`, {
-            method: "DELETE",
-          });
+          const res = await authFetch(`${WORKER_BASE}/api/posts`);
+          const data = await res.json();
+          const list = document.getElementById("postLibraryList");
+          list.innerHTML = "";
 
-          if (response.ok) {
-            alert("✅ Post deleted!");
-            document.getElementById("newPostBtn").click();
-            loadPostsList();
-          } else {
-            alert("❌ Delete failed");
+          let postsArray = [];
+          if (data.success && data.posts) {
+            postsArray = data.posts;
+          } else if (Array.isArray(data)) {
+            postsArray = data;
+          } else if (typeof data === "object") {
+            postsArray = Object.entries(data).map(([slug, post]) => ({
+              ...post,
+              slug: slug,
+            }));
           }
-        } catch (error) {
-          alert("❌ " + error.message);
-        }
-      });
 
-      // ========== COMMENTS ==========
-      async function loadComments() {
-        try {
-          const response = await authFetch("/api/admin/comments");
-          const data = await response.json();
-
-          document.getElementById("pendingCount").textContent = data.stats.pending;
-          document.getElementById("approvedCount").textContent = data.stats.approved;
-          document.getElementById("rejectedCount").textContent = data.stats.rejected;
-
-          const list = document.getElementById("commentsList");
-          if (!data.comments || data.comments.length === 0) {
-            list.innerHTML = "<p class='text-gray-500 text-center py-8'>No comments</p>";
+          if (postsArray.length === 0) {
+            list.innerHTML = "<p class='text-center text-gray-500 py-8'>No posts yet</p>";
             return;
           }
 
-          list.innerHTML = data.comments
-            .map(
-              (comment) => `
-          <div class="bg-white rounded-lg p-4 border-l-4 ${
-            comment.status === "pending"
-              ? "border-yellow-400"
-              : comment.status === "approved"
-              ? "border-green-400"
-              : "border-red-400"
-          }">
-            <div class="flex items-start justify-between mb-2">
-              <div>
-                <div class="font-semibold">${comment.name}</div>
-                <div class="text-sm text-gray-500">${comment.email}</div>
-                <div class="text-xs text-gray-400">Post: ${comment.postSlug}</div>
-              </div>
-              <span class="px-2 py-1 text-xs font-medium rounded ${
-                comment.status === "pending"
-                  ? "bg-yellow-100 text-yellow-800"
-                  : comment.status === "approved"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }">
-                ${comment.status}
-              </span>
-            </div>
-            <p class="text-gray-700 mb-3">${comment.comment}</p>
-            <div class="text-xs text-gray-500 mb-3">${new Date(
-              comment.createdAt
-            ).toLocaleString()}</div>
-            <div class="flex gap-2">
-              ${
-                comment.status === "pending"
-                  ? `
-                <button onclick="moderateComment('${comment.postSlug}', '${comment.id}', 'approve')" class="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600">✅ Approve</button>
-                <button onclick="moderateComment('${comment.postSlug}', '${comment.id}', 'reject')" class="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600">❌ Reject</button>
-              `
-                  : `
-                <button onclick="deleteComment('${comment.postSlug}', '${comment.id}')" class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600">🗑️ Delete</button>
-              `
-              }
-            </div>
-          </div>
-        `
-            )
-            .join("");
-        } catch (error) {
-          console.error("Comments load error:", error);
-        }
-      }
-
-      window.moderateComment = async function (postSlug, commentId, action) {
-        try {
-          const response = await authFetch(
-            `/api/admin/comments/${postSlug}/${commentId}/${action}`,
-            {
-              method: "POST",
-            }
-          );
-
-          if (response.ok) {
-            loadComments();
-          } else {
-            alert("❌ Failed");
-          }
-        } catch (error) {
-          alert("❌ " + error.message);
-        }
-      };
-
-      window.deleteComment = async function (postSlug, commentId) {
-        if (!confirm("Delete this comment?")) return;
-
-        try {
-          const response = await authFetch(`/api/admin/comments/${postSlug}/${commentId}`, {
-            method: "DELETE",
+          postsArray.forEach((post) => {
+            const el = document.createElement("div");
+            el.className = "p-4 border-b hover:bg-gray-50 cursor-pointer transition";
+            el.innerHTML = `
+              <div class="font-semibold text-primary">${post.title}</div>
+              <div class="text-xs text-gray-500">${post.slug} • ${new Date(
+              post.date
+            ).toLocaleDateString()}</div>
+            `;
+            el.addEventListener("click", () => {
+              loadPostToEditor(post);
+              document.getElementById("postLibraryModal").classList.add("modal-hidden");
+            });
+            list.appendChild(el);
           });
-
-          if (response.ok) {
-            loadComments();
-          } else {
-            alert("❌ Failed");
-          }
-        } catch (error) {
-          alert("❌ " + error.message);
-        }
-      };
-
-      document.getElementById("refreshCommentsBtn").addEventListener("click", loadComments);
-
-      // ========== NEWSLETTER ==========
-      async function loadNewsletter() {
-        try {
-          const response = await authFetch("/api/admin/posts");
-          const data = await response.json();
-
-          // For now, just show placeholder stats
-          document.getElementById("totalSubscribers").textContent = "0";
-          document.getElementById("activeSubscribers").textContent = "0";
-          document.getElementById("unsubscribed").textContent = "0";
-        } catch (error) {
-          console.error("Newsletter load error:", error);
+        } catch (err) {
+          console.error(err);
+          document.getElementById("postLibraryList").innerHTML =
+            "<p class='text-center text-red-600 py-8'>Failed to load posts</p>";
         }
       }
+
+      function loadPostToEditor(post) {
+        document.getElementById("postTitle").value = post.title;
+        document.getElementById("postExcerpt").value = post.excerpt || "";
+        document.getElementById("postDate").value = post.date;
+        document.getElementById("content").innerHTML = post.content || "";
+        document.getElementById("postCategory").value = post.category || "wellness";
+        document.getElementById("postTags").value = (post.tags || []).join(", ");
+        document.getElementById("postAuthor").value = post.author || "";
+        document.getElementById("postReadTime").value = post.readTime || "";
+        document.getElementById("metaDescription").value = post.metaDescription || "";
+        document.getElementById("metaKeywords").value = post.metaKeywords || "";
+        document.getElementById("canonicalUrl").value = post.canonicalUrl || "";
+        document.getElementById("heroAlt").value = post.imageAlt || "";
+        document.getElementById("postSlug").value = post.slug;
+        selectedHeroImage = post.image;
+
+        if (post.image) {
+          document.getElementById("heroPreview").innerHTML = `<img src="${post.image}" alt="${
+            post.imageAlt || "Hero"
+          }" class="max-w-full rounded-lg shadow-md" />`;
+        }
+
+        currentPost = post;
+        updatePreview();
+      }
+
+      // Delete Post
+      document.getElementById("deletePostBtn").addEventListener("click", async () => {
+        const slug = document.getElementById("postSlug").value;
+        if (!slug) return alert("No post selected");
+        if (!confirm("Delete this post? This cannot be undone.")) return;
+
+        try {
+          const res = await authFetch(`${WORKER_BASE}/api/posts/${slug}`, { method: "DELETE" });
+          if (res.ok) {
+            alert("✅ Post deleted");
+            document.getElementById("newPostBtn").click();
+          } else {
+            alert("❌ Delete failed");
+          }
+        } catch (err) {
+          alert("❌ Error: " + err.message);
+        }
+      });
+
+      // Upload Hero Image
+      document.getElementById("uploadHeroBtn").addEventListener("click", async () => {
+        const file = document.getElementById("heroImageFile").files[0];
+        if (!file) return alert("Choose an image");
+
+        const form = new FormData();
+        form.append("file", file);
+        form.append("alt", document.getElementById("heroAlt").value || file.name);
+
+        try {
+          document.getElementById("uploadHeroBtn").disabled = true;
+          const res = await authFetch(`${WORKER_BASE}/upload`, { method: "POST", body: form });
+          const data = await res.json();
+
+          if (res.ok) {
+            // Fix: Use the correct URL format
+            const imageUrl =
+              data.url ||
+              `${WORKER_BASE}/files/${encodeURIComponent(data.r2Key || data.metadata?.r2Key)}`;
+            selectedHeroImage = imageUrl;
+
+            document.getElementById("heroPreview").innerHTML = `<img src="${imageUrl}" alt="${
+              data.metadata?.alt || data.alt || "Hero image"
+            }" class="max-w-full rounded-lg shadow-md" />`;
+
+            alert("✅ Hero image uploaded");
+          } else {
+            alert("❌ Upload failed: " + (data.error || "Unknown error"));
+          }
+        } catch (err) {
+          alert("❌ Upload failed: " + err.message);
+        } finally {
+          document.getElementById("uploadHeroBtn").disabled = false;
+        }
+      });
+
+      // Select Hero from Library
+      document.getElementById("selectHeroBtn").addEventListener("click", () => {
+        document.getElementById("imageLibraryModal").classList.remove("modal-hidden");
+        loadImageLibraryForHero();
+      });
+
+      async function loadImageLibraryForHero() {
+        try {
+          const res = await authFetch(`${WORKER_BASE}/list`);
+          const data = await res.json();
+          const grid = document.getElementById("libraryGridModal");
+          grid.innerHTML = "";
+
+          if (!data.images || data.images.length === 0) {
+            grid.innerHTML =
+              "<div class='col-span-full text-center text-gray-500 py-8'>No images in library</div>";
+            return;
+          }
+
+          data.images.forEach((img) => {
+            const thumb = document.createElement("div");
+            thumb.className = "relative group cursor-pointer";
+
+            // Fix: Construct proper image URL
+            const imageUrl = `${WORKER_BASE}/files/${encodeURIComponent(img.r2Key || img.key)}`;
+
+            thumb.innerHTML = `
+              <img src="${imageUrl}" alt="${img.alt || ""}" 
+                   class="w-full h-32 object-cover rounded hover:opacity-75 transition" />
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center">
+                <span class="text-white opacity-0 group-hover:opacity-100 font-medium">Select</span>
+              </div>
+            `;
+
+            thumb.addEventListener("click", () => {
+              selectedHeroImage = imageUrl;
+              document.getElementById("heroPreview").innerHTML = `<img src="${imageUrl}" alt="${
+                img.alt || "Hero"
+              }" class="max-w-full rounded-lg shadow-md" />`;
+              document.getElementById("heroAlt").value = img.alt || "";
+              document.getElementById("imageLibraryModal").classList.add("modal-hidden");
+              alert("✅ Hero image selected");
+            });
+
+            grid.appendChild(thumb);
+          });
+        } catch (err) {
+          console.error(err);
+          document.getElementById("libraryGridModal").innerHTML =
+            "<div class='col-span-full text-center text-red-600 py-8'>Failed to load library</div>";
+        }
+      }
+
+      // Insert Image Button
+      document.getElementById("insertImageBtn").addEventListener("click", () => {
+        document.getElementById("imageLibraryModal").classList.remove("modal-hidden");
+        loadImageLibraryForInline();
+      });
+
+      async function loadImageLibraryForInline() {
+        try {
+          const res = await authFetch(`${WORKER_BASE}/list`);
+          const data = await res.json();
+          const grid = document.getElementById("libraryGridModal");
+          grid.innerHTML = "";
+
+          if (!data.images || data.images.length === 0) {
+            grid.innerHTML =
+              "<div class='col-span-full text-center text-gray-500 py-8'>No images in library</div>";
+            return;
+          }
+
+          data.images.forEach((img) => {
+            const thumb = document.createElement("div");
+            thumb.className = "relative group cursor-pointer";
+
+            // Fix: Construct proper image URL
+            const imageUrl = `${WORKER_BASE}/files/${encodeURIComponent(img.r2Key || img.key)}`;
+
+            thumb.innerHTML = `
+              <img src="${imageUrl}" alt="${img.alt || ""}" 
+                   class="w-full h-32 object-cover rounded hover:opacity-75 transition" />
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center">
+                <span class="text-white opacity-0 group-hover:opacity-100 font-medium">Insert</span>
+              </div>
+            `;
+
+            thumb.addEventListener("click", () => {
+              const imgElement = document.createElement("img");
+              imgElement.src = imageUrl;
+              imgElement.alt = img.alt || "";
+              imgElement.className = "inline-img my-4 rounded-lg shadow-md max-w-full";
+              imgElement.style.maxWidth = "100%";
+              imgElement.style.height = "auto";
+
+              document.getElementById("content").appendChild(imgElement);
+              document.getElementById("imageLibraryModal").classList.add("modal-hidden");
+              updatePreview();
+            });
+
+            grid.appendChild(thumb);
+          });
+        } catch (err) {
+          console.error(err);
+          document.getElementById("libraryGridModal").innerHTML =
+            "<div class='col-span-full text-center text-red-600 py-8'>Failed to load library</div>";
+        }
+      }
+
+      // Load Image Library Tab
+      async function loadImageLibraryTab() {
+        try {
+          const res = await authFetch(`${WORKER_BASE}/list`);
+          const data = await res.json();
+          const grid = document.getElementById("imageLibraryGrid");
+          grid.innerHTML = "";
+
+          if (!data.images || data.images.length === 0) {
+            grid.innerHTML =
+              "<div class='col-span-full text-center text-gray-500 py-8'>No images uploaded yet</div>";
+            return;
+          }
+
+          data.images.forEach((img) => {
+            const card = document.createElement("div");
+            card.className =
+              "bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition";
+
+            // Fix: Construct proper image URL
+            const imageUrl = `${WORKER_BASE}/files/${encodeURIComponent(img.r2Key || img.key)}`;
+
+            card.innerHTML = `
+              <img src="${imageUrl}" alt="${img.alt || ""}" class="w-full h-40 object-cover" />
+              <div class="p-3">
+                <p class="text-sm font-medium text-gray-700 truncate">${
+                  img.title || img.filename || "Image"
+                }</p>
+                <p class="text-xs text-gray-500">${img.alt || "No alt text"}</p>
+              </div>
+            `;
+            grid.appendChild(card);
+          });
+        } catch (err) {
+          console.error(err);
+          document.getElementById("imageLibraryGrid").innerHTML =
+            "<div class='col-span-full text-center text-red-600 py-8'>Failed to load images</div>";
+        }
+      }
+
+      // Generate Schema
+      document.getElementById("generateSchemaBtn").addEventListener("click", () => {
+        const schemaType = document.getElementById("schemaType").value;
+        const title = document.getElementById("postTitle").value || "Untitled";
+        const excerpt = document.getElementById("postExcerpt").value || "";
+        const author = document.getElementById("postAuthor").value || "Calmiqs Team";
+        const date = document.getElementById("postDate").value || new Date().toISOString();
+
+        const schema = {
+          "@context": "https://schema.org",
+          "@type": schemaType,
+          headline: title,
+          description: excerpt,
+          author: { "@type": "Person", name: author },
+          datePublished: date,
+          image:
+            document.getElementById("ogImage").value ||
+            selectedHeroImage ||
+            "https://calmiqs.pages.dev/assets/logo.svg",
+          publisher: {
+            "@type": "Organization",
+            name: "Calmiqs",
+            logo: "https://calmiqs.pages.dev/assets/logo.svg",
+          },
+        };
+
+        document.getElementById("schemaPreview").textContent = JSON.stringify(schema, null, 2);
+      });
+
+      // Copy Schema
+      document.getElementById("copySchemaBtn").addEventListener("click", () => {
+        const schema = document.getElementById("schemaPreview").textContent;
+        navigator.clipboard
+          .writeText(schema)
+          .then(() => {
+            alert("✅ Schema copied to clipboard");
+          })
+          .catch(() => {
+            alert("Failed to copy");
+          });
+      });
+
+      // Save Site Settings
+      document.getElementById("saveSiteSettings").addEventListener("click", () => {
+        const settings = {
+          siteUrl: document.getElementById("siteUrl").value,
+          siteTitle: document.getElementById("siteTitle").value,
+          siteDescription: document.getElementById("siteDescription").value,
+        };
+        localStorage.setItem("calmiqsSiteSettings", JSON.stringify(settings));
+        alert("✅ Settings saved");
+      });
+
+      // Close modals
+      document.getElementById("closeLibraryModal").addEventListener("click", () => {
+        document.getElementById("imageLibraryModal").classList.add("modal-hidden");
+      });
+
+      document.getElementById("closePostLibraryModal").addEventListener("click", () => {
+        document.getElementById("postLibraryModal").classList.add("modal-hidden");
+      });
+
+      // Close modals on outside click
+      document.querySelectorAll(".modal-hidden").forEach((modal) => {
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) {
+            modal.classList.add("modal-hidden");
+          }
+        });
+      });
+
+      // Logout
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("calmiqsAuth");
+        sessionStorage.removeItem("calmiqsAuth");
+        localStorage.removeItem("isAdmin");
+        sessionStorage.removeItem("isAdmin");
+        window.location.href = "/";
+      });
+
+      // Initialize
+      document.getElementById("postDate").valueAsDate = new Date();
+      const settings = JSON.parse(localStorage.getItem("calmiqsSiteSettings") || "{}");
+      if (settings.siteUrl) document.getElementById("siteUrl").value = settings.siteUrl;
+      if (settings.siteTitle) document.getElementById("siteTitle").value = settings.siteTitle;
+      if (settings.siteDescription)
+        document.getElementById("siteDescription").value = settings.siteDescription;
     </script>
   </body>
 </html>
