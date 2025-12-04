@@ -22,477 +22,348 @@
     </script>
 
     <link rel="stylesheet" href="/assets/css/style.css?v=12" />
+
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GJ0N1TQ5PP"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-GJ0N1TQ5PP", {
+        page_path: window.location.pathname,
+        page_title: document.title,
+      });
+    </script>
   </head>
 
   <body class="font-sans bg-[#F9FAFB] text-gray-800">
-    <!-- HEADER -->
     <div id="navbar-container"></div>
 
     <main class="max-w-4xl mx-auto py-16 px-6">
-      <!-- Post Content -->
-      <div id="postContainer" class="text-center"></div>
-
-      <!-- Post Navigation -->
-      <div id="postNav" class="flex justify-between mt-12"></div>
-
-      <!-- Share Buttons -->
-      <div class="mt-12 pt-8 border-t border-gray-200">
-        <h3 class="text-lg font-semibold mb-4 text-center">Share this post</h3>
-        <div class="flex justify-center gap-4">
-          <a
-            id="shareTwitter"
-            target="_blank"
-            class="share-btn bg-blue-400 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition"
-          >
-            🐦 Twitter
-          </a>
-          <a
-            id="shareLinkedIn"
-            target="_blank"
-            class="share-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
-          >
-            💼 LinkedIn
-          </a>
-          <a
-            id="shareFacebook"
-            target="_blank"
-            class="share-btn bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg transition"
-          >
-            📘 Facebook
-          </a>
-          <button
-            id="copyLink"
-            class="share-btn bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition"
-          >
-            🔗 Copy Link
-          </button>
-        </div>
+      <!-- Loading State -->
+      <div id="loadingState" class="text-center py-16">
+        <div
+          class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"
+        ></div>
+        <p class="text-gray-500">Loading post...</p>
       </div>
 
-      <!-- Comments Section -->
-      <div id="commentsContainer" class="mt-16"></div>
-
-      <!-- Back to Blog -->
-      <div class="mt-12 text-center">
+      <!-- Error State -->
+      <div id="errorState" class="hidden text-center py-16">
+        <div class="text-6xl mb-4">⚠️</div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Post Not Found</h2>
+        <p class="text-gray-600 mb-6">
+          The post you're looking for doesn't exist or has been removed.
+        </p>
         <a
-          href="blog.html"
-          class="inline-block bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-accent transition shadow"
+          href="/blog.html"
+          class="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-accent transition"
         >
           ← Back to Blog
         </a>
       </div>
-      <!-- Comments Section -->
-      <div id="commentsSection" class="mt-16">
-        <!-- Will be loaded by script -->
+
+      <!-- Post Container -->
+      <div id="postContainer" class="hidden">
+        <!-- Post content will be inserted here -->
       </div>
 
-      <script>
-        async function loadAndDisplayComments() {
-          const postSlug = new URLSearchParams(window.location.search).get("post");
-          if (!postSlug) return;
+      <!-- Post Navigation -->
+      <div id="postNav" class="flex justify-between mt-12 gap-4"></div>
 
-          try {
-            console.log(`[COMMENTS] Loading for post: ${postSlug}`);
-
-            const response = await fetch(`/api/comments/${postSlug}`);
-            const data = await response.json();
-
-            if (!data.comments || data.comments.length === 0) {
-              document.getElementById("commentsSection").innerHTML = `
-          <div class="bg-gray-50 rounded-lg p-8 text-center">
-            <p class="text-gray-600">No comments yet. Be the first to share your thoughts!</p>
-          </div>
-        `;
-              console.log("[COMMENTS] No approved comments found");
-              return;
-            }
-
-            console.log(`[COMMENTS] Loaded ${data.comments.length} approved comments`);
-
-            // Display comments
-            const commentsHTML = data.comments
-              .map(
-                (comment) => `
-        <div class="bg-white rounded-lg shadow p-6 mb-4 border-l-4 border-primary">
-          <div class="flex items-start gap-4">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-lg">
-              ${comment.name.charAt(0).toUpperCase()}
-            </div>
-            <div class="flex-1">
-              <h4 class="font-semibold text-gray-800">${comment.name}</h4>
-              <p class="text-sm text-gray-500">${new Date(comment.createdAt).toLocaleDateString(
-                "en-US",
-                {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }
-              )}</p>
-              <p class="text-gray-700 mt-2 whitespace-pre-wrap">${comment.comment}</p>
-            </div>
-          </div>
-        </div>
-      `
-              )
-              .join("");
-
-            document.getElementById("commentsSection").innerHTML = `
-       <div class="mt-16">
-      <h3 class="text-2xl font-bold text-primary mb-8">💬 Comments (${data.comments.length})</h3>
-      ${commentsHTML}
-    </div>
-    
-    <!-- Comment Form -->
-    <div class="mt-12">
-      <h4 class="text-xl font-semibold mb-6 text-gray-800">Leave a Comment</h4>
-      <form id="commentForm" class="space-y-4">
-        <div class="grid md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium mb-2">Name *</label>
-            <input type="text" id="commentName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Your name" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-2">Email *</label>
-            <input type="email" id="commentEmail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="your@email.com" />
-            <p class="text-xs text-gray-500 mt-1">Your email will not be published</p>
-          </div>
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium mb-2">Comment *</label>
-          <textarea id="commentText" required rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none" placeholder="Share your thoughts..."></textarea>
-        </div>
-        
-        <div class="flex items-center gap-3">
-          <button type="submit" class="bg-primary hover:bg-accent text-white px-6 py-2.5 rounded-lg font-medium transition shadow-md hover:shadow-lg">
-            📤 Submit Comment
-          </button>
-          <div id="commentMessage" class="text-sm"></div>
-        </div>
-      </form>
-    </div>
-  `;
-
-            // Attach form handler
-            document.getElementById("commentForm").addEventListener("submit", submitComment);
-          } catch (error) {
-            console.error("Failed to load comments:", error);
-            document.getElementById("commentsSection").innerHTML = `
-    <div class="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
-      <p class="text-red-600">Failed to load comments</p>
-    </div>
-  `;
-          }
-        }
-        async function submitComment(e) {
-          e.preventDefault();
-          const postSlug = new URLSearchParams(window.location.search).get("post");
-          const messageEl = document.getElementById("commentMessage");
-          const formData = {
-            postSlug,
-            name: document.getElementById("commentName").value.trim(),
-            email: document.getElementById("commentEmail").value.trim(),
-            comment: document.getElementById("commentText").value.trim(),
-          };
-
-          console.log("[COMMENTS] Submitting comment:", formData);
-
-          const submitBtn = e.target.querySelector('button[type="submit"]');
-          submitBtn.disabled = true;
-          submitBtn.textContent = "⏳ Submitting...";
-
-          try {
-            const response = await fetch("/api/comments/" + postSlug, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(formData),
-            });
-
-            const result = await response.json();
-
-            if (response.ok || response.status === 201) {
-              messageEl.className = "text-sm text-green-600";
-              messageEl.textContent = "✅ Comment submitted! It will appear after moderation.";
-              e.target.reset();
-
-              // Track GA4 event
-              if (typeof gtag !== "undefined") {
-                gtag("event", "comment_posted", { post_slug: postSlug });
-              }
-
-              // Reload comments after delay
-              setTimeout(() => {
-                loadAndDisplayComments();
-              }, 2000);
-            } else {
-              throw new Error(result.error || "Failed to submit");
-            }
-          } catch (error) {
-            console.error("Comment submission error:", error);
-            messageEl.className = "text-sm text-red-600";
-            messageEl.textContent = "❌ " + error.message;
-          } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = "📤 Submit Comment";
-          }
-        }
-        // Load comments when page loads
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", loadAndDisplayComments);
-        } else {
-          loadAndDisplayComments();
-        }
-      </script>
+      <!-- Comments Section -->
+      <div id="commentsContainer" class="mt-16"></div>
     </main>
 
-    <footer class="bg-gray-100 py-8 mt-16 text-center text-gray-600">
-      <p>© 2025 Calmiqs – Wellness Meets Sustainability</p>
-    </footer>
-
-    <!-- Load Comments Script -->
-    <script src="/assets/js/comments.js"></script>
+    <div id="footer-container"></div>
 
     <script>
-      (async () => {
-        const postContainer = document.getElementById("postContainer");
-        const postNav = document.getElementById("postNav");
+      async function loadFragment(url, selector) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`Failed to load ${url}`);
+          document.querySelector(selector).innerHTML = await res.text();
+        } catch (err) {
+          console.error(`Failed to load ${url}:`, err);
+        }
+      }
 
-        // Get post slug from URL
+      (async () => {
         const params = new URLSearchParams(window.location.search);
         const postSlug = params.get("post");
 
+        console.log("Post slug from URL:", postSlug);
+
         if (!postSlug) {
-          postContainer.innerHTML = `<p class="text-gray-500">Post not found.</p>`;
+          showError("No post specified");
           return;
         }
-
-        // Fallback embedded posts (same as before)
-        const embeddedPosts = {
-          "mindful-breathing": {
-            title: "The Art of Mindful Breathing",
-            date: "November 2, 2025",
-            image: "https://via.placeholder.com/800x400?text=Mindful+Breathing",
-            content: `
-              <p>Mindful breathing allows you to focus on your breath and anchor your thoughts in the present moment. This practice reduces stress, anxiety, and improves focus.</p>
-              <p class="mt-4">Start by taking deep, slow breaths, observing each inhale and exhale. Feel the air as it enters and leaves your body, grounding you in calm awareness.</p>
-            `,
-          },
-          "eco-habits": {
-            title: "5 Small Eco Habits That Reduce Stress",
-            date: "November 4, 2025",
-            image: "https://via.placeholder.com/800x400?text=Eco+Habits",
-            content: `
-              <p>Living sustainably doesn't have to be overwhelming. By making small eco-friendly changes, you can create a lifestyle that supports both the planet and your mental well-being.</p>
-              <ul class="list-disc ml-6 mt-4 text-left">
-                <li>Practice digital detoxes to save energy and reduce stress.</li>
-                <li>Walk or cycle instead of driving short distances.</li>
-                <li>Start composting to reconnect with nature.</li>
-                <li>Use reusable water bottles and cups.</li>
-                <li>Spend time in green spaces daily.</li>
-              </ul>
-            `,
-          },
-        };
-
-        // Load posts from KV
-        async function loadPosts() {
-          try {
-            const res = await fetch("/posts");
-            if (!res.ok) throw new Error("KV fetch failed");
-            return await res.json();
-          } catch (err) {
-            console.error("KV fetch failed, using fallback:", err);
-            return embeddedPosts;
-          }
-        }
-
-        const posts = await loadPosts();
-        const keys = Object.keys(posts);
-        const post = posts[postSlug];
-
-        if (!post) {
-          postContainer.innerHTML = `<p class="text-gray-500">Post not found.</p>`;
-          return;
-        }
-
-        // Render post
-        postContainer.innerHTML = `
-          <h1 class="text-4xl font-bold text-primary mb-4">${post.title}</h1>
-          <p class="text-gray-500 mb-6">${post.date}</p>
-          <img src="${post.image}" alt="${
-          post.imageAlt || post.title
-        }" class="rounded-xl mb-8 shadow-lg mx-auto" />
-          <div class="text-lg leading-relaxed text-left max-w-3xl mx-auto">${post.content}</div>
-        `;
-
-        // Setup share buttons
-        const postUrl = window.location.href;
-        const postTitle = encodeURIComponent(post.title);
-
-        document.getElementById(
-          "shareTwitter"
-        ).href = `https://twitter.com/intent/tweet?text=${postTitle}&url=${encodeURIComponent(
-          postUrl
-        )}`;
-
-        document.getElementById(
-          "shareLinkedIn"
-        ).href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-          postUrl
-        )}`;
-
-        document.getElementById(
-          "shareFacebook"
-        ).href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`;
-
-        document.getElementById("copyLink").addEventListener("click", async () => {
-          try {
-            await navigator.clipboard.writeText(postUrl);
-            const btn = document.getElementById("copyLink");
-            btn.textContent = "✅ Copied!";
-            setTimeout(() => (btn.textContent = "🔗 Copy Link"), 2000);
-          } catch (err) {
-            alert("Failed to copy link");
-          }
-        });
-
-        // Previous / Next navigation
-        const currentIndex = keys.indexOf(postSlug);
-        const prevKey = keys[currentIndex - 1];
-        const nextKey = keys[currentIndex + 1];
-
-        postNav.innerHTML = `
-          <div>
-            ${
-              prevKey
-                ? `<a href="post-template.html?post=${prevKey}" class="text-primary hover:underline">← ${posts[prevKey].title}</a>`
-                : ""
-            }
-          </div>
-          <div>
-            ${
-              nextKey
-                ? `<a href="post-template.html?post=${nextKey}" class="text-primary hover:underline">${posts[nextKey].title} →</a>`
-                : ""
-            }
-          </div>
-        `;
-
-        // Initialize comments system
-        window.initComments(postSlug);
-      })();
-    </script>
-
-    <script>
-      // Add this AFTER the post loading script
-      async function loadComments() {
-        const postSlug = new URLSearchParams(window.location.search).get("post");
-        if (!postSlug) return;
 
         try {
-          // Fetch approved comments for this post
-          const response = await fetch(`/api/comments/${postSlug}`);
-          const data = await response.json();
+          // Fetch all posts first
+          console.log("Fetching posts from /api/posts");
+          const res = await fetch("/api/posts");
 
-          if (!data.comments || data.comments.length === 0) {
-            document.getElementById("commentsSection").innerHTML = `
-          <div class="bg-gray-50 rounded-lg p-8 text-center">
-            <p class="text-gray-600">No comments yet. Be the first to share your thoughts!</p>
-          </div>
-        `;
+          if (!res.ok) {
+            throw new Error(`Server responded with status ${res.status}`);
+          }
+
+          const data = await res.json();
+          console.log("API Response:", data);
+
+          // Parse posts from different response formats
+          let postsArray = [];
+
+          if (data.success && data.posts) {
+            // Format: { success: true, posts: [...] }
+            postsArray = data.posts;
+          } else if (Array.isArray(data)) {
+            // Format: [...]
+            postsArray = data;
+          } else if (typeof data === "object") {
+            // Format: { slug1: {...}, slug2: {...} }
+            postsArray = Object.entries(data).map(([slug, post]) => ({
+              ...post,
+              slug: slug,
+            }));
+          }
+
+          console.log("Posts array:", postsArray);
+
+          // Find the requested post
+          const post = postsArray.find((p) => p.slug === postSlug);
+
+          if (!post) {
+            console.error(
+              "Post not found. Available slugs:",
+              postsArray.map((p) => p.slug)
+            );
+            showError(`Post "${postSlug}" not found`);
             return;
           }
 
-          // Display comments
-          const commentsHTML = data.comments
-            .map(
-              (comment) => `
-        <div class="bg-white rounded-lg shadow p-6 mb-4 border-l-4 border-primary">
-          <div class="flex items-start gap-4">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
-              ${comment.name.charAt(0).toUpperCase()}
-            </div>
-            <div class="flex-1">
-              <h4 class="font-semibold text-gray-800">${comment.name}</h4>
-              <p class="text-sm text-gray-500">${new Date(
-                comment.createdAt
-              ).toLocaleDateString()}</p>
-              <p class="text-gray-700 mt-2">${comment.comment}</p>
-            </div>
-          </div>
-        </div>
-      `
-            )
-            .join("");
+          console.log("Post found:", post);
 
-          document.getElementById("commentsSection").innerHTML = `
-        <div class="mt-16">
-          <h3 class="text-2xl font-bold text-primary mb-8">💬 Comments (${data.comments.length})</h3>
-          ${commentsHTML}
-        </div>
-        <div class="mt-12">
-          <h4 class="text-xl font-semibold mb-6 text-gray-800">Leave a Comment</h4>
-          <form id="commentForm" class="space-y-4">
-            <div class="grid md:grid-cols-2 gap-4">
-              <input type="text" id="commentName" placeholder="Your name" required class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" />
-              <input type="email" id="commentEmail" placeholder="your@email.com" required class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" />
-            </div>
-            <textarea id="commentText" placeholder="Share your thoughts..." rows="4" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none"></textarea>
-            <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg font-medium hover:bg-accent transition">Submit Comment</button>
-          </form>
-          <div id="commentMessage" class="mt-4 text-sm"></div>
-        </div>
-      `;
+          // Display the post
+          displayPost(post);
 
-          // Attach form handler
-          document.getElementById("commentForm").addEventListener("submit", submitComment);
-        } catch (error) {
-          console.error("Failed to load comments:", error);
-        }
-      }
+          // Load navigation
+          loadPostNavigation(postsArray, postSlug);
 
-      async function submitComment(e) {
-        e.preventDefault();
-        const postSlug = new URLSearchParams(window.location.search).get("post");
-        const messageEl = document.getElementById("commentMessage");
-
-        const formData = {
-          postSlug,
-          name: document.getElementById("commentName").value,
-          email: document.getElementById("commentEmail").value,
-          comment: document.getElementById("commentText").value,
-        };
-
-        try {
-          const response = await fetch("/api/comments", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
-          });
-
-          const result = await response.json();
-
-          if (response.ok) {
-            messageEl.className = "mt-4 text-sm text-green-600";
-            messageEl.textContent = "✅ Comment submitted! It will appear after moderation.";
-            e.target.reset();
-            setTimeout(() => loadComments(), 2000);
-          } else {
-            throw new Error(result.error || "Failed to submit");
+          // Initialize comments
+          if (window.initComments) {
+            window.initComments(postSlug);
           }
-        } catch (error) {
-          messageEl.className = "mt-4 text-sm text-red-600";
-          messageEl.textContent = "❌ " + error.message;
+        } catch (err) {
+          console.error("Error loading post:", err);
+          showError(err.message);
         }
+
+        // Load header and footer
+        loadFragment("/assets/components/header.html", "#navbar-container");
+        loadFragment("/assets/components/footer.html", "#footer-container");
+      })();
+
+      function displayPost(post) {
+        document.getElementById("loadingState").classList.add("hidden");
+        document.getElementById("postContainer").classList.remove("hidden");
+
+        // Update page title
+        document.title = `${post.title} - Calmiqs`;
+
+        // Format the date
+        const postDate = new Date(post.date);
+        const formattedDate = postDate.toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        });
+
+        // Build tags HTML
+        let tagsHTML = "";
+        if (post.tags && post.tags.length > 0) {
+          tagsHTML = `
+            <div class="mb-8 flex flex-wrap gap-2">
+              ${post.tags
+                .map(
+                  (tag) =>
+                    `<a href="/blog.html?tags=${tag}" class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm hover:bg-primary hover:text-white transition">
+                      #${tag}
+                    </a>`
+                )
+                .join("")}
+            </div>
+          `;
+        }
+
+        // Build image HTML
+        let imageHTML = "";
+        if (post.image) {
+          imageHTML = `
+            <figure class="mb-8">
+              <img 
+                src="${post.image}" 
+                alt="${post.imageAlt || post.title}" 
+                class="w-full h-96 object-cover rounded-2xl shadow-lg" 
+              />
+              ${
+                post.imageAlt
+                  ? `<figcaption class="text-sm text-gray-600 mt-2 text-center italic">${post.imageAlt}</figcaption>`
+                  : ""
+              }
+            </figure>
+          `;
+        }
+
+        // Populate post content
+        document.getElementById("postContainer").innerHTML = `
+          <article class="bg-white rounded-2xl shadow-lg p-8 md:p-12">
+            <!-- Breadcrumb -->
+            <nav class="mb-6 text-sm text-gray-600" aria-label="Breadcrumb">
+              <a href="/" class="text-primary hover:underline">Home</a> / 
+              <a href="/blog.html" class="text-primary hover:underline">Blog</a> / 
+              <span class="text-gray-800">${post.title}</span>
+            </nav>
+
+            <!-- Post Meta -->
+            <div class="flex gap-4 text-sm text-gray-500 mb-4 flex-wrap">
+              <span>📅 ${formattedDate}</span>
+              <span>•</span>
+              <span>✍️ ${post.author || "Calmiqs Team"}</span>
+              <span>•</span>
+              <span>⏱️ ${post.readTime || "5 min read"}</span>
+              ${
+                post.category
+                  ? `
+                <span>•</span>
+                <span class="px-2 py-1 bg-primary/10 text-primary rounded">${post.category}</span>
+              `
+                  : ""
+              }
+            </div>
+
+            <!-- Title -->
+            <h1 class="text-4xl md:text-5xl font-bold text-primary mb-4">
+              ${post.title}
+            </h1>
+
+            <!-- Excerpt -->
+            ${post.excerpt ? `<p class="text-lg text-gray-600 mb-8">${post.excerpt}</p>` : ""}
+
+            <!-- Featured Image -->
+            ${imageHTML}
+
+            <!-- Content -->
+            <div class="prose prose-lg max-w-none mb-8">
+              ${post.content}
+            </div>
+
+            <!-- Tags -->
+            ${tagsHTML}
+
+            <!-- Author Bio -->
+            <div class="border-t border-gray-200 pt-6 mt-8">
+              <h3 class="font-semibold mb-2">About the Author</h3>
+              <p class="text-gray-600">
+                ${
+                  post.author || "Calmiqs Team"
+                } - Professional wellness and sustainability advocate.
+              </p>
+            </div>
+
+            <!-- Share Buttons -->
+            <div class="border-t border-gray-200 pt-6 mt-8">
+              <h3 class="font-semibold mb-4">Share this article</h3>
+              <div class="flex gap-3">
+                <button onclick="shareOnTwitter()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                  🐦 Twitter
+                </button>
+                <button onclick="shareOnFacebook()" class="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition">
+                  📘 Facebook
+                </button>
+                <button onclick="copyLink()" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">
+                  🔗 Copy Link
+                </button>
+              </div>
+            </div>
+          </article>
+        `;
       }
 
-      // Load comments when page loads
-      document.addEventListener("DOMContentLoaded", loadComments);
+      function loadPostNavigation(posts, currentSlug) {
+        const currentIndex = posts.findIndex((p) => p.slug === currentSlug);
+        const prevPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
+        const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+
+        let navHTML = "";
+
+        if (prevPost) {
+          navHTML += `
+            <a href="/post-template.html?post=${prevPost.slug}" 
+               class="flex-1 p-4 bg-white rounded-lg shadow hover:shadow-lg transition">
+              <div class="text-sm text-gray-600">← Previous</div>
+              <div class="font-semibold text-primary">${prevPost.title}</div>
+            </a>
+          `;
+        } else {
+          navHTML += `<div class="flex-1"></div>`;
+        }
+
+        if (nextPost) {
+          navHTML += `
+            <a href="/post-template.html?post=${nextPost.slug}" 
+               class="flex-1 p-4 bg-white rounded-lg shadow hover:shadow-lg transition text-right">
+              <div class="text-sm text-gray-600">Next →</div>
+              <div class="font-semibold text-primary">${nextPost.title}</div>
+            </a>
+          `;
+        } else {
+          navHTML += `<div class="flex-1"></div>`;
+        }
+
+        document.getElementById("postNav").innerHTML = navHTML;
+      }
+
+      function showError(message) {
+        document.getElementById("loadingState").classList.add("hidden");
+        document.getElementById("errorState").classList.remove("hidden");
+
+        const errorState = document.getElementById("errorState");
+        errorState.querySelector("p").textContent =
+          message || "The post you're looking for doesn't exist.";
+      }
+
+      // Share functions
+      function shareOnTwitter() {
+        const url = window.location.href;
+        const title = document.title;
+        window.open(
+          `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+            url
+          )}&text=${encodeURIComponent(title)}`,
+          "_blank"
+        );
+      }
+
+      function shareOnFacebook() {
+        const url = window.location.href;
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+          "_blank"
+        );
+      }
+
+      function copyLink() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          alert("Link copied to clipboard!");
+        });
+      }
     </script>
-    <!-- Global scripts -->
+
     <script src="/assets/js/auth.js"></script>
     <script src="/assets/js/header-loader.js"></script>
+    <script src="/assets/js/comments.js"></script>
   </body>
 </html>
