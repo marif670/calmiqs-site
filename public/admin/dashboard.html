@@ -263,6 +263,38 @@
                 placeholder="Start writing your content..."
               ></div>
             </div>
+
+            <!-- Inline Image Upload -->
+            <div class="bg-white rounded-xl shadow p-6">
+              <h2 class="text-lg font-bold text-primary mb-4">🖼️ Insert Image</h2>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-sm font-medium mb-2">Upload Image</label>
+                  <input
+                    type="file"
+                    id="inlineImageFile"
+                    class="w-full px-4 py-2 border rounded-lg"
+                    accept="image/*"
+                  />
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <button
+                    id="uploadInlineBtn"
+                    class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent transition"
+                  >
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Upload & Insert
+                  </button>
+                  <button
+                    id="selectInlineBtn"
+                    class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+                  >
+                    <i class="fas fa-image"></i>
+                    From Library
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Right: Metadata -->
@@ -569,16 +601,20 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           const cmd = btn.dataset.cmd;
+
           if (cmd === "link") {
             const url = prompt("Enter URL:");
             if (url) document.execCommand("createLink", false, url);
-          } else if (["h2", "h3", "ul", "ol"].includes(cmd)) {
-            if (cmd === "ul") document.execCommand("insertUnorderedList", false, null);
-            else if (cmd === "ol") document.execCommand("insertOrderedList", false, null);
-            else document.execCommand("formatBlock", false, `<${cmd}>`);
-          } else {
+          } else if (cmd === "h2" || cmd === "h3") {
+            document.execCommand("formatBlock", false, cmd);
+          } else if (cmd === "ul") {
+            document.execCommand("insertUnorderedList", false, null);
+          } else if (cmd === "ol") {
+            document.execCommand("insertOrderedList", false, null);
+          } else if (cmd) {
             document.execCommand(cmd, false, null);
           }
+
           updatePreview();
           document.getElementById("content").focus();
         });
@@ -772,31 +808,42 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
         const form = new FormData();
         form.append("file", file);
         form.append("alt", document.getElementById("heroAlt").value || file.name);
+        form.append("title", document.getElementById("postTitle").value || file.name);
 
         try {
           document.getElementById("uploadHeroBtn").disabled = true;
-          const res = await authFetch(`${WORKER_BASE}/upload`, { method: "POST", body: form });
-          const data = await res.json();
+          document.getElementById("uploadHeroBtn").innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Uploading...';
 
-          if (res.ok) {
-            // Fix: Use the correct URL format
-            const imageUrl =
-              data.url ||
-              `${WORKER_BASE}/files/${encodeURIComponent(data.r2Key || data.metadata?.r2Key)}`;
+          const res = await authFetch(`${WORKER_BASE}/upload`, {
+            method: "POST",
+            body: form,
+          });
+
+          const data = await res.json();
+          console.log("Upload response:", data);
+
+          if (res.ok && data.success) {
+            // The worker returns { success: true, url: ..., r2Key: ..., metadata: ... }
+            const imageUrl = data.url;
             selectedHeroImage = imageUrl;
 
             document.getElementById("heroPreview").innerHTML = `<img src="${imageUrl}" alt="${
-              data.metadata?.alt || data.alt || "Hero image"
-            }" class="max-w-full rounded-lg shadow-md" />`;
+              data.metadata?.alt || "Hero image"
+            }" class="max-w-full rounded-lg shadow-md" 
+                    onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect width=%22400%22 height=%22300%22 fill=%22%23f0f0f0%22/><text x=%2250%25%22 y=%2250%25%22 fill=%22%23999%22 text-anchor=%22middle%22 dy=%22.3em%22>Image uploaded</text></svg>';" />`;
 
-            alert("✅ Hero image uploaded");
+            alert("✅ Hero image uploaded successfully!");
           } else {
-            alert("❌ Upload failed: " + (data.error || "Unknown error"));
+            throw new Error(data.error || "Upload failed");
           }
         } catch (err) {
+          console.error("Upload error:", err);
           alert("❌ Upload failed: " + err.message);
         } finally {
           document.getElementById("uploadHeroBtn").disabled = false;
+          document.getElementById("uploadHeroBtn").innerHTML =
+            '<i class="fas fa-cloud-upload-alt"></i> Upload';
         }
       });
 
@@ -809,14 +856,22 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
 
       async function loadImageLibraryForHero() {
         try {
+          console.log("Loading image library for hero...");
           const res = await authFetch(`${WORKER_BASE}/list`);
+
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
+
           const data = await res.json();
+          console.log("Library data:", data);
+
           const grid = document.getElementById("libraryGridModal");
           grid.innerHTML = "";
 
           if (!data.images || data.images.length === 0) {
             grid.innerHTML =
-              "<div class='col-span-full text-center text-gray-500 py-8'>No images in library</div>";
+              "<div class='col-span-full text-center text-gray-500 py-8'>No images in library. Upload some images first!</div>";
             return;
           }
 
@@ -824,15 +879,20 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             const thumb = document.createElement("div");
             thumb.className = "relative group cursor-pointer";
 
-            // Fix: Construct proper image URL
-            const imageUrl = `${WORKER_BASE}/files/${encodeURIComponent(img.r2Key || img.key)}`;
+            // Construct proper image URL
+            const imageUrl = `${WORKER_BASE}/files/${encodeURIComponent(img.r2Key)}`;
+            console.log("Image URL:", imageUrl);
 
             thumb.innerHTML = `
               <img src="${imageUrl}" alt="${img.alt || ""}" 
-                   class="w-full h-32 object-cover rounded hover:opacity-75 transition" />
+                   class="w-full h-32 object-cover rounded hover:opacity-75 transition"
+                   onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-32 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500\\'>Load error</div>';" />
               <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center">
                 <span class="text-white opacity-0 group-hover:opacity-100 font-medium">Select</span>
               </div>
+              <div class="text-xs text-center mt-1 truncate">${
+                img.title || img.filename || "Image"
+              }</div>
             `;
 
             thumb.addEventListener("click", () => {
@@ -848,29 +908,97 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             grid.appendChild(thumb);
           });
         } catch (err) {
-          console.error(err);
-          document.getElementById("libraryGridModal").innerHTML =
-            "<div class='col-span-full text-center text-red-600 py-8'>Failed to load library</div>";
+          console.error("Library load error:", err);
+          document.getElementById(
+            "libraryGridModal"
+          ).innerHTML = `<div class='col-span-full text-center text-red-600 py-8'>Failed to load library<br><span class="text-xs">${err.message}</span></div>`;
         }
       }
 
-      // Insert Image Button
+      // Insert Image Button (from library)
       document.getElementById("insertImageBtn").addEventListener("click", () => {
         const modal = document.getElementById("imageLibraryModal");
         modal.classList.remove("hidden");
         loadImageLibraryForInline();
       });
 
+      // Select Inline Image from Library
+      document.getElementById("selectInlineBtn").addEventListener("click", () => {
+        const modal = document.getElementById("imageLibraryModal");
+        modal.classList.remove("hidden");
+        loadImageLibraryForInline();
+      });
+
+      // Upload Inline Image
+      document.getElementById("uploadInlineBtn").addEventListener("click", async () => {
+        const file = document.getElementById("inlineImageFile").files[0];
+        if (!file) return alert("Choose an image");
+
+        const form = new FormData();
+        form.append("file", file);
+        form.append("alt", file.name);
+        form.append("title", file.name);
+
+        try {
+          document.getElementById("uploadInlineBtn").disabled = true;
+          document.getElementById("uploadInlineBtn").innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+
+          const res = await authFetch(`${WORKER_BASE}/upload`, {
+            method: "POST",
+            body: form,
+          });
+
+          const data = await res.json();
+          console.log("Inline upload response:", data);
+
+          if (res.ok && data.success) {
+            const imageUrl = data.url;
+
+            // Insert image into editor
+            const imgElement = document.createElement("img");
+            imgElement.src = imageUrl;
+            imgElement.alt = data.metadata?.alt || file.name;
+            imgElement.className = "inline-img my-4 rounded-lg shadow-md";
+            imgElement.style.maxWidth = "100%";
+            imgElement.style.height = "auto";
+
+            document.getElementById("content").appendChild(imgElement);
+            document.getElementById("inlineImageFile").value = "";
+            updatePreview();
+
+            alert("✅ Image inserted successfully!");
+          } else {
+            throw new Error(data.error || "Upload failed");
+          }
+        } catch (err) {
+          console.error("Inline upload error:", err);
+          alert("❌ Upload failed: " + err.message);
+        } finally {
+          document.getElementById("uploadInlineBtn").disabled = false;
+          document.getElementById("uploadInlineBtn").innerHTML =
+            '<i class="fas fa-cloud-upload-alt"></i> Upload & Insert';
+        }
+      });
+
       async function loadImageLibraryForInline() {
         try {
+          console.log("Loading image library for inline...");
           const res = await authFetch(`${WORKER_BASE}/list`);
+
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
+
           const data = await res.json();
+          console.log("Library data:", data);
+
           const grid = document.getElementById("libraryGridModal");
           grid.innerHTML = "";
 
           if (!data.images || data.images.length === 0) {
             grid.innerHTML =
-              "<div class='col-span-full text-center text-gray-500 py-8'>No images in library</div>";
+              "<div class='col-span-full text-center text-gray-500 py-8'>No images in library. Upload some images first!</div>";
             return;
           }
 
@@ -878,22 +1006,25 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             const thumb = document.createElement("div");
             thumb.className = "relative group cursor-pointer";
 
-            // Fix: Construct proper image URL
-            const imageUrl = `${WORKER_BASE}/files/${encodeURIComponent(img.r2Key || img.key)}`;
+            const imageUrl = `${WORKER_BASE}/files/${encodeURIComponent(img.r2Key)}`;
 
             thumb.innerHTML = `
               <img src="${imageUrl}" alt="${img.alt || ""}" 
-                   class="w-full h-32 object-cover rounded hover:opacity-75 transition" />
+                   class="w-full h-32 object-cover rounded hover:opacity-75 transition"
+                   onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-32 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500\\'>Load error</div>';" />
               <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center">
                 <span class="text-white opacity-0 group-hover:opacity-100 font-medium">Insert</span>
               </div>
+              <div class="text-xs text-center mt-1 truncate">${
+                img.title || img.filename || "Image"
+              }</div>
             `;
 
             thumb.addEventListener("click", () => {
               const imgElement = document.createElement("img");
               imgElement.src = imageUrl;
               imgElement.alt = img.alt || "";
-              imgElement.className = "inline-img my-4 rounded-lg shadow-md max-w-full";
+              imgElement.className = "inline-img my-4 rounded-lg shadow-md";
               imgElement.style.maxWidth = "100%";
               imgElement.style.height = "auto";
 
@@ -905,23 +1036,32 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             grid.appendChild(thumb);
           });
         } catch (err) {
-          console.error(err);
-          document.getElementById("libraryGridModal").innerHTML =
-            "<div class='col-span-full text-center text-red-600 py-8'>Failed to load library</div>";
+          console.error("Library load error:", err);
+          document.getElementById(
+            "libraryGridModal"
+          ).innerHTML = `<div class='col-span-full text-center text-red-600 py-8'>Failed to load library<br><span class="text-xs">${err.message}</span></div>`;
         }
       }
 
       // Load Image Library Tab
       async function loadImageLibraryTab() {
         try {
+          console.log("Loading images tab...");
           const res = await authFetch(`${WORKER_BASE}/list`);
+
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
+
           const data = await res.json();
+          console.log("Images tab data:", data);
+
           const grid = document.getElementById("imageLibraryGrid");
           grid.innerHTML = "";
 
           if (!data.images || data.images.length === 0) {
             grid.innerHTML =
-              "<div class='col-span-full text-center text-gray-500 py-8'>No images uploaded yet</div>";
+              "<div class='col-span-full text-center text-gray-500 py-8'>No images uploaded yet. Upload images from the Editor tab!</div>";
             return;
           }
 
@@ -930,24 +1070,28 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             card.className =
               "bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition";
 
-            // Fix: Construct proper image URL
-            const imageUrl = `${WORKER_BASE}/files/${encodeURIComponent(img.r2Key || img.key)}`;
+            const imageUrl = `${WORKER_BASE}/files/${encodeURIComponent(img.r2Key)}`;
 
             card.innerHTML = `
-              <img src="${imageUrl}" alt="${img.alt || ""}" class="w-full h-40 object-cover" />
+              <img src="${imageUrl}" alt="${img.alt || ""}" class="w-full h-40 object-cover"
+                   onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-40 bg-gray-200 flex items-center justify-center text-xs text-gray-500\\'>Load error</div>';" />
               <div class="p-3">
                 <p class="text-sm font-medium text-gray-700 truncate">${
                   img.title || img.filename || "Image"
                 }</p>
-                <p class="text-xs text-gray-500">${img.alt || "No alt text"}</p>
+                <p class="text-xs text-gray-500 truncate">${img.alt || "No alt text"}</p>
+                <p class="text-xs text-gray-400 mt-1">${new Date(
+                  img.uploadedAt || img.createdAt
+                ).toLocaleDateString()}</p>
               </div>
             `;
             grid.appendChild(card);
           });
         } catch (err) {
-          console.error(err);
-          document.getElementById("imageLibraryGrid").innerHTML =
-            "<div class='col-span-full text-center text-red-600 py-8'>Failed to load images</div>";
+          console.error("Images tab error:", err);
+          document.getElementById(
+            "imageLibraryGrid"
+          ).innerHTML = `<div class='col-span-full text-center text-red-600 py-8'>Failed to load images<br><span class="text-xs">${err.message}</span></div>`;
         }
       }
 
