@@ -547,7 +547,7 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
     </div>
 
     <script>
-      const WORKER_BASE = "https://calmiqs-images-worker.techaipet.workers.dev";
+      const WORKER_BASE = ""; // Use relative paths for same domain
       const ADMIN_TOKEN = window.CALMIQS_ADMIN_TOKEN;
 
       let currentPost = null;
@@ -601,12 +601,17 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           const cmd = btn.dataset.cmd;
+          const editor = document.getElementById("content");
 
           if (cmd === "link") {
             const url = prompt("Enter URL:");
-            if (url) document.execCommand("createLink", false, url);
-          } else if (cmd === "h2" || cmd === "h3") {
-            document.execCommand("formatBlock", false, cmd);
+            if (url) {
+              document.execCommand("createLink", false, url);
+            }
+          } else if (cmd === "h2") {
+            document.execCommand("formatBlock", false, "<h2>");
+          } else if (cmd === "h3") {
+            document.execCommand("formatBlock", false, "<h3>");
           } else if (cmd === "ul") {
             document.execCommand("insertUnorderedList", false, null);
           } else if (cmd === "ol") {
@@ -616,7 +621,7 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
           }
 
           updatePreview();
-          document.getElementById("content").focus();
+          editor.focus();
         });
       });
 
@@ -685,7 +690,7 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
         };
 
         try {
-          const res = await authFetch(`${WORKER_BASE}/api/posts`, {
+          const res = await authFetch(`/api/posts`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(postData),
@@ -711,7 +716,7 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
 
       async function loadPostLibrary() {
         try {
-          const res = await authFetch(`${WORKER_BASE}/api/posts`);
+          const res = await authFetch(`/api/posts`);
           const data = await res.json();
           const list = document.getElementById("postLibraryList");
           list.innerHTML = "";
@@ -788,7 +793,7 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
         if (!confirm("Delete this post? This cannot be undone.")) return;
 
         try {
-          const res = await authFetch(`${WORKER_BASE}/api/posts/${slug}`, { method: "DELETE" });
+          const res = await authFetch(`/api/posts/${slug}`, { method: "DELETE" });
           if (res.ok) {
             alert("✅ Post deleted");
             document.getElementById("newPostBtn").click();
@@ -815,16 +820,17 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
           document.getElementById("uploadHeroBtn").innerHTML =
             '<i class="fas fa-spinner fa-spin"></i> Uploading...';
 
-          const res = await authFetch(`${WORKER_BASE}/upload`, {
+          console.log("Uploading to /upload...");
+          const res = await authFetch(`/upload`, {
             method: "POST",
             body: form,
           });
 
+          console.log("Upload response status:", res.status);
           const data = await res.json();
-          console.log("Upload response:", data);
+          console.log("Upload response data:", data);
 
           if (res.ok && data.success) {
-            // The worker returns { success: true, url: ..., r2Key: ..., metadata: ... }
             const imageUrl = data.url;
             selectedHeroImage = imageUrl;
 
@@ -835,11 +841,15 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
 
             alert("✅ Hero image uploaded successfully!");
           } else {
-            throw new Error(data.error || "Upload failed");
+            throw new Error(data.error || `HTTP ${res.status}: ${res.statusText}`);
           }
         } catch (err) {
           console.error("Upload error:", err);
-          alert("❌ Upload failed: " + err.message);
+          alert(
+            "❌ Upload failed: " +
+              err.message +
+              "\n\nTry checking:\n1. Is the worker running?\n2. Is the upload endpoint configured?\n3. Check browser console for details"
+          );
         } finally {
           document.getElementById("uploadHeroBtn").disabled = false;
           document.getElementById("uploadHeroBtn").innerHTML =
@@ -857,7 +867,7 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
       async function loadImageLibraryForHero() {
         try {
           console.log("Loading image library for hero...");
-          const res = await authFetch(`${WORKER_BASE}/list`);
+          const res = await authFetch(`/list`);
 
           if (!res.ok) {
             throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -880,7 +890,7 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             thumb.className = "relative group cursor-pointer";
 
             // Construct proper image URL
-            const imageUrl = `${WORKER_BASE}/files/${encodeURIComponent(img.r2Key)}`;
+            const imageUrl = `/files/${encodeURIComponent(img.r2Key)}`;
             console.log("Image URL:", imageUrl);
 
             thumb.innerHTML = `
@@ -944,7 +954,7 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
           document.getElementById("uploadInlineBtn").innerHTML =
             '<i class="fas fa-spinner fa-spin"></i> Uploading...';
 
-          const res = await authFetch(`${WORKER_BASE}/upload`, {
+          const res = await authFetch(`/upload`, {
             method: "POST",
             body: form,
           });
@@ -984,7 +994,7 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
       async function loadImageLibraryForInline() {
         try {
           console.log("Loading image library for inline...");
-          const res = await authFetch(`${WORKER_BASE}/list`);
+          const res = await authFetch(`/list`);
 
           if (!res.ok) {
             throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -1006,7 +1016,7 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             const thumb = document.createElement("div");
             thumb.className = "relative group cursor-pointer";
 
-            const imageUrl = `${WORKER_BASE}/files/${encodeURIComponent(img.r2Key)}`;
+            const imageUrl = `/files/${encodeURIComponent(img.r2Key)}`;
 
             thumb.innerHTML = `
               <img src="${imageUrl}" alt="${img.alt || ""}" 
@@ -1047,7 +1057,7 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
       async function loadImageLibraryTab() {
         try {
           console.log("Loading images tab...");
-          const res = await authFetch(`${WORKER_BASE}/list`);
+          const res = await authFetch(`/list`);
 
           if (!res.ok) {
             throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -1070,7 +1080,7 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             card.className =
               "bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition";
 
-            const imageUrl = `${WORKER_BASE}/files/${encodeURIComponent(img.r2Key)}`;
+            const imageUrl = `/files/${encodeURIComponent(img.r2Key)}`;
 
             card.innerHTML = `
               <img src="${imageUrl}" alt="${img.alt || ""}" class="w-full h-40 object-cover"

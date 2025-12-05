@@ -14,6 +14,10 @@ id = "cdab54f42fde47db8ea06123a7b686eb"
 binding = "CALMIQS_NEWSLETTER"
 id = "af9f270722ec4af899f2ef340f5dfa44" # Create new KV namespace if needed
 
+[[kv_namespaces]]
+binding = "CALMIQS_COMMENTS"
+id = "c721558929a546729bf733b917db96e4"
+
 [[r2_buckets]]
 binding = "R2_BUCKET"
 bucket_name = "calmiqs-images"
