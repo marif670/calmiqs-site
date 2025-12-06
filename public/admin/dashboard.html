@@ -867,10 +867,14 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
       async function loadImageLibraryForHero() {
         try {
           console.log("Loading image library for hero...");
+
+          // Make sure auth token is being sent
           const res = await authFetch(`/list`);
 
           if (!res.ok) {
-            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            const errorText = await res.text();
+            console.error(`HTTP ${res.status}:`, errorText);
+            throw new Error(`HTTP ${res.status}: Failed to load images`);
           }
 
           const data = await res.json();
@@ -890,26 +894,29 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             thumb.className = "relative group cursor-pointer";
 
             // Construct proper image URL
-            const imageUrl = `/files/${encodeURIComponent(img.r2Key)}`;
-            console.log("Image URL:", imageUrl);
+            const imageUrl = `https://calmiqs-images-worker.techaipet.workers.dev/files/${encodeURIComponent(
+              img.r2Key
+            )}`;
+
+            console.log("Constructed image URL:", imageUrl);
 
             thumb.innerHTML = `
-              <img src="${imageUrl}" alt="${img.alt || ""}" 
-                   class="w-full h-32 object-cover rounded hover:opacity-75 transition"
-                   onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-32 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500\\'>Load error</div>';" />
-              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center">
-                <span class="text-white opacity-0 group-hover:opacity-100 font-medium">Select</span>
-              </div>
-              <div class="text-xs text-center mt-1 truncate">${
-                img.title || img.filename || "Image"
-              }</div>
-            `;
+        <img src="${imageUrl}" 
+             alt="${img.alt || ""}" 
+             class="w-full h-32 object-cover rounded hover:opacity-75 transition"
+             onerror="console.error('Image failed to load:', this.src); this.parentElement.innerHTML='<div class=\\'w-full h-32 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500\\'>Load error</div>';" />
+        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center">
+          <span class="text-white opacity-0 group-hover:opacity-100 font-medium">Select</span>
+        </div>
+        <div class="text-xs text-center mt-1 truncate">${img.title || img.filename || "Image"}</div>
+      `;
 
             thumb.addEventListener("click", () => {
               selectedHeroImage = imageUrl;
-              document.getElementById("heroPreview").innerHTML = `<img src="${imageUrl}" alt="${
-                img.alt || "Hero"
-              }" class="max-w-full rounded-lg shadow-md" />`;
+              document.getElementById("heroPreview").innerHTML = `<img src="${imageUrl}" 
+          alt="${img.alt || "Hero"}" 
+          class="max-w-full rounded-lg shadow-md"
+          onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%23f0f0f0%22 width=%22400%22 height=%22300%22/></svg>';" />`;
               document.getElementById("heroAlt").value = img.alt || "";
               document.getElementById("imageLibraryModal").classList.add("hidden");
               alert("✅ Hero image selected");
@@ -921,7 +928,11 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
           console.error("Library load error:", err);
           document.getElementById(
             "libraryGridModal"
-          ).innerHTML = `<div class='col-span-full text-center text-red-600 py-8'>Failed to load library<br><span class="text-xs">${err.message}</span></div>`;
+          ).innerHTML = `<div class='col-span-full text-center text-red-600 py-8'>
+      Failed to load library
+      <br><span class="text-xs">${err.message}</span>
+      <br><span class="text-xs text-gray-500">Make sure:<br>1. Admin token is correct<br>2. Images have been uploaded<br>3. KV namespace is configured</span>
+    </div>`;
         }
       }
 
@@ -997,7 +1008,9 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
           const res = await authFetch(`/list`);
 
           if (!res.ok) {
-            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            const errorText = await res.text();
+            console.error(`HTTP ${res.status}:`, errorText);
+            throw new Error(`HTTP ${res.status}: Failed to load images`);
           }
 
           const data = await res.json();
@@ -1016,19 +1029,20 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             const thumb = document.createElement("div");
             thumb.className = "relative group cursor-pointer";
 
-            const imageUrl = `/files/${encodeURIComponent(img.r2Key)}`;
+            const imageUrl = `https://calmiqs-images-worker.techaipet.workers.dev/files/${encodeURIComponent(
+              img.r2Key
+            )}`;
 
             thumb.innerHTML = `
-              <img src="${imageUrl}" alt="${img.alt || ""}" 
-                   class="w-full h-32 object-cover rounded hover:opacity-75 transition"
-                   onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-32 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500\\'>Load error</div>';" />
-              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center">
-                <span class="text-white opacity-0 group-hover:opacity-100 font-medium">Insert</span>
-              </div>
-              <div class="text-xs text-center mt-1 truncate">${
-                img.title || img.filename || "Image"
-              }</div>
-            `;
+        <img src="${imageUrl}" 
+             alt="${img.alt || ""}" 
+             class="w-full h-32 object-cover rounded hover:opacity-75 transition"
+             onerror="console.error('Image failed:', this.src); this.parentElement.innerHTML='<div class=\\'w-full h-32 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500\\'>Load error</div>';" />
+        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center">
+          <span class="text-white opacity-0 group-hover:opacity-100 font-medium">Insert</span>
+        </div>
+        <div class="text-xs text-center mt-1 truncate">${img.title || img.filename || "Image"}</div>
+      `;
 
             thumb.addEventListener("click", () => {
               const imgElement = document.createElement("img");
@@ -1049,7 +1063,10 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
           console.error("Library load error:", err);
           document.getElementById(
             "libraryGridModal"
-          ).innerHTML = `<div class='col-span-full text-center text-red-600 py-8'>Failed to load library<br><span class="text-xs">${err.message}</span></div>`;
+          ).innerHTML = `<div class='col-span-full text-center text-red-600 py-8'>
+      Failed to load library
+      <br><span class="text-xs">${err.message}</span>
+    </div>`;
         }
       }
 
@@ -1060,7 +1077,9 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
           const res = await authFetch(`/list`);
 
           if (!res.ok) {
-            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            const errorText = await res.text();
+            console.error(`HTTP ${res.status}:`, errorText);
+            throw new Error(`HTTP ${res.status}: Failed to load images`);
           }
 
           const data = await res.json();
@@ -1080,28 +1099,35 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             card.className =
               "bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition";
 
-            const imageUrl = `/files/${encodeURIComponent(img.r2Key)}`;
+            const imageUrl = `https://calmiqs-images-worker.techaipet.workers.dev/files/${encodeURIComponent(
+              img.r2Key
+            )}`;
 
             card.innerHTML = `
-              <img src="${imageUrl}" alt="${img.alt || ""}" class="w-full h-40 object-cover"
-                   onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-40 bg-gray-200 flex items-center justify-center text-xs text-gray-500\\'>Load error</div>';" />
-              <div class="p-3">
-                <p class="text-sm font-medium text-gray-700 truncate">${
-                  img.title || img.filename || "Image"
-                }</p>
-                <p class="text-xs text-gray-500 truncate">${img.alt || "No alt text"}</p>
-                <p class="text-xs text-gray-400 mt-1">${new Date(
-                  img.uploadedAt || img.createdAt
-                ).toLocaleDateString()}</p>
-              </div>
-            `;
+        <img src="${imageUrl}" 
+             alt="${img.alt || ""}" 
+             class="w-full h-40 object-cover"
+             onerror="this.parentElement.innerHTML='<div class=\\'w-full h-40 bg-gray-200 flex items-center justify-center text-xs text-gray-500\\'>Load error</div>';" />
+        <div class="p-3">
+          <p class="text-sm font-medium text-gray-700 truncate">${
+            img.title || img.filename || "Image"
+          }</p>
+          <p class="text-xs text-gray-500 truncate">${img.alt || "No alt text"}</p>
+          <p class="text-xs text-gray-400 mt-1">${new Date(
+            img.uploadedAt || img.createdAt
+          ).toLocaleDateString()}</p>
+        </div>
+      `;
             grid.appendChild(card);
           });
         } catch (err) {
           console.error("Images tab error:", err);
           document.getElementById(
             "imageLibraryGrid"
-          ).innerHTML = `<div class='col-span-full text-center text-red-600 py-8'>Failed to load images<br><span class="text-xs">${err.message}</span></div>`;
+          ).innerHTML = `<div class='col-span-full text-center text-red-600 py-8'>
+      Failed to load images
+      <br><span class="text-xs">${err.message}</span>
+    </div>`;
         }
       }
 
