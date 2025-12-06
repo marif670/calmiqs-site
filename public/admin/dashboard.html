@@ -1,5 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+  // At the top of your editor page if (!localStorage.getItem("calmiqsAuth") &&
+  !sessionStorage.getItem("calmiqsAuth")) { // Show auth screen
+  document.getElementById("authScreen").classList.remove("hidden");
+  document.getElementById("editorPanel").classList.add("hidden"); } else { // Show editor
+  document.getElementById("authScreen").classList.add("hidden");
+  document.getElementById("editorPanel").classList.remove("hidden"); }
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -60,36 +66,9 @@
   </head>
 
   <body class="bg-gray-50 font-sans">
-    <!-- Auth Screen -->
-    <div
-      id="authScreen"
-      class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-accent to-tech p-4"
-    >
-      <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-primary mb-2">Calmiqs Editor</h1>
-          <p class="text-gray-600">Secure Content Management</p>
-        </div>
-        <form id="authForm" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium mb-2">Password</label>
-            <input
-              type="password"
-              id="authPassword"
-              class="w-full px-4 py-2 border rounded-lg"
-              placeholder="Enter admin password"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            class="w-full bg-primary text-white px-4 py-3 rounded-lg hover:bg-accent transition"
-          >
-            Login
-          </button>
-        </form>
-      </div>
-    </div>
+    <script>
+      window.CALMIQS_ADMIN_TOKEN = "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Hadia@2017_Ayesha@2007";
+    </script>
 
     <!-- Header -->
     <header class="bg-white border-b sticky top-0 z-50 shadow-sm">
