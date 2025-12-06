@@ -56,6 +56,127 @@
       .modal-hidden {
         display: none !important;
       }
+      /* Image wrapper styling */
+      .inline-image-wrapper {
+        position: relative;
+        display: inline-block;
+        margin: 1rem 0;
+      }
+
+      .inline-img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+
+      .inline-img:hover {
+        opacity: 0.9;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .inline-img.selected {
+        outline: 3px solid #4fa49a;
+        outline-offset: 2px;
+      }
+
+      /* Image toolbar */
+      #imageFormattingToolbar {
+        position: absolute;
+        top: -50px;
+        left: 0;
+        background: #333;
+        color: white;
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+        display: flex;
+        gap: 0.5rem;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      #imageFormattingToolbar input,
+      #imageFormattingToolbar select {
+        padding: 0.25rem;
+        border-radius: 0.25rem;
+        border: none;
+        font-size: 0.75rem;
+      }
+
+      #imageFormattingToolbar button {
+        background: #666;
+        color: white;
+        border: none;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        font-size: 0.75rem;
+        transition: background 0.2s;
+      }
+
+      #imageFormattingToolbar button:hover {
+        background: #555;
+      }
+
+      #imageFormattingToolbar button.delete {
+        background: #dc2626;
+      }
+
+      #imageFormattingToolbar button.delete:hover {
+        background: #b91c1c;
+      }
+
+      /* Content editor adjustments */
+      #content img {
+        max-width: 100%;
+        height: auto;
+        margin: 1rem 0;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      #content .inline-image-wrapper {
+        position: relative;
+        margin: 1rem 0;
+      }
+
+      #content .inline-image-wrapper img {
+        margin: 0;
+      }
+
+      /* Floating images */
+      #content .inline-image-wrapper.align-left {
+        float: left;
+        margin-right: 1rem;
+      }
+
+      #content .inline-image-wrapper.align-right {
+        float: right;
+        margin-left: 1rem;
+      }
+
+      #content .inline-image-wrapper.align-center {
+        text-align: center;
+        float: none;
+        margin: 1rem auto;
+      }
+      #formatIndicator {
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin-bottom: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        background: #f3f4f6;
+        border-radius: 0.25rem;
+        display: inline-block;
+      }
+
+      #formatIndicator.active {
+        background: #4fa49a;
+        color: white;
+      }
     </style>
   </head>
 
@@ -301,6 +422,9 @@
                 <button type="button" data-cmd="h2" title="Heading 2">H2</button>
                 <button type="button" data-cmd="h3" title="Heading 3">H3</button>
                 <button type="button" data-cmd="h4" title="Heading 4">H4</button>
+                <button type="button" data-cmd="p" title="Paragraph">
+                  <i class="fas fa-align-left"></i>
+                </button>
                 <div class="w-px bg-gray-300"></div>
                 <button type="button" data-cmd="ul" title="Bullet List">
                   <i class="fas fa-list"></i>
@@ -681,35 +805,46 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
       // Add CSS styles for the editor output
       const style = document.createElement("style");
       style.textContent = `
+              #content {
+                min-height: 400px;
+                padding: 1rem;
+                border: 2px solid #d1d5db;
+                border-radius: 0.5rem;
+                outline: none;
+                line-height: 1.6;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                white-space: normal;
+              }
+
+              #content p {
+                margin-bottom: 1rem;
+                line-height: 1.6;
+              }
+
               #content h2 {
                 font-size: 1.875rem;
                 font-weight: bold;
-                margin: 1rem 0 0.5rem 0;
+                margin: 1.5rem 0 0.75rem 0;
                 color: #1f2937;
               }
 
               #content h3 {
                 font-size: 1.5rem;
                 font-weight: bold;
-                margin: 1rem 0 0.5rem 0;
+                margin: 1.25rem 0 0.5rem 0;
                 color: #1f2937;
               }
 
               #content h4 {
                 font-size: 1.25rem;
                 font-weight: bold;
-                margin: 0.75rem 0 0.5rem 0;
+                margin: 1rem 0 0.5rem 0;
                 color: #1f2937;
               }
 
-              #content ul {
-                list-style-type: disc;
-                margin-left: 2rem;
-                margin-bottom: 1rem;
-              }
-
+              #content ul,
               #content ol {
-                list-style-type: decimal;
                 margin-left: 2rem;
                 margin-bottom: 1rem;
               }
@@ -718,30 +853,22 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
                 margin-bottom: 0.5rem;
               }
 
-              #content img {
-                max-width: 100%;
-                height: auto;
-                margin: 1rem 0;
-                border-radius: 0.5rem;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-              }
-
-              #content img.inline-img {
-                cursor: pointer;
-              }
-
-              #content img.inline-img:hover {
-                opacity: 0.8;
-              }
-
-              #content p {
-                margin-bottom: 1rem;
+              #content blockquote {
+                border-left: 4px solid #4FA49A;
+                margin-left: 0;
+                padding-left: 1rem;
+                color: #6b7280;
+                font-style: italic;
               }
 
               #content a {
                 color: #5a67d8;
                 text-decoration: underline;
               }
+
+              #content a:hover {
+                color: #4f46e5;
+              }             
             `;
       document.head.appendChild(style);
 
@@ -894,6 +1021,8 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
               document.execCommand("formatBlock", false, "<h3>");
             } else if (cmd === "h4") {
               document.execCommand("formatBlock", false, "<h4>");
+            } else if (cmd === "p") {
+              document.execCommand("formatBlock", false, "<p>");
             } else if (cmd === "ul") {
               document.execCommand("insertUnorderedList", false, null);
             } else if (cmd === "ol") {
@@ -1242,33 +1371,69 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
 
           data.images.forEach((img) => {
             const thumb = document.createElement("div");
-            thumb.className = "relative group cursor-pointer bg-white rounded-lg overflow-hidden";
+            thumb.className =
+              "relative group cursor-pointer bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition";
 
+            // FIXED: Use correct URL format
             const imageUrl = `https://calmiqs-images-worker.techaipet.workers.dev/files/${encodeURIComponent(
               img.r2Key
             )}`;
+            console.log("Loading hero image:", imageUrl);
 
-            thumb.innerHTML = `
-                    <div style="width: 100%; height: 128px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; position: relative;">
-                      <img src="${imageUrl}"
-                           alt="${img.alt || ""}"
-                           style="max-width: 100%; max-height: 100%; object-fit: cover; width: 100%; height: 100%;" />
-                      <div style="position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.2s;" class="group-hover:bg-black/30 flex items-center justify-center">
-                        <span style="color: white; opacity: 0; transition: opacity 0.2s; font-weight: 500;" class="group-hover:opacity-100">Select</span>
-                      </div>
-                    </div>
-                    <div style="padding: 0.5rem; text-align: center;">
-                      <p style="font-size: 0.75rem; font-weight: 500; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${
-                        img.title || img.filename || "Image"
-                      }</p>
-                    </div>
-                  `;
+            // Create container with fixed height
+            const imgContainer = document.createElement("div");
+            imgContainer.style.cssText =
+              "width: 100%; height: 128px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;";
+
+            const imgEl = document.createElement("img");
+            imgEl.src = imageUrl;
+            imgEl.alt = img.alt || "";
+            imgEl.style.cssText = "width: 100%; height: 100%; object-fit: cover;";
+            imgEl.className = "hover:opacity-75 transition";
+
+            // Handle load errors
+            imgEl.onerror = function () {
+              console.error("Image failed to load:", imageUrl);
+              imgContainer.innerHTML =
+                '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f3f4f6; color: #999; font-size: 0.75rem;">Image load error</div>';
+            };
+
+            imgContainer.appendChild(imgEl);
+
+            const overlay = document.createElement("div");
+            overlay.style.cssText =
+              "position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.2s;";
+            overlay.className = "group-hover:bg-black/30 flex items-center justify-center";
+
+            const selectText = document.createElement("span");
+            selectText.textContent = "Select";
+            selectText.style.cssText =
+              "color: white; opacity: 0; transition: opacity 0.2s; font-weight: 500;";
+            selectText.className = "group-hover:opacity-100";
+
+            overlay.appendChild(selectText);
+            imgContainer.appendChild(overlay);
+
+            const infoDiv = document.createElement("div");
+            infoDiv.style.cssText = "padding: 0.5rem; text-align: center; background: white;";
+            infoDiv.innerHTML = `
+        <p style="font-size: 0.75rem; font-weight: 500; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0;">${
+          img.title || img.filename || "Image"
+        }</p>
+        <p style="font-size: 0.75rem; color: #6b7280; margin: 0.25rem 0 0 0;">${
+          img.alt || "No description"
+        }</p>
+      `;
+
+            thumb.appendChild(imgContainer);
+            thumb.appendChild(infoDiv);
 
             thumb.addEventListener("click", () => {
               selectedHeroImage = imageUrl;
-              document.getElementById("heroPreview").innerHTML = `<img src="${imageUrl}"
-                      alt="${img.alt || "Hero"}"
-                      style="max-width: 100%; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />`;
+              document.getElementById("heroPreview").innerHTML = `<img src="${imageUrl}" 
+          alt="${img.alt || "Hero"}" 
+          style="max-width: 100%; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" 
+          onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%23f0f0f0%22 width=%22400%22 height=%22300%22/><text x=%2250%25%22 y=%2250%25%22 fill=%22%23999%22 text-anchor=%22middle%22 dy=%22.3em%22>Image</text></svg>';" />`;
               document.getElementById("heroAlt").value = img.alt || "";
               document.getElementById("imageLibraryModal").classList.add("hidden");
               alert("✅ Hero image selected");
@@ -1281,12 +1446,10 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
           document.getElementById(
             "libraryGridModal"
           ).innerHTML = `<div class='col-span-full text-center text-red-600 py-8'>
-                  Failed to load library
-                  <br><span class="text-xs">${err.message}</span>
-                </div>`;
+      Failed to load library: ${err.message}
+    </div>`;
         }
       }
-
       // Insert Image Button (from library)
       document.getElementById("insertImageBtn").addEventListener("click", () => {
         const modal = document.getElementById("imageLibraryModal");
@@ -1331,55 +1494,75 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
           if (res.ok && data.success) {
             const imageUrl = data.url;
             const editor = document.getElementById("content");
+
+            // CRITICAL FIX: Save current selection before focusing
+            const selection = window.getSelection();
+            let savedSelection = null;
+
+            if (selection.rangeCount > 0) {
+              savedSelection = selection.getRangeAt(0);
+            }
+
             editor.focus();
+
+            // Create image wrapper for better control
+            const imgWrapper = document.createElement("div");
+            imgWrapper.className = "inline-image-wrapper";
+            imgWrapper.style.cssText = "position: relative; display: inline-block; margin: 1rem 0;";
 
             const imgElement = document.createElement("img");
             imgElement.src = imageUrl;
             imgElement.alt = data.metadata?.alt || file.name;
             imgElement.className = "inline-img";
-            imgElement.style.maxWidth = "100%";
-            imgElement.style.height = "auto";
+            imgElement.setAttribute("data-src", imageUrl);
+            imgElement.style.cssText = `
+        max-width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        cursor: pointer;
+      `;
             imgElement.contentEditable = "false";
 
-            // Click to select/delete
+            // Image click handler for selection and formatting
             imgElement.addEventListener("click", function (e) {
               e.preventDefault();
-              if (this.style.outline === "2px solid #4fa49a") {
-                if (confirm("Delete this image?")) {
-                  this.remove();
-                  updatePreview();
-                }
-              } else {
-                document.querySelectorAll(".inline-img").forEach((img) => {
-                  img.style.outline = "none";
-                });
-                this.style.outline = "2px solid #4fa49a";
-                this.style.outlineOffset = "2px";
-              }
+              e.stopPropagation();
+
+              // Show image toolbar
+              showImageToolbar(this);
             });
 
-            // Insert at cursor
-            const sel = window.getSelection();
-            if (sel.rangeCount > 0) {
-              const range = sel.getRangeAt(0);
-              range.insertNode(imgElement);
-              range.setStartAfter(imgElement);
-              range.collapse(true);
-              sel.removeAllRanges();
-              sel.addRange(range);
+            imgWrapper.appendChild(imgElement);
+
+            // Insert at saved cursor position
+            if (savedSelection && savedSelection.commonAncestorContainer.parentNode === editor) {
+              try {
+                savedSelection.insertNode(imgWrapper);
+                // Move cursor after image
+                savedSelection.setStartAfter(imgWrapper);
+                savedSelection.collapse(true);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(savedSelection);
+              } catch (e) {
+                console.error("Error inserting at cursor:", e);
+                editor.appendChild(imgWrapper);
+              }
             } else {
-              editor.appendChild(imgElement);
+              editor.appendChild(imgWrapper);
             }
 
-            // Add paragraph after
+            // Add paragraph after image for continued typing
             const p = document.createElement("p");
             p.innerHTML = "<br>";
-            imgElement.parentNode.insertBefore(p, imgElement.nextSibling);
+            imgWrapper.parentNode.insertBefore(p, imgWrapper.nextSibling);
             p.focus();
 
             document.getElementById("inlineImageFile").value = "";
             updatePreview();
-            alert("✅ Image inserted");
+            alert("✅ Image inserted at cursor");
           } else {
             throw new Error(data.error || "Upload failed");
           }
@@ -1390,6 +1573,139 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
           const btn = document.getElementById("uploadInlineBtn");
           btn.disabled = false;
           btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Upload & Insert';
+        }
+      });
+      function showImageToolbar(imgElement) {
+        // Remove any existing toolbar
+        const existingToolbar = document.getElementById("imageFormattingToolbar");
+        if (existingToolbar) existingToolbar.remove();
+
+        // Create toolbar
+        const toolbar = document.createElement("div");
+        toolbar.id = "imageFormattingToolbar";
+        toolbar.style.cssText = `
+    position: absolute;
+    top: -50px;
+    left: 0;
+    background: #333;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  `;
+
+        const wrapper = imgElement.parentElement;
+        wrapper.style.position = "relative";
+
+        // WIDTH CONTROL
+        const widthLabel = document.createElement("span");
+        widthLabel.textContent = "Width:";
+        widthLabel.style.color = "#ccc";
+        widthLabel.style.fontSize = "0.75rem";
+
+        const widthInput = document.createElement("input");
+        widthInput.type = "number";
+        widthInput.value = imgElement.width || 100;
+        widthInput.min = 50;
+        widthInput.max = 800;
+        widthInput.style.cssText =
+          "width: 50px; padding: 0.25rem; border-radius: 0.25rem; border: none;";
+
+        widthInput.addEventListener("change", () => {
+          imgElement.style.width = widthInput.value + "px";
+          imgElement.style.height = "auto";
+          updatePreview();
+        });
+
+        // ALIGNMENT CONTROL
+        const alignLabel = document.createElement("span");
+        alignLabel.textContent = "Align:";
+        alignLabel.style.color = "#ccc";
+        alignLabel.style.fontSize = "0.75rem";
+
+        const alignSelect = document.createElement("select");
+        alignSelect.style.cssText = "padding: 0.25rem; border-radius: 0.25rem; border: none;";
+        alignSelect.innerHTML = `
+    <option value="block">Block</option>
+    <option value="left">Left</option>
+    <option value="right">Right</option>
+    <option value="center">Center</option>
+  `;
+
+        alignSelect.addEventListener("change", () => {
+          wrapper.style.display = alignSelect.value === "block" ? "block" : "inline";
+          if (alignSelect.value === "left") {
+            imgElement.style.float = "left";
+            imgElement.style.marginRight = "1rem";
+          } else if (alignSelect.value === "right") {
+            imgElement.style.float = "right";
+            imgElement.style.marginLeft = "1rem";
+          } else if (alignSelect.value === "center") {
+            imgElement.style.float = "none";
+            wrapper.style.textAlign = "center";
+          } else {
+            imgElement.style.float = "none";
+            wrapper.style.textAlign = "left";
+          }
+          updatePreview();
+        });
+
+        // DELETE BUTTON
+        const deleteBtn = document.createElement("button");
+        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+        deleteBtn.style.cssText = `
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+  `;
+
+        deleteBtn.addEventListener("click", () => {
+          wrapper.remove();
+          updatePreview();
+        });
+
+        // CLOSE BUTTON
+        const closeBtn = document.createElement("button");
+        closeBtn.innerHTML = "✕";
+        closeBtn.style.cssText = `
+    background: #6b7280;
+    color: white;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+  `;
+
+        closeBtn.addEventListener("click", () => {
+          toolbar.remove();
+        });
+
+        toolbar.appendChild(widthLabel);
+        toolbar.appendChild(widthInput);
+        toolbar.appendChild(alignLabel);
+        toolbar.appendChild(alignSelect);
+        toolbar.appendChild(deleteBtn);
+        toolbar.appendChild(closeBtn);
+
+        wrapper.appendChild(toolbar);
+      }
+
+      // Close image toolbar when clicking outside
+      document.addEventListener("click", function (e) {
+        if (
+          !e.target.closest(".inline-image-wrapper") &&
+          !e.target.closest("#imageFormattingToolbar")
+        ) {
+          const toolbar = document.getElementById("imageFormattingToolbar");
+          if (toolbar) toolbar.remove();
         }
       });
 
@@ -1448,37 +1764,64 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
 
             thumb.addEventListener("click", () => {
               const editor = document.getElementById("content");
+
+              // Save current selection
+              const selection = window.getSelection();
+              let savedSelection = null;
+
+              if (selection.rangeCount > 0) {
+                savedSelection = selection.getRangeAt(0);
+              }
+
               editor.focus();
+
+              // Create wrapper
+              const imgWrapper = document.createElement("div");
+              imgWrapper.className = "inline-image-wrapper";
+              imgWrapper.style.cssText =
+                "position: relative; display: inline-block; margin: 1rem 0;";
 
               const imgElement = document.createElement("img");
               imgElement.src = imageUrl;
               imgElement.alt = img.alt || "";
-              imgElement.style.maxWidth = "100%";
-              imgElement.style.height = "auto";
-              imgElement.style.margin = "1rem 0";
-              imgElement.style.borderRadius = "0.5rem";
-              imgElement.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
               imgElement.className = "inline-img";
+              imgElement.style.cssText = `
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+  `;
               imgElement.contentEditable = "false";
 
-              // Insert at cursor or at end
-              const sel = window.getSelection();
-              if (sel.rangeCount > 0) {
-                const range = sel.getRangeAt(0);
-                range.insertNode(imgElement);
-                range.setStartAfter(imgElement);
-                range.collapse(true);
-                sel.removeAllRanges();
-                sel.addRange(range);
+              imgElement.addEventListener("click", function (e) {
+                e.preventDefault();
+                showImageToolbar(this);
+              });
+
+              imgWrapper.appendChild(imgElement);
+
+              // Insert at saved position
+              if (savedSelection && savedSelection.commonAncestorContainer.parentNode === editor) {
+                try {
+                  savedSelection.insertNode(imgWrapper);
+                  savedSelection.setStartAfter(imgWrapper);
+                  savedSelection.collapse(true);
+                  const sel = window.getSelection();
+                  sel.removeAllRanges();
+                  sel.addRange(savedSelection);
+                } catch (e) {
+                  editor.appendChild(imgWrapper);
+                }
               } else {
-                editor.appendChild(imgElement);
+                editor.appendChild(imgWrapper);
               }
 
-              // Add paragraph after image
-              const paragraph = document.createElement("p");
-              paragraph.innerHTML = "<br>";
-              imgElement.parentNode.insertBefore(paragraph, imgElement.nextSibling);
-              paragraph.focus();
+              const p = document.createElement("p");
+              p.innerHTML = "<br>";
+              imgWrapper.parentNode.insertBefore(p, imgWrapper.nextSibling);
+              p.focus();
 
               document.getElementById("imageLibraryModal").classList.add("hidden");
               updatePreview();
