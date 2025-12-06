@@ -63,7 +63,55 @@
     <script>
       window.CALMIQS_ADMIN_TOKEN = "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Hadia@2017_Ayesha@2007";
     </script>
+    <!-- ADD THIS AT THE VERY TOP OF dashboard.html (before the header) -->
 
+    <!-- AUTH WALL - BLOCK UNAUTHORIZED ACCESS -->
+    <script>
+      // Check if user is authenticated
+      function checkAuth() {
+        const isAuth =
+          localStorage.getItem("calmiqsAuth") === "true" ||
+          sessionStorage.getItem("calmiqsAuth") === "true" ||
+          localStorage.getItem("isAdmin") === "true" ||
+          sessionStorage.getItem("isAdmin") === "true";
+
+        if (!isAuth) {
+          // Redirect to login page or home
+          window.location.href = "/";
+          return false;
+        }
+        return true;
+      }
+
+      // Run auth check immediately
+      if (!checkAuth()) {
+        document.body.innerHTML =
+          '<div style="display:flex;align-items:center;justify-content:center;height:100vh;"><p>Redirecting to login...</p></div>';
+      }
+    </script>
+    <!-- ============================================ -->
+    <!-- FIXED LOGOUT BUTTON IN HEADER -->
+    <!-- ============================================ -->
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", () => {
+            // Clear all auth tokens
+            localStorage.removeItem("calmiqsAuth");
+            sessionStorage.removeItem("calmiqsAuth");
+            localStorage.removeItem("isAdmin");
+            sessionStorage.removeItem("isAdmin");
+            localStorage.removeItem("calmiqsDraft");
+            localStorage.removeItem("calmiqsSiteSettings");
+
+            // Redirect to home page
+            window.location.href = "/";
+          });
+        }
+      });
+    </script>
     <!-- Header -->
     <header class="bg-white border-b sticky top-0 z-50 shadow-sm">
       <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -227,8 +275,18 @@
             </div>
 
             <!-- Content Editor -->
+            <!-- Content Editor with better styling -->
             <div class="bg-white rounded-xl shadow p-6">
               <h2 class="text-lg font-bold text-primary mb-4">📄 Content Editor</h2>
+
+              <!-- Formatting indicator -->
+              <div
+                id="formatIndicator"
+                style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.5rem"
+              >
+                Format: Plain
+              </div>
+
               <div class="editor-toolbar flex flex-wrap gap-2 mb-4 p-3 bg-gray-50 rounded-lg">
                 <button type="button" data-cmd="bold" title="Bold (Ctrl+B)">
                   <i class="fas fa-bold"></i>
@@ -242,6 +300,7 @@
                 <div class="w-px bg-gray-300"></div>
                 <button type="button" data-cmd="h2" title="Heading 2">H2</button>
                 <button type="button" data-cmd="h3" title="Heading 3">H3</button>
+                <button type="button" data-cmd="h4" title="Heading 4">H4</button>
                 <div class="w-px bg-gray-300"></div>
                 <button type="button" data-cmd="ul" title="Bullet List">
                   <i class="fas fa-list"></i>
@@ -249,13 +308,24 @@
                 <button type="button" data-cmd="ol" title="Numbered List">
                   <i class="fas fa-list-ol"></i>
                 </button>
+                <button type="button" data-cmd="indent" title="Increase Indent">
+                  <i class="fas fa-indent"></i>
+                </button>
+                <button type="button" data-cmd="outdent" title="Decrease Indent">
+                  <i class="fas fa-outdent"></i>
+                </button>
+                <div class="w-px bg-gray-300"></div>
                 <button type="button" data-cmd="link" title="Insert Link">
                   <i class="fas fa-link"></i>
                 </button>
                 <button type="button" id="insertImageBtn" title="Insert Image">
                   <i class="fas fa-image"></i>
                 </button>
+                <button type="button" id="htmlViewBtn" title="Toggle HTML View">
+                  <i class="fas fa-code"></i>
+                </button>
               </div>
+
               <div
                 id="content"
                 contenteditable="true"
@@ -266,6 +336,7 @@
                   border: 2px solid #d1d5db;
                   border-radius: 0.5rem;
                   outline: none;
+                  line-height: 1.6;
                 "
                 placeholder="Start writing your content..."
               ></div>
@@ -552,13 +623,171 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
         </div>
       </div>
     </div>
+    <!-- ============================================ -->
+    <!-- HTML VIEW MODAL -->
+    <!-- ============================================ -->
 
+    <div
+      id="htmlViewModal"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    >
+      <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
+        <div class="flex justify-between items-center p-6 border-b sticky top-0 bg-white">
+          <h3 class="text-xl font-bold text-primary">📝 HTML Code View</h3>
+          <button id="closeHtmlModal" class="text-2xl text-gray-400 hover:text-gray-600">×</button>
+        </div>
+        <div class="p-6">
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem">
+            <button
+              id="copyHtmlBtn"
+              class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent transition"
+            >
+              <i class="fas fa-copy"></i>
+              Copy HTML
+            </button>
+            <button
+              id="pasteHtmlBtn"
+              class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+            >
+              <i class="fas fa-paste"></i>
+              Paste HTML
+            </button>
+          </div>
+          <textarea
+            id="htmlCodeView"
+            style="
+              width: 100%;
+              height: 500px;
+              padding: 1rem;
+              border: 2px solid #d1d5db;
+              border-radius: 0.5rem;
+              font-family: 'Courier New', monospace;
+              font-size: 0.875rem;
+            "
+          ></textarea>
+        </div>
+      </div>
+    </div>
     <script>
       const WORKER_BASE = ""; // Use relative paths for same domain
       const ADMIN_TOKEN = window.CALMIQS_ADMIN_TOKEN;
 
       let currentPost = null;
       let selectedHeroImage = null;
+      // ADD THIS AFTER: let selectedHeroImage = null;
+
+      const contentEditor = document.getElementById("content");
+
+      // Add CSS styles for the editor output
+      const style = document.createElement("style");
+      style.textContent = `
+              #content h2 {
+                font-size: 1.875rem;
+                font-weight: bold;
+                margin: 1rem 0 0.5rem 0;
+                color: #1f2937;
+              }
+
+              #content h3 {
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin: 1rem 0 0.5rem 0;
+                color: #1f2937;
+              }
+
+              #content h4 {
+                font-size: 1.25rem;
+                font-weight: bold;
+                margin: 0.75rem 0 0.5rem 0;
+                color: #1f2937;
+              }
+
+              #content ul {
+                list-style-type: disc;
+                margin-left: 2rem;
+                margin-bottom: 1rem;
+              }
+
+              #content ol {
+                list-style-type: decimal;
+                margin-left: 2rem;
+                margin-bottom: 1rem;
+              }
+
+              #content li {
+                margin-bottom: 0.5rem;
+              }
+
+              #content img {
+                max-width: 100%;
+                height: auto;
+                margin: 1rem 0;
+                border-radius: 0.5rem;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+              }
+
+              #content img.inline-img {
+                cursor: pointer;
+              }
+
+              #content img.inline-img:hover {
+                opacity: 0.8;
+              }
+
+              #content p {
+                margin-bottom: 1rem;
+              }
+
+              #content a {
+                color: #5a67d8;
+                text-decoration: underline;
+              }
+            `;
+      document.head.appendChild(style);
+
+      // Style editor on focus/blur
+      contentEditor.addEventListener("focus", function () {
+        this.style.borderColor = "#4FA49A";
+        this.style.boxShadow = "0 0 0 3px rgba(79, 164, 154, 0.1)";
+        document.getElementById("htmlViewBtn").style.opacity = "1";
+      });
+
+      contentEditor.addEventListener("blur", function () {
+        this.style.borderColor = "#d1d5db";
+        this.style.boxShadow = "none";
+      });
+
+      // Update format indicator
+      function updateFormatIndicator() {
+        const selection = window.getSelection();
+        let format = "Plain";
+
+        if (!selection.rangeCount) {
+          document.getElementById("formatIndicator").textContent = "Format: " + format;
+          return;
+        }
+
+        const range = selection.getRangeAt(0);
+        let node = range.commonAncestorContainer;
+
+        while (node && node !== contentEditor) {
+          const tagName = node.nodeName.toLowerCase();
+          if (tagName === "strong" || tagName === "b") format = "Bold";
+          if (tagName === "em" || tagName === "i") format = "Italic";
+          if (tagName === "h2") format = "Heading 2";
+          if (tagName === "h3") format = "Heading 3";
+          if (tagName === "h4") format = "Heading 4";
+          if (tagName === "ul") format = "Bullet List";
+          if (tagName === "ol") format = "Numbered List";
+          node = node.parentNode;
+        }
+
+        document.getElementById("formatIndicator").textContent = "Format: " + format;
+      }
+
+      contentEditor.addEventListener("click", updateFormatIndicator);
+      contentEditor.addEventListener("keyup", updateFormatIndicator);
+      contentEditor.addEventListener("input", () => updatePreview());
 
       // Auth fetch helper
       async function authFetch(url, opts = {}) {
@@ -581,15 +810,27 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
         const content = document.getElementById("content").innerHTML || "<p>No content</p>";
         const preview = document.getElementById("postPreview");
 
-        // Clean up the content for preview
-        let previewContent = content
-          .replace(/<img[^>]*>/g, "[Image]") // Replace images with placeholder
-          .substring(0, 300);
-
+        // Show actual formatted preview
         preview.innerHTML = `
     <h3 class="font-bold text-primary mb-2">${escapeHtml(title)}</h3>
-    <div class="text-xs">${previewContent}...</div>
+    <div class="text-sm border-t pt-4" style="max-height: 300px; overflow-y: auto;">
+      ${content.substring(0, 500)}
+    </div>
   `;
+
+        // Add styling to preview elements
+        const previewContent = preview.querySelector("div");
+        if (previewContent) {
+          previewContent.querySelectorAll("h2, h3, h4").forEach((el) => {
+            el.className = "font-bold text-gray-800 my-3";
+          });
+          previewContent.querySelectorAll("ul, ol").forEach((el) => {
+            el.className = "ml-4 my-2";
+          });
+          previewContent.querySelectorAll("li").forEach((el) => {
+            el.className = "my-1";
+          });
+        }
       }
 
       function escapeHtml(text) {
@@ -639,7 +880,6 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
 
           console.log("Toolbar command:", cmd);
 
-          // Ensure editor has focus
           editor.focus();
 
           try {
@@ -652,10 +892,16 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
               document.execCommand("formatBlock", false, "<h2>");
             } else if (cmd === "h3") {
               document.execCommand("formatBlock", false, "<h3>");
+            } else if (cmd === "h4") {
+              document.execCommand("formatBlock", false, "<h4>");
             } else if (cmd === "ul") {
               document.execCommand("insertUnorderedList", false, null);
             } else if (cmd === "ol") {
               document.execCommand("insertOrderedList", false, null);
+            } else if (cmd === "indent") {
+              document.execCommand("indent", false, null);
+            } else if (cmd === "outdent") {
+              document.execCommand("outdent", false, null);
             } else if (cmd === "bold") {
               document.execCommand("bold", false, null);
             } else if (cmd === "italic") {
@@ -665,12 +911,70 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             }
 
             updatePreview();
+            updateFormatIndicator();
           } catch (error) {
             console.error("Editor command error:", error);
           }
 
           editor.focus();
         });
+      });
+      // ========================================
+      // STEP 4: ADD HTML VIEW TOGGLE CODE
+      // ========================================
+
+      // ADD THIS NEW SECTION (after the toolbar code above):
+
+      const htmlViewBtn = document.getElementById("htmlViewBtn");
+      const htmlViewModal = document.getElementById("htmlViewModal");
+      const closeHtmlModal = document.getElementById("closeHtmlModal");
+      const htmlCodeView = document.getElementById("htmlCodeView");
+      const copyHtmlBtn = document.getElementById("copyHtmlBtn");
+      const pasteHtmlBtn = document.getElementById("pasteHtmlBtn");
+
+      if (htmlViewBtn) {
+        htmlViewBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          const editor = document.getElementById("content");
+          htmlCodeView.value = editor.innerHTML;
+          htmlViewModal.classList.remove("hidden");
+        });
+      }
+
+      if (closeHtmlModal) {
+        closeHtmlModal.addEventListener("click", () => {
+          htmlViewModal.classList.add("hidden");
+        });
+      }
+
+      if (copyHtmlBtn) {
+        copyHtmlBtn.addEventListener("click", () => {
+          htmlCodeView.select();
+          document.execCommand("copy");
+          alert("✅ HTML copied to clipboard");
+        });
+      }
+
+      if (pasteHtmlBtn) {
+        pasteHtmlBtn.addEventListener("click", async () => {
+          try {
+            const html = htmlCodeView.value;
+            const editor = document.getElementById("content");
+            editor.innerHTML = html;
+            htmlViewModal.classList.add("hidden");
+            updatePreview();
+            alert("✅ HTML pasted into editor");
+          } catch (err) {
+            alert("❌ Error: " + err.message);
+          }
+        });
+      }
+
+      // Close modal on background click
+      htmlViewModal.addEventListener("click", (e) => {
+        if (e.target === htmlViewModal) {
+          htmlViewModal.classList.add("hidden");
+        }
       });
 
       // Title input
@@ -790,11 +1094,11 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             const el = document.createElement("div");
             el.className = "p-4 border-b hover:bg-gray-50 cursor-pointer transition";
             el.innerHTML = `
-              <div class="font-semibold text-primary">${post.title}</div>
-              <div class="text-xs text-gray-500">${post.slug} • ${new Date(
+                          <div class="font-semibold text-primary">${post.title}</div>
+                          <div class="text-xs text-gray-500">${post.slug} • ${new Date(
               post.date
             ).toLocaleDateString()}</div>
-            `;
+                        `;
             el.addEventListener("click", () => {
               loadPostToEditor(post);
               document.getElementById("postLibraryModal").classList.add("hidden");
@@ -884,8 +1188,8 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
 
             document.getElementById("heroPreview").innerHTML = `<img src="${imageUrl}" alt="${
               data.metadata?.alt || "Hero image"
-            }" class="max-w-full rounded-lg shadow-md" 
-                    onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect width=%22400%22 height=%22300%22 fill=%22%23f0f0f0%22/><text x=%2250%25%22 y=%2250%25%22 fill=%22%23999%22 text-anchor=%22middle%22 dy=%22.3em%22>Image uploaded</text></svg>';" />`;
+            }" class="max-w-full rounded-lg shadow-md"
+                                onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect width=%22400%22 height=%22300%22 fill=%22%23f0f0f0%22/><text x=%2250%25%22 y=%2250%25%22 fill=%22%23999%22 text-anchor=%22middle%22 dy=%22.3em%22>Image uploaded</text></svg>';" />`;
 
             alert("✅ Hero image uploaded successfully!");
           } else {
@@ -945,26 +1249,26 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             )}`;
 
             thumb.innerHTML = `
-        <div style="width: 100%; height: 128px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; position: relative;">
-          <img src="${imageUrl}" 
-               alt="${img.alt || ""}" 
-               style="max-width: 100%; max-height: 100%; object-fit: cover; width: 100%; height: 100%;" />
-          <div style="position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.2s;" class="group-hover:bg-black/30 flex items-center justify-center">
-            <span style="color: white; opacity: 0; transition: opacity 0.2s; font-weight: 500;" class="group-hover:opacity-100">Select</span>
-          </div>
-        </div>
-        <div style="padding: 0.5rem; text-align: center;">
-          <p style="font-size: 0.75rem; font-weight: 500; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${
-            img.title || img.filename || "Image"
-          }</p>
-        </div>
-      `;
+                    <div style="width: 100%; height: 128px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; position: relative;">
+                      <img src="${imageUrl}"
+                           alt="${img.alt || ""}"
+                           style="max-width: 100%; max-height: 100%; object-fit: cover; width: 100%; height: 100%;" />
+                      <div style="position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.2s;" class="group-hover:bg-black/30 flex items-center justify-center">
+                        <span style="color: white; opacity: 0; transition: opacity 0.2s; font-weight: 500;" class="group-hover:opacity-100">Select</span>
+                      </div>
+                    </div>
+                    <div style="padding: 0.5rem; text-align: center;">
+                      <p style="font-size: 0.75rem; font-weight: 500; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${
+                        img.title || img.filename || "Image"
+                      }</p>
+                    </div>
+                  `;
 
             thumb.addEventListener("click", () => {
               selectedHeroImage = imageUrl;
-              document.getElementById("heroPreview").innerHTML = `<img src="${imageUrl}" 
-          alt="${img.alt || "Hero"}" 
-          style="max-width: 100%; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />`;
+              document.getElementById("heroPreview").innerHTML = `<img src="${imageUrl}"
+                      alt="${img.alt || "Hero"}"
+                      style="max-width: 100%; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />`;
               document.getElementById("heroAlt").value = img.alt || "";
               document.getElementById("imageLibraryModal").classList.add("hidden");
               alert("✅ Hero image selected");
@@ -977,9 +1281,9 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
           document.getElementById(
             "libraryGridModal"
           ).innerHTML = `<div class='col-span-full text-center text-red-600 py-8'>
-      Failed to load library
-      <br><span class="text-xs">${err.message}</span>
-    </div>`;
+                  Failed to load library
+                  <br><span class="text-xs">${err.message}</span>
+                </div>`;
         }
       }
 
@@ -1016,37 +1320,31 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
           btn.disabled = true;
           btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
 
-          console.log("Uploading inline image...");
           const res = await authFetch(`/upload`, {
             method: "POST",
             body: form,
           });
 
           const data = await res.json();
-          console.log("Inline upload response:", data);
+          console.log("Upload response:", data);
 
           if (res.ok && data.success) {
             const imageUrl = data.url;
-
-            // Insert image at cursor position (or at end)
             const editor = document.getElementById("content");
             editor.focus();
 
-            // Create image element
             const imgElement = document.createElement("img");
             imgElement.src = imageUrl;
             imgElement.alt = data.metadata?.alt || file.name;
+            imgElement.className = "inline-img";
             imgElement.style.maxWidth = "100%";
             imgElement.style.height = "auto";
-            imgElement.style.margin = "1rem 0";
-            imgElement.style.borderRadius = "0.5rem";
-            imgElement.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
-            imgElement.className = "inline-img";
             imgElement.contentEditable = "false";
 
-            // Add delete functionality on click
+            // Click to select/delete
             imgElement.addEventListener("click", function (e) {
-              if (this.style.outline === "rgb(79, 164, 154) solid 2px") {
+              e.preventDefault();
+              if (this.style.outline === "2px solid #4fa49a") {
                 if (confirm("Delete this image?")) {
                   this.remove();
                   updatePreview();
@@ -1055,12 +1353,12 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
                 document.querySelectorAll(".inline-img").forEach((img) => {
                   img.style.outline = "none";
                 });
-                this.style.outline = "2px solid #4FA49A";
+                this.style.outline = "2px solid #4fa49a";
                 this.style.outlineOffset = "2px";
               }
             });
 
-            // Insert at cursor or at end
+            // Insert at cursor
             const sel = window.getSelection();
             if (sel.rangeCount > 0) {
               const range = sel.getRangeAt(0);
@@ -1073,22 +1371,21 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
               editor.appendChild(imgElement);
             }
 
-            // Add paragraph after image for continued typing
-            const paragraph = document.createElement("p");
-            paragraph.innerHTML = "<br>";
-            imgElement.parentNode.insertBefore(paragraph, imgElement.nextSibling);
-            paragraph.focus();
+            // Add paragraph after
+            const p = document.createElement("p");
+            p.innerHTML = "<br>";
+            imgElement.parentNode.insertBefore(p, imgElement.nextSibling);
+            p.focus();
 
             document.getElementById("inlineImageFile").value = "";
             updatePreview();
-
-            alert("✅ Image inserted successfully!");
+            alert("✅ Image inserted");
           } else {
             throw new Error(data.error || "Upload failed");
           }
         } catch (err) {
-          console.error("Inline upload error:", err);
-          alert("❌ Upload failed: " + err.message);
+          console.error("Error:", err);
+          alert("❌ " + err.message);
         } finally {
           const btn = document.getElementById("uploadInlineBtn");
           btn.disabled = false;
@@ -1130,24 +1427,24 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             console.log("Image URL:", imageUrl);
 
             thumb.innerHTML = `
-        <div style="width: 100%; height: 128px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; position: relative;">
-          <img src="${imageUrl}" 
-               alt="${img.alt || ""}" 
-               style="max-width: 100%; max-height: 100%; object-fit: cover; width: 100%; height: 100%;"
-               class="hover:opacity-75 transition" />
-          <div style="position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.2s;" class="group-hover:bg-black/30 flex items-center justify-center">
-            <span style="color: white; opacity: 0; transition: opacity 0.2s; font-weight: 500;" class="group-hover:opacity-100">Select</span>
-          </div>
-        </div>
-        <div style="padding: 0.5rem; text-align: center;">
-          <p style="font-size: 0.75rem; font-weight: 500; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${
-            img.title || img.filename || "Image"
-          }</p>
-          <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">${
-            img.alt || "No description"
-          }</p>
-        </div>
-      `;
+                    <div style="width: 100%; height: 128px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; position: relative;">
+                      <img src="${imageUrl}"
+                           alt="${img.alt || ""}"
+                           style="max-width: 100%; max-height: 100%; object-fit: cover; width: 100%; height: 100%;"
+                           class="hover:opacity-75 transition" />
+                      <div style="position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.2s;" class="group-hover:bg-black/30 flex items-center justify-center">
+                        <span style="color: white; opacity: 0; transition: opacity 0.2s; font-weight: 500;" class="group-hover:opacity-100">Select</span>
+                      </div>
+                    </div>
+                    <div style="padding: 0.5rem; text-align: center;">
+                      <p style="font-size: 0.75rem; font-weight: 500; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${
+                        img.title || img.filename || "Image"
+                      }</p>
+                      <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">${
+                        img.alt || "No description"
+                      }</p>
+                    </div>
+                  `;
 
             thumb.addEventListener("click", () => {
               const editor = document.getElementById("content");
@@ -1194,15 +1491,15 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
           document.getElementById(
             "libraryGridModal"
           ).innerHTML = `<div class='col-span-full text-center text-red-600 py-8'>
-      Failed to load library
-      <br><span class="text-xs">${err.message}</span>
-      <br><span class="text-xs text-gray-500">Possible causes:<br>
-      1. Images not uploaded yet<br>
-      2. Invalid admin token<br>
-      3. KV namespace not configured<br>
-      4. R2 bucket not accessible
-      </span>
-    </div>`;
+                  Failed to load library
+                  <br><span class="text-xs">${err.message}</span>
+                  <br><span class="text-xs text-gray-500">Possible causes:<br>
+                  1. Images not uploaded yet<br>
+                  2. Invalid admin token<br>
+                  3. KV namespace not configured<br>
+                  4. R2 bucket not accessible
+                  </span>
+                </div>`;
         }
       }
 
@@ -1240,23 +1537,23 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             )}`;
 
             card.innerHTML = `
-        <div style="width: 100%; height: 160px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-          <img src="${imageUrl}" 
-               alt="${img.alt || ""}" 
-               style="max-width: 100%; max-height: 100%; object-fit: cover; width: 100%; height: 100%;" />
-        </div>
-        <div style="padding: 1rem;">
-          <p style="font-size: 0.875rem; font-weight: 500; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${
-            img.title || img.filename || "Image"
-          }</p>
-          <p style="font-size: 0.75rem; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.25rem;">${
-            img.alt || "No description"
-          }</p>
-          <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">${new Date(
-            img.uploadedAt || img.createdAt
-          ).toLocaleDateString()}</p>
-        </div>
-      `;
+                    <div style="width: 100%; height: 160px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                      <img src="${imageUrl}"
+                           alt="${img.alt || ""}"
+                           style="max-width: 100%; max-height: 100%; object-fit: cover; width: 100%; height: 100%;" />
+                    </div>
+                    <div style="padding: 1rem;">
+                      <p style="font-size: 0.875rem; font-weight: 500; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${
+                        img.title || img.filename || "Image"
+                      }</p>
+                      <p style="font-size: 0.75rem; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.25rem;">${
+                        img.alt || "No description"
+                      }</p>
+                      <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">${new Date(
+                        img.uploadedAt || img.createdAt
+                      ).toLocaleDateString()}</p>
+                    </div>
+                  `;
             grid.appendChild(card);
           });
         } catch (err) {
@@ -1264,9 +1561,9 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
           document.getElementById(
             "imageLibraryGrid"
           ).innerHTML = `<div class='col-span-full text-center text-red-600 py-8'>
-      Failed to load images
-      <br><span class="text-xs">${err.message}</span>
-    </div>`;
+                  Failed to load images
+                  <br><span class="text-xs">${err.message}</span>
+                </div>`;
         }
       }
 
@@ -1363,6 +1660,7 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
       if (settings.siteTitle) document.getElementById("siteTitle").value = settings.siteTitle;
       if (settings.siteDescription)
         document.getElementById("siteDescription").value = settings.siteDescription;
+      updatePreview();
     </script>
   </body>
 </html>
