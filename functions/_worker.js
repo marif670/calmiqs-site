@@ -1,4 +1,4 @@
-// functions/_worker.js - Updated with Comments API
+// functions/_worker.js - Complete with all routes including /files/
 
 export default {
   async fetch(request, env, ctx) {
@@ -23,6 +23,40 @@ export default {
     };
 
     try {
+      // ========== SERVE IMAGES FROM R2 ==========
+      if (path.startsWith("/files/")) {
+        const r2Key = decodeURIComponent(path.replace("/files/", ""));
+        console.log("Fetching from R2:", r2Key);
+
+        try {
+          const object = await env.R2_BUCKET.get(r2Key);
+
+          if (!object) {
+            console.log("Image not found in R2:", r2Key);
+            return new Response("Image not found", {
+              status: 404,
+              headers: corsHeaders,
+            });
+          }
+
+          return new Response(object.body, {
+            headers: {
+              ...corsHeaders,
+              "Content-Type":
+                object.httpMetadata?.contentType || "application/octet-stream",
+              "Cache-Control": "public, max-age=31536000",
+              ETag: object.etag,
+            },
+          });
+        } catch (err) {
+          console.error("R2 fetch error:", err);
+          return new Response("Error loading image: " + err.message, {
+            status: 500,
+            headers: corsHeaders,
+          });
+        }
+      }
+
       // ========== POSTS API ==========
       if (path === "/posts" && request.method === "GET") {
         return handleGetPosts(env, corsHeaders);
