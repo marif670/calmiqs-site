@@ -4,6 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calmiqs Editor - Content Management</title>
+    <!-- AUTH PROTECTION - ADD THIS FIRST -->
+    <script>
+      (function () {
+        const isAuth =
+          localStorage.getItem("calmiqsAuth") === "true" ||
+          sessionStorage.getItem("calmiqsAuth") === "true" ||
+          localStorage.getItem("isAdmin") === "true" ||
+          sessionStorage.getItem("isAdmin") === "true";
+
+        if (!isAuth) {
+          // Redirect immediately before page loads
+          window.location.href = "/admin/login.html";
+          // Stop all further execution
+          document.body.innerHTML = "";
+        }
+      })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -853,6 +870,28 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
                 margin-bottom: 0.5rem;
               }
 
+              #content ul {
+                list-style-type: disc;
+                list-style-position: inside;
+                margin-left: 1.5rem;
+                margin-bottom: 1rem;
+                padding-left: 0;
+              }
+                #content ol {
+                list-style-type: decimal;
+                list-style-position: inside;
+                margin-left: 1.5rem;
+                margin-bottom: 1rem;
+                padding-left: 0;
+              }
+
+                #content li {
+                margin-bottom: 0.5rem;
+                display: list-item;
+                list-style-position: inside;
+                
+              }
+
               #content blockquote {
                 border-left: 4px solid #4FA49A;
                 margin-left: 0;
@@ -868,7 +907,8 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
 
               #content a:hover {
                 color: #4f46e5;
-              }             
+              }   
+                          
             `;
       document.head.appendChild(style);
 
@@ -1024,9 +1064,43 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
             } else if (cmd === "p") {
               document.execCommand("formatBlock", false, "<p>");
             } else if (cmd === "ul") {
-              document.execCommand("insertUnorderedList", false, null);
+              // First ensure we're in a list context
+              const editor = document.getElementById("content");
+              const selection = window.getSelection();
+
+              if (selection.rangeCount === 0) {
+                editor.focus();
+                document.execCommand("insertUnorderedList", false, null);
+              } else {
+                const range = selection.getRangeAt(0);
+                const text = range.toString();
+
+                if (text) {
+                  // If text is selected, wrap it in list item
+                  document.execCommand("insertUnorderedList", false, null);
+                } else {
+                  // Just create empty list
+                  document.execCommand("insertUnorderedList", false, null);
+                }
+              }
             } else if (cmd === "ol") {
-              document.execCommand("insertOrderedList", false, null);
+              // Same for ordered list
+              const editor = document.getElementById("content");
+              const selection = window.getSelection();
+
+              if (selection.rangeCount === 0) {
+                editor.focus();
+                document.execCommand("insertOrderedList", false, null);
+              } else {
+                const range = selection.getRangeAt(0);
+                const text = range.toString();
+
+                if (text) {
+                  document.execCommand("insertOrderedList", false, null);
+                } else {
+                  document.execCommand("insertOrderedList", false, null);
+                }
+              }
             } else if (cmd === "indent") {
               document.execCommand("indent", false, null);
             } else if (cmd === "outdent") {
@@ -1148,9 +1222,11 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
         const title = document.getElementById("postTitle").value.trim();
         if (!title) return alert("Enter post title");
 
+        const slug = generateSlug(title);
+
+        // Don't include slug in the data - it will be the KEY
         const postData = {
           title,
-          slug: generateSlug(title),
           excerpt: document.getElementById("postExcerpt").value,
           date: document.getElementById("postDate").value,
           category: document.getElementById("postCategory").value,
@@ -1171,14 +1247,23 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
         };
 
         try {
+          // KEY is "post:slug", NOT "slug"
           const res = await authFetch(`/api/posts`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(postData),
+            body: JSON.stringify({
+              slug: slug, // Send slug separately so worker can use it as key
+              data: postData, // Data without slug
+            }),
           });
+
           const result = await res.json();
+
           if (res.ok) {
             alert("✅ Post saved successfully!");
+            document.getElementById("postSlug").value = slug;
+            // Update page after save
+            setTimeout(() => loadPostLibrary(), 500);
           } else {
             alert("❌ " + (result.error || "Save failed"));
           }
@@ -1375,9 +1460,11 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
               "relative group cursor-pointer bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition";
 
             // FIXED: Use correct URL format
-            const imageUrl = `https://calmiqs-images-worker.techaipet.workers.dev/files/${encodeURIComponent(
-              img.r2Key
-            )}`;
+            const imageUrl =
+              img.url ||
+              `https://calmiqs-images-worker.techaipet.workers.dev/files/${encodeURIComponent(
+                img.r2Key
+              )}`;
             console.log("Loading hero image:", imageUrl);
 
             // Create container with fixed height
@@ -1986,14 +2073,22 @@ Explore AI-powered wellness tools and eco-friendly insights</textarea
       });
 
       // Logout
-      document.getElementById("logoutBtn").addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        // Clear ALL auth tokens
         localStorage.removeItem("calmiqsAuth");
-        sessionStorage.removeItem("calmiqsAuth");
         localStorage.removeItem("isAdmin");
+        localStorage.removeItem("calmiqsAuthTimestamp");
+        localStorage.removeItem("calmiqsAuthExpiration");
+
+        sessionStorage.removeItem("calmiqsAuth");
         sessionStorage.removeItem("isAdmin");
-        window.location.href = "/";
+
+        // Also clear any drafts
+        localStorage.removeItem("calmiqsDraft");
+        localStorage.removeItem("calmiqsSiteSettings");
+
+        // Redirect to login page
+        window.location.href = "/admin/login.html";
       });
 
       // Initialize

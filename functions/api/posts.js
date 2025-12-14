@@ -66,41 +66,33 @@ export async function onRequest(context) {
     }
 
     // POST save post
-    if (request.method === "POST") {
-      if (!isAdmin) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401,
-          headers: corsHeaders,
-        });
+    if (path === "/api/posts" && request.method === "POST") {
+      if (!isAdmin()) {
+        return unauthorized();
       }
 
       try {
-        const postData = await request.json();
-        const key = postData.slug;
-        const post = {
-          ...postData,
-          updatedAt: new Date().toISOString(),
-        };
+        const { slug, data } = await request.json();
 
-        await env.CALMIQS_POSTS.put(key, JSON.stringify(post));
+        if (!slug || !data) {
+          return error("Missing slug or data", 400);
+        }
 
-        return new Response(
-          JSON.stringify({
-            success: true,
-            message: "Post saved",
-            slug: postData.slug,
-          }),
-          {
-            status: 200,
-            headers: corsHeaders,
-          }
-        );
+        // Save with slug as part of the key
+        const kvKey = `post:${slug}`;
+
+        // Add metadata
+        data.updatedAt = new Date().toISOString();
+        if (!data.createdAt) {
+          data.createdAt = data.updatedAt;
+        }
+
+        // Store in KV
+        await env.CALMIQS_POSTS.put(kvKey, JSON.stringify(data));
+
+        return success({ success: true, slug, kvKey });
       } catch (err) {
-        console.error("POST error:", err);
-        return new Response(JSON.stringify({ error: err.message }), {
-          status: 500,
-          headers: corsHeaders,
-        });
+        return error(err.message, 500);
       }
     }
 
