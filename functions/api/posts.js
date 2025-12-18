@@ -4,6 +4,8 @@
 
 export async function onRequest(context) {
   const { request, env } = context;
+  const url = new URL(request.url);
+  const path = url.pathname; // ✅ ADD THIS LINE
 
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
